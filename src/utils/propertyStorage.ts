@@ -100,6 +100,40 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
         'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
       ],
     },
+    '7': {
+      id: '7',
+      name: 'Metro Central',
+      type: 'apartment',
+      bedrooms: 1,
+      bathrooms: 1,
+      maxGuests: 2,
+      size: '40',
+      description: 'Experience the heart of Iloilo City at Metro Central, a modern accommodation situated in the bustling City Proper district.',
+      location: 'City Proper, Iloilo City',
+      pricePerNight: '2200',
+      airbnbUrl: 'https://airbnb.com/rooms/metro-central',
+      amenities: ['WiFi', 'Air Conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
+      photos: [
+        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
+      ],
+    },
+    '8': {
+      id: '8',
+      name: 'Riverside Studio',
+      type: 'studio',
+      bedrooms: 0,
+      bathrooms: 1,
+      maxGuests: 2,
+      size: '35',
+      description: 'Discover tranquility at Riverside Studio, a peaceful retreat nestled along the scenic Jaro River.',
+      location: 'Jaro District, Iloilo City',
+      pricePerNight: '2000',
+      airbnbUrl: 'https://airbnb.com/rooms/riverside-studio',
+      amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'River View', 'Peaceful Setting', 'Historic Area'],
+      photos: [
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
+      ],
+    },
   };
 
   return defaults[id] || {

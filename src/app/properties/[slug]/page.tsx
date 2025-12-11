@@ -146,6 +146,46 @@ With ample space for families to spread out and relax, this unit serves as the p
     airbnb_url: 'https://airbnb.com',
     map_url: 'https://maps.google.com/?q=Villa+Beach+Iloilo',
   },
+  {
+    id: '7',
+    name: 'Metro Central',
+    slug: 'metro-central',
+    location: 'City Proper',
+    address: 'City Proper, Iloilo City',
+    description: `Experience the heart of Iloilo City at Metro Central, a modern accommodation situated in the bustling City Proper district. This strategically located unit provides easy access to shopping centers, restaurants, government offices, and transportation hubs.
+
+The contemporary design features clean lines and efficient use of space, creating a comfortable urban retreat. Large windows provide natural light while modern amenities ensure a convenient stay for business travelers and tourists alike.
+
+Located within walking distance of major landmarks including the Iloilo Provincial Capitol, SM City Iloilo, and the historic Calle Real. The central location makes it easy to explore the city's attractions without the need for extensive transportation.
+
+Perfect for guests who want to be in the center of all the action while enjoying modern comfort and convenience.`,
+    short_description: 'Modern unit in the heart of City Proper. Walking distance to major attractions and business centers.',
+    amenities: ['WiFi', 'Air-conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
+    featured: false,
+    active: true,
+    airbnb_url: 'https://airbnb.com',
+    map_url: 'https://maps.google.com/?q=City+Proper+Iloilo',
+  },
+  {
+    id: '8',
+    name: 'Riverside Studio',
+    slug: 'riverside-studio',
+    location: 'Jaro District',
+    address: 'Jaro District, Iloilo City',
+    description: `Discover tranquility at Riverside Studio, a peaceful retreat nestled along the scenic Jaro River. This charming studio combines the serenity of waterfront living with easy access to the historic Jaro district's cultural attractions.
+
+The studio features large windows overlooking the river, creating a calming atmosphere perfect for relaxation. The space is thoughtfully designed to maximize comfort while maintaining connection with the natural surroundings through the riverside location.
+
+Jaro district offers rich cultural heritage with the famous Jaro Cathedral, historic mansions, and traditional Filipino architecture. Despite the peaceful setting, the city center is easily accessible via public transportation or private vehicle.
+
+Ideal for travelers seeking a unique experience away from the typical urban accommodations while still being connected to Iloilo's attractions and amenities.`,
+    short_description: 'Peaceful riverside studio in historic Jaro district. Perfect for those seeking tranquility with cultural access.',
+    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'River View', 'Peaceful Setting', 'Historic Area'],
+    featured: false,
+    active: true,
+    airbnb_url: 'https://airbnb.com',
+    map_url: 'https://maps.google.com/?q=Jaro+District+Iloilo',
+  },
 ];
 
 // Generate static params for all properties
