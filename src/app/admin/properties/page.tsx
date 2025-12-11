@@ -18,7 +18,7 @@ import {
 
 // Sample properties data
 const initialProperties = [
-  { id: '1', name: 'Cityscape Studio', location: 'Iloilo Business Park', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
+  { id: '1', name: 'Artist Loft', location: 'Arts District', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
   { id: '2', name: 'Garden View Suite', location: 'Smallville Complex', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
   { id: '3', name: 'Downtown Retreat', location: 'City Proper', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
   { id: '4', name: 'Sunset Bay Unit', location: 'Mandurriao', featured: false, active: true, airbnbUrl: '' },

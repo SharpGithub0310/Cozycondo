@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2 } from 'lucide-react';
+import { getStoredProperty, saveProperty, getDefaultPropertyData } from '@/utils/propertyStorage';
 
 export default function EditProperty() {
   const params = useParams();
@@ -35,29 +36,24 @@ export default function EditProperty() {
   useEffect(() => {
     const loadProperty = async () => {
       try {
-        // In production, fetch from API
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Load property from localStorage or get default data
+        const storedProperty = getStoredProperty(params.id as string);
+        const propertyData = storedProperty || getDefaultPropertyData(params.id as string);
 
-        // Mock data for demonstration
-        const mockProperty = {
-          name: `Property ${params.id}`,
-          type: 'apartment',
-          bedrooms: 2,
-          bathrooms: 1,
-          maxGuests: 4,
-          size: '45',
-          description: 'A beautiful and cozy apartment perfect for travelers looking for comfort and convenience.',
-          location: 'Iloilo City, Philippines',
-          pricePerNight: '2500',
-          airbnbUrl: 'https://airbnb.com/rooms/123456',
-          amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'TV', 'Balcony'],
-          photos: [
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-          ],
-        };
-
-        setProperty(mockProperty);
+        setProperty({
+          name: propertyData.name,
+          type: propertyData.type,
+          bedrooms: propertyData.bedrooms,
+          bathrooms: propertyData.bathrooms,
+          maxGuests: propertyData.maxGuests,
+          size: propertyData.size,
+          description: propertyData.description,
+          location: propertyData.location,
+          pricePerNight: propertyData.pricePerNight,
+          airbnbUrl: propertyData.airbnbUrl,
+          amenities: propertyData.amenities,
+          photos: propertyData.photos,
+        });
       } catch (error) {
         console.error('Failed to load property:', error);
       } finally {
@@ -73,8 +69,27 @@ export default function EditProperty() {
     setIsSaving(true);
 
     try {
-      // In production, save to database
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Save to localStorage (in production, this would be an API call)
+      saveProperty(params.id as string, {
+        id: params.id as string,
+        name: property.name,
+        type: property.type,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        maxGuests: property.maxGuests,
+        size: property.size,
+        description: property.description,
+        location: property.location,
+        pricePerNight: property.pricePerNight,
+        airbnbUrl: property.airbnbUrl,
+        amenities: property.amenities,
+        photos: property.photos,
+      });
+
+      // Simulate save delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Redirect back to property view
       router.push(`/admin/properties/${params.id}`);
     } catch (error) {
       console.error('Failed to save property:', error);

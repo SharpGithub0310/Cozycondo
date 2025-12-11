@@ -1,0 +1,122 @@
+// Simple storage utility for managing property data with photos
+// In production, this would be replaced with API calls to your backend/Supabase
+
+interface PropertyData {
+  id: string;
+  name: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
+  maxGuests: number;
+  size: string;
+  description: string;
+  location: string;
+  pricePerNight: string;
+  airbnbUrl: string;
+  amenities: string[];
+  photos: string[];
+  updatedAt?: string;
+}
+
+const STORAGE_KEY = 'cozy_condo_properties';
+
+// Get all stored properties
+export function getStoredProperties(): Record<string, PropertyData> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch (error) {
+    console.error('Error reading stored properties:', error);
+    return {};
+  }
+}
+
+// Save property data
+export function saveProperty(id: string, propertyData: PropertyData): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const stored = getStoredProperties();
+    stored[id] = {
+      ...propertyData,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  } catch (error) {
+    console.error('Error saving property:', error);
+  }
+}
+
+// Get specific property data
+export function getStoredProperty(id: string): PropertyData | null {
+  const stored = getStoredProperties();
+  return stored[id] || null;
+}
+
+// Clear all stored properties (useful for development)
+export function clearStoredProperties(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+// Default property data
+export const getDefaultPropertyData = (id: string): PropertyData => {
+  const defaults: Record<string, PropertyData> = {
+    '1': {
+      id: '1',
+      name: 'Artist Loft',
+      type: 'loft',
+      bedrooms: 1,
+      bathrooms: 1,
+      maxGuests: 2,
+      size: '60',
+      description: 'Step into creative inspiration at this unique artist loft in Iloilo\'s vibrant Arts District. This spacious, light-filled space combines industrial charm with artistic flair.',
+      location: 'Arts District, Iloilo City',
+      pricePerNight: '3000',
+      airbnbUrl: 'https://airbnb.com/rooms/artist-loft',
+      amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'Smart TV', 'High Ceilings', 'Natural Light', 'Workspace'],
+      photos: [
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
+      ],
+    },
+    '2': {
+      id: '2',
+      name: 'Garden View Suite',
+      type: 'apartment',
+      bedrooms: 1,
+      bathrooms: 1,
+      maxGuests: 4,
+      size: '50',
+      description: 'Escape to this serene garden-view suite nestled in the popular Smallville Complex.',
+      location: 'Smallville Complex, Iloilo City',
+      pricePerNight: '2800',
+      airbnbUrl: 'https://airbnb.com/rooms/garden-suite',
+      amenities: ['WiFi', 'Air Conditioning', 'Parking', 'Kitchen', 'Balcony', 'Smart TV', 'Washer'],
+      photos: [
+        'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
+      ],
+    },
+  };
+
+  return defaults[id] || {
+    id,
+    name: `Property ${id}`,
+    type: 'apartment',
+    bedrooms: 2,
+    bathrooms: 1,
+    maxGuests: 4,
+    size: '45',
+    description: 'A beautiful and cozy apartment perfect for travelers looking for comfort and convenience.',
+    location: 'Iloilo City, Philippines',
+    pricePerNight: '2500',
+    airbnbUrl: 'https://airbnb.com/rooms/123456',
+    amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'TV', 'Balcony'],
+    photos: [
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
+    ],
+  };
+};

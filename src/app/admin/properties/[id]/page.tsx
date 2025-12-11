@@ -14,6 +14,7 @@ import {
   Star,
   Eye
 } from 'lucide-react';
+import { getStoredProperty, getDefaultPropertyData } from '@/utils/propertyStorage';
 
 export default function PropertyDetail() {
   const params = useParams();
@@ -22,36 +23,37 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading property data
+    // Load property data from localStorage or defaults
     const loadProperty = async () => {
       try {
-        // In production, fetch from API
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Get stored property data or fall back to defaults
+        const storedProperty = getStoredProperty(params.id as string);
+        const defaultProperty = getDefaultPropertyData(params.id as string);
+        const propertyData = storedProperty || defaultProperty;
 
-        // Mock data for demonstration
-        setProperty({
+        // Transform to the format expected by the component
+        const mockProperty = {
           id: params.id,
-          name: `Property ${params.id}`,
-          type: 'Apartment',
-          bedrooms: 2,
-          bathrooms: 1,
-          maxGuests: 4,
-          size: '45 sq m',
-          pricePerNight: 2500,
-          location: 'Iloilo City, Philippines',
-          description: 'A beautiful and cozy apartment perfect for travelers looking for comfort and convenience.',
-          amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'TV', 'Balcony'],
-          photos: [
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-          ],
-          airbnbUrl: 'https://airbnb.com/rooms/123456',
+          name: propertyData.name,
+          type: propertyData.type.charAt(0).toUpperCase() + propertyData.type.slice(1),
+          bedrooms: propertyData.bedrooms,
+          bathrooms: propertyData.bathrooms,
+          maxGuests: propertyData.maxGuests,
+          size: propertyData.size + ' sq m',
+          pricePerNight: parseInt(propertyData.pricePerNight),
+          location: propertyData.location,
+          description: propertyData.description,
+          amenities: propertyData.amenities,
+          photos: propertyData.photos,
+          airbnbUrl: propertyData.airbnbUrl,
           createdAt: '2024-01-15',
           lastBooking: '2024-12-01',
-          totalBookings: 24,
-          rating: 4.8,
+          totalBookings: params.id === '1' ? 18 : 24,
+          rating: params.id === '1' ? 4.9 : 4.8,
           status: 'active',
-        });
+        };
+
+        setProperty(mockProperty);
       } catch (error) {
         console.error('Failed to load property:', error);
       } finally {

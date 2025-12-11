@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 const properties = [
   {
     id: '1',
-    name: 'Cityscape Studio',
-    slug: 'cityscape-studio',
-    location: 'Iloilo Business Park',
-    short_description: 'Modern studio with stunning city views. Perfect for business travelers and couples seeking a contemporary urban retreat.',
-    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Smart TV', 'Workspace'],
+    name: 'Artist Loft',
+    slug: 'artist-loft',
+    location: 'Arts District',
+    short_description: 'Unique artist loft with high ceilings and natural light. Perfect for creative professionals and art lovers.',
+    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Smart TV', 'High Ceilings', 'Natural Light', 'Workspace'],
     featured: true,
     active: true,
   },
