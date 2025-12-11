@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Save, Trash2, Eye, Calendar, Tag, User } from 'lucide-react';
+import { Save, Trash2, Eye, Calendar, Tag, User, Upload, Image } from 'lucide-react';
 
 export default function EditBlogPost() {
   const params = useParams();
@@ -352,8 +352,39 @@ export default function EditBlogPost() {
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
               Featured Image
             </h3>
+
+            {/* Image Upload */}
+            <div className="mb-4">
+              <div className="border-2 border-dashed border-[#faf3e6] rounded-xl p-6 text-center hover:border-[#14b8a6] transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        const imageUrl = event.target?.result as string;
+                        setPost({...post, featuredImage: imageUrl});
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label htmlFor="image-upload" className="cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto mb-3 text-[#9a7d5e]" />
+                  <p className="text-[#5f4a38] font-medium mb-1">Upload Featured Image</p>
+                  <p className="text-[#9a7d5e] text-sm">Click to select an image</p>
+                  <p className="text-[#9a7d5e] text-xs mt-1">JPG, PNG, WebP (Max 5MB)</p>
+                </label>
+              </div>
+            </div>
+
+            {/* URL Input */}
             <div>
-              <label className="form-label">Image URL</label>
+              <label className="form-label">Or enter image URL</label>
               <input
                 type="url"
                 value={post.featuredImage}
@@ -361,19 +392,31 @@ export default function EditBlogPost() {
                 className="form-input"
                 placeholder="https://example.com/image.jpg"
               />
-              {post.featuredImage && (
-                <div className="mt-3">
+            </div>
+
+            {/* Image Preview */}
+            {post.featuredImage && (
+              <div className="mt-4 relative">
+                <div className="relative group">
                   <img
                     src={post.featuredImage}
                     alt="Featured image preview"
-                    className="w-full h-32 object-cover rounded-lg border border-[#faf3e6]"
+                    className="w-full h-48 object-cover rounded-lg border border-[#faf3e6]"
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2YjczODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBub3QgZm91bmQ8L3RleHQ+Cjwvc3ZnPg==';
                     }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setPost({...post, featuredImage: ''})}
+                    className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-              )}
-            </div>
+                <p className="text-xs text-[#9a7d5e] mt-2">This image will be displayed as the blog post's featured image.</p>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
