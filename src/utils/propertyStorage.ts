@@ -15,6 +15,7 @@ interface PropertyData {
   airbnbUrl: string;
   amenities: string[];
   photos: string[];
+  featuredPhotoIndex?: number;
   updatedAt?: string;
 }
 

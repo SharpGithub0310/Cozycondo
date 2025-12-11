@@ -50,8 +50,8 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
     const propertyId = property.id;
     const storedProperty = getStoredProperty(propertyId);
 
-    if (storedProperty && storedProperty.photos && storedProperty.photos.length > 0) {
-      // Use stored data if available and has photos
+    if (storedProperty) {
+      // Update property data with stored information
       setProperty({
         ...property,
         ...storedProperty,
@@ -61,9 +61,29 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
         location: storedProperty.location,
         amenities: storedProperty.amenities,
       });
-      setDisplayPhotos(storedProperty.photos);
+
+      // Set photos from stored data, reordering to put featured photo first
+      if (storedProperty.photos && storedProperty.photos.length > 0) {
+        const photos = [...storedProperty.photos];
+        const featuredIndex = storedProperty.featuredPhotoIndex || 0;
+
+        // Move featured photo to first position if it's not already there
+        if (featuredIndex > 0 && featuredIndex < photos.length) {
+          const featuredPhoto = photos[featuredIndex];
+          photos.splice(featuredIndex, 1);
+          photos.unshift(featuredPhoto);
+        }
+
+        setDisplayPhotos(photos);
+      } else {
+        // Use default photos if no stored photos
+        setDisplayPhotos([
+          'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
+          'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
+        ]);
+      }
     } else {
-      // Use default photos if no stored photos
+      // Use default photos if no stored data at all
       setDisplayPhotos([
         'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
         'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',

@@ -1,11 +1,15 @@
+'use client';
+
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, ArrowRight, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getStoredProperty } from '@/utils/propertyStorage';
 
-export const metadata: Metadata = {
-  title: 'Properties',
-  description: 'Browse our collection of premium short-term rental condominiums in Iloilo City. Modern amenities, prime locations, and exceptional comfort.',
-};
+// export const metadata: Metadata = {
+//   title: 'Properties',
+//   description: 'Browse our collection of premium short-term rental condominiums in Iloilo City. Modern amenities, prime locations, and exceptional comfort.',
+// };
 
 // Sample properties (will be replaced with Supabase data)
 const properties = [
@@ -71,11 +75,11 @@ const properties = [
   },
   {
     id: '7',
-    name: 'Artist Loft',
-    slug: 'artist-loft',
-    location: 'La Paz',
-    short_description: 'Unique loft-style unit with high ceilings and artistic touches. Natural light floods the space.',
-    amenities: ['WiFi', 'Air-conditioning', 'High Ceiling', 'Workspace'],
+    name: 'Metro Central',
+    slug: 'metro-central',
+    location: 'City Proper',
+    short_description: 'Modern unit in the heart of City Proper. Walking distance to major attractions and business centers.',
+    amenities: ['WiFi', 'Air-conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
     featured: false,
     active: true,
   },
@@ -84,18 +88,8 @@ const properties = [
     name: 'Riverside Studio',
     slug: 'riverside-studio',
     location: 'Jaro District',
-    short_description: 'Peaceful studio near the Jaro River. Perfect for those seeking tranquility within the city.',
-    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'River View'],
-    featured: false,
-    active: true,
-  },
-  {
-    id: '9',
-    name: 'Metro Central',
-    slug: 'metro-central',
-    location: 'City Proper',
-    short_description: 'Central location with easy access to public transportation and major attractions.',
-    amenities: ['WiFi', 'Air-conditioning', 'Smart TV', '24/7 Security'],
+    short_description: 'Peaceful riverside studio in historic Jaro district. Perfect for those seeking tranquility with cultural access.',
+    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'River View', 'Peaceful Setting', 'Historic Area'],
     featured: false,
     active: true,
   },
@@ -190,18 +184,40 @@ export default function PropertiesPage() {
 
 // Property Card Component
 function PropertyCard({ property }: { property: typeof properties[0] }) {
+  const [displayPhoto, setDisplayPhoto] = useState<string>('');
+
+  useEffect(() => {
+    const storedProperty = getStoredProperty(property.id);
+    if (storedProperty && storedProperty.photos && storedProperty.photos.length > 0) {
+      // Use featured photo if available, otherwise first photo
+      const featuredIndex = storedProperty.featuredPhotoIndex || 0;
+      setDisplayPhoto(storedProperty.photos[featuredIndex] || storedProperty.photos[0]);
+    }
+  }, [property.id]);
+
   return (
     <div className="card group">
-      {/* Image placeholder */}
+      {/* Image */}
       <div className="relative aspect-[4/3] bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-white/80">
-            <div className="w-16 h-16 mx-auto mb-2 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <span className="font-display text-2xl font-bold">CC</span>
+        {displayPhoto ? (
+          <img
+            src={displayPhoto}
+            alt={property.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            onError={(e) => {
+              setDisplayPhoto('');
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center text-white/80">
+              <div className="w-16 h-16 mx-auto mb-2 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <span className="font-display text-2xl font-bold">CC</span>
+              </div>
+              <p className="text-sm">Photo coming soon</p>
             </div>
-            <p className="text-sm">Photo coming soon</p>
           </div>
-        </div>
+        )}
         {property.featured && (
           <div className="absolute top-4 left-4 px-3 py-1 bg-[#14b8a6] text-white text-xs font-medium rounded-full">
             Featured

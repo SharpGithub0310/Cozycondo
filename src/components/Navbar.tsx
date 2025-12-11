@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, Home, Building2, BookOpen, Phone, MessageCircle } from 'lucide-react';
+import { getStoredSettings } from '@/utils/settingsStorage';
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
@@ -14,6 +15,7 @@ const navigation = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [logo, setLogo] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +23,14 @@ export default function Navbar() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Load logo from settings
+    const settings = getStoredSettings();
+    if (settings.logo) {
+      setLogo(settings.logo);
+    }
   }, []);
 
   return (
@@ -35,9 +45,22 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-              <span className="text-white font-display text-xl font-bold">CC</span>
-            </div>
+            {logo ? (
+              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow">
+                <img
+                  src={logo}
+                  alt="Cozy Condo Logo"
+                  className="w-full h-full object-contain bg-white"
+                  onError={() => {
+                    setLogo(''); // Reset logo state to show fallback
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                <span className="text-white font-display text-xl font-bold">CC</span>
+              </div>
+            )}
             <div>
               <span className="font-display text-xl font-semibold text-[#5f4a38]">
                 Cozy Condo

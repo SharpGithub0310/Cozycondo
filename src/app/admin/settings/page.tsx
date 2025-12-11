@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2 } from 'lucide-react';
+import { getStoredSettings, saveSettings } from '@/utils/settingsStorage';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState({
@@ -21,6 +22,12 @@ export default function AdminSettings() {
     favicon: '',
   });
 
+  useEffect(() => {
+    // Load stored settings on component mount
+    const storedSettings = getStoredSettings();
+    setSettings(prev => ({ ...prev, ...storedSettings }));
+  }, []);
+
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
 
@@ -30,8 +37,15 @@ export default function AdminSettings() {
     setSaveMessage('');
 
     try {
-      // In production, save to database
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Save to localStorage
+      saveSettings({
+        logo: settings.logo,
+        footerLogo: settings.footerLogo,
+        heroBackground: settings.heroBackground,
+        aboutImage: settings.aboutImage,
+        contactImage: settings.contactImage,
+        favicon: settings.favicon,
+      });
       setSaveMessage('Settings saved successfully!');
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
@@ -205,7 +219,9 @@ export default function AdminSettings() {
                           const reader = new FileReader();
                           reader.onload = (event) => {
                             const imageUrl = event.target?.result as string;
-                            setSettings({...settings, logo: imageUrl});
+                            const updatedSettings = {...settings, logo: imageUrl};
+                            setSettings(updatedSettings);
+                            saveSettings({ logo: imageUrl });
                           };
                           reader.readAsDataURL(file);
                         }
@@ -222,7 +238,11 @@ export default function AdminSettings() {
                   <input
                     type="url"
                     value={settings.logo}
-                    onChange={(e) => setSettings({...settings, logo: e.target.value})}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setSettings({...settings, logo: newValue});
+                      saveSettings({ logo: newValue });
+                    }}
                     className="form-input text-sm"
                     placeholder="Or enter logo URL"
                   />
@@ -260,7 +280,9 @@ export default function AdminSettings() {
                           const reader = new FileReader();
                           reader.onload = (event) => {
                             const imageUrl = event.target?.result as string;
-                            setSettings({...settings, footerLogo: imageUrl});
+                            const updatedSettings = {...settings, footerLogo: imageUrl};
+                            setSettings(updatedSettings);
+                            saveSettings({ footerLogo: imageUrl });
                           };
                           reader.readAsDataURL(file);
                         }
@@ -277,7 +299,11 @@ export default function AdminSettings() {
                   <input
                     type="url"
                     value={settings.footerLogo}
-                    onChange={(e) => setSettings({...settings, footerLogo: e.target.value})}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setSettings({...settings, footerLogo: newValue});
+                      saveSettings({ footerLogo: newValue });
+                    }}
                     className="form-input text-sm"
                     placeholder="Or enter footer logo URL"
                   />
@@ -321,7 +347,9 @@ export default function AdminSettings() {
                         const reader = new FileReader();
                         reader.onload = (event) => {
                           const imageUrl = event.target?.result as string;
-                          setSettings({...settings, heroBackground: imageUrl});
+                          const updatedSettings = {...settings, heroBackground: imageUrl};
+                          setSettings(updatedSettings);
+                          saveSettings({ heroBackground: imageUrl });
                         };
                         reader.readAsDataURL(file);
                       }
@@ -339,7 +367,11 @@ export default function AdminSettings() {
                 <input
                   type="url"
                   value={settings.heroBackground}
-                  onChange={(e) => setSettings({...settings, heroBackground: e.target.value})}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setSettings({...settings, heroBackground: newValue});
+                    saveSettings({ heroBackground: newValue });
+                  }}
                   className="form-input"
                   placeholder="Or enter hero background URL"
                 />
@@ -382,7 +414,9 @@ export default function AdminSettings() {
                           const reader = new FileReader();
                           reader.onload = (event) => {
                             const imageUrl = event.target?.result as string;
-                            setSettings({...settings, aboutImage: imageUrl});
+                            const updatedSettings = {...settings, aboutImage: imageUrl};
+                            setSettings(updatedSettings);
+                            saveSettings({ aboutImage: imageUrl });
                           };
                           reader.readAsDataURL(file);
                         }
@@ -399,7 +433,11 @@ export default function AdminSettings() {
                   <input
                     type="url"
                     value={settings.aboutImage}
-                    onChange={(e) => setSettings({...settings, aboutImage: e.target.value})}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setSettings({...settings, aboutImage: newValue});
+                      saveSettings({ aboutImage: newValue });
+                    }}
                     className="form-input text-sm"
                     placeholder="Or enter about image URL"
                   />
@@ -437,7 +475,9 @@ export default function AdminSettings() {
                           const reader = new FileReader();
                           reader.onload = (event) => {
                             const imageUrl = event.target?.result as string;
-                            setSettings({...settings, contactImage: imageUrl});
+                            const updatedSettings = {...settings, contactImage: imageUrl};
+                            setSettings(updatedSettings);
+                            saveSettings({ contactImage: imageUrl });
                           };
                           reader.readAsDataURL(file);
                         }
@@ -454,7 +494,11 @@ export default function AdminSettings() {
                   <input
                     type="url"
                     value={settings.contactImage}
-                    onChange={(e) => setSettings({...settings, contactImage: e.target.value})}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setSettings({...settings, contactImage: newValue});
+                      saveSettings({ contactImage: newValue });
+                    }}
                     className="form-input text-sm"
                     placeholder="Or enter contact image URL"
                   />
@@ -496,7 +540,9 @@ export default function AdminSettings() {
                         const reader = new FileReader();
                         reader.onload = (event) => {
                           const imageUrl = event.target?.result as string;
-                          setSettings({...settings, favicon: imageUrl});
+                          const updatedSettings = {...settings, favicon: imageUrl};
+                          setSettings(updatedSettings);
+                          saveSettings({ favicon: imageUrl });
                         };
                         reader.readAsDataURL(file);
                       }
@@ -513,7 +559,11 @@ export default function AdminSettings() {
                 <input
                   type="url"
                   value={settings.favicon}
-                  onChange={(e) => setSettings({...settings, favicon: e.target.value})}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setSettings({...settings, favicon: newValue});
+                    saveSettings({ favicon: newValue });
+                  }}
                   className="form-input text-sm"
                   placeholder="Or enter favicon URL"
                 />
