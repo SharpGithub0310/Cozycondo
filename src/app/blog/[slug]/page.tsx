@@ -112,6 +112,47 @@ Famous for their jumbo siopao - perfect for a quick, filling meal.
     read_time: '4 min read',
     category: 'Food & Dining',
   },
+  {
+    id: '3',
+    title: 'Why Iloilo City is Perfect for Remote Work',
+    slug: 'why-iloilo-city-is-perfect-for-remote-work',
+    excerpt: 'Discover why Iloilo City has become a top destination for remote workers and digital nomads in the Philippines.',
+    content: `
+Iloilo City has become an increasingly popular destination for remote workers and digital nomads. Here's why this charming Philippine city should be your next remote work destination.
+
+## Excellent Infrastructure
+
+Iloilo City boasts reliable internet connectivity with fiber optic networks throughout the metro area. Most cafes, coworking spaces, and accommodations offer high-speed WiFi perfect for video calls and collaborative work.
+
+## Affordable Cost of Living
+
+Your money goes much further in Iloilo compared to Metro Manila or Cebu. From accommodation to food to transportation, you can maintain a comfortable lifestyle at a fraction of the cost.
+
+## Rich Culture and History
+
+When you're not working, explore the city's rich heritage through its historic churches, museums, and colonial architecture. The city perfectly blends modern amenities with traditional Filipino culture.
+
+## Great Food Scene
+
+Iloilo is famous for its delicious local cuisine including La Paz Batchoy, Pancit Molo, and fresh seafood. The city offers everything from street food to fine dining.
+
+## Friendly Community
+
+Ilonggos are known for their warm hospitality. The local community is very welcoming to foreigners, making it easy to settle in and feel at home.
+
+## Perfect Location
+
+Iloilo serves as a gateway to beautiful destinations in the Visayas region. Weekend trips to Boracay, Guimaras, or Antique are just a few hours away.
+
+---
+
+*Ready to experience remote work in Iloilo? Book your stay with us and discover why so many remote workers are choosing this beautiful city as their base.*
+    `,
+    author: 'Cozy Condo Team',
+    published_at: '2024-12-08',
+    read_time: '6 min read',
+    category: 'Remote Work',
+  },
 ];
 
 export async function generateStaticParams() {

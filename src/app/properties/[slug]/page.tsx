@@ -98,6 +98,66 @@ Perfect for travelers who want to immerse themselves in the authentic Iloilo exp
     airbnb_url: 'https://airbnb.com',
     map_url: 'https://maps.google.com/?q=SM+City+Iloilo',
   },
+  {
+    id: '4',
+    name: 'Sunset Bay Unit',
+    slug: 'sunset-bay-unit',
+    location: 'Jaro District',
+    address: 'Jaro District, Iloilo City',
+    description: `Experience breathtaking sunset views from this beautifully appointed unit in the peaceful Jaro district. This spacious accommodation offers the perfect blend of tranquility and convenience.
+
+The unit features large windows that flood the space with natural light during the day and offer spectacular sunset vistas each evening. The open-plan living area is perfect for relaxation, while the well-equipped kitchen makes meal preparation a pleasure.
+
+Located in the culturally rich Jaro district, you'll be steps away from the famous Jaro Cathedral and the historic Nelly Garden. Despite the peaceful setting, the city center is easily accessible via public transportation.
+
+This unit is ideal for travelers seeking a more authentic Iloilo experience away from the bustling commercial areas while still enjoying modern comforts.`,
+    short_description: 'Serene unit with stunning sunset views in historic Jaro district. Perfect for peaceful stays.',
+    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Smart TV', 'Balcony', 'Parking'],
+    featured: true,
+    active: true,
+    airbnb_url: 'https://airbnb.com',
+    map_url: 'https://maps.google.com/?q=Jaro+Cathedral+Iloilo',
+  },
+  {
+    id: '5',
+    name: 'Executive Suite',
+    slug: 'executive-suite',
+    location: 'Ayala Mall Area',
+    address: 'Near Ayala Malls Capitol Central, Iloilo City',
+    description: `Indulge in luxury and convenience at this premium executive suite located near Ayala Malls Capitol Central. Designed with the discerning business traveler in mind, this suite offers unparalleled comfort and sophistication.
+
+The suite features a separate living area and bedroom, providing ample space to work and relax. The elegant furnishings and modern amenities create an environment conducive to both productivity and comfort.
+
+A dedicated workspace with high-speed internet ensures you can stay connected and productive, while the premium bedding guarantees restful nights. The fully equipped kitchen allows for convenient in-room dining.
+
+Located within walking distance of Capitol Central, you'll have easy access to upscale dining, shopping, and entertainment options.`,
+    short_description: 'Premium executive suite near Ayala Mall with separate living area. Ideal for business travelers.',
+    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Smart TV', 'Workspace', 'Premium Bedding', '24/7 Security', 'Gym Access'],
+    featured: true,
+    active: true,
+    airbnb_url: 'https://airbnb.com',
+    map_url: 'https://maps.google.com/?q=Ayala+Malls+Capitol+Central+Iloilo',
+  },
+  {
+    id: '6',
+    name: 'Family Haven',
+    slug: 'family-haven',
+    location: 'Villa Beach',
+    address: 'Villa Beach, Iloilo City',
+    description: `Create lasting memories at this spacious family-friendly unit located in the charming Villa Beach area. Designed with families in mind, this accommodation provides comfort, safety, and convenience for guests of all ages.
+
+The unit features multiple bedrooms, a large living area, and a fully equipped kitchen perfect for preparing family meals. Child-friendly amenities and safety features ensure peace of mind for parents traveling with little ones.
+
+The Villa Beach location offers a quieter alternative to the city center while still providing easy access to Iloilo's attractions. The nearby beach area is perfect for morning walks or evening family outings.
+
+With ample space for families to spread out and relax, this unit serves as the perfect base for exploring Iloilo together while having a comfortable home away from home.`,
+    short_description: 'Spacious family-friendly unit in peaceful Villa Beach. Multiple bedrooms and family amenities.',
+    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Smart TV', 'Family-friendly', 'Multiple Bedrooms', 'Beach Access'],
+    featured: false,
+    active: true,
+    airbnb_url: 'https://airbnb.com',
+    map_url: 'https://maps.google.com/?q=Villa+Beach+Iloilo',
+  },
 ];
 
 // Generate static params for all properties

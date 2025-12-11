@@ -122,7 +122,10 @@ export default function PropertyDetail() {
         </div>
 
         <div className="flex gap-3">
-          <button className="btn-secondary flex items-center gap-2">
+          <button
+            onClick={() => router.push(`/admin/properties/${params.id}/edit`)}
+            className="btn-secondary flex items-center gap-2"
+          >
             <Edit className="w-4 h-4" />
             Edit
           </button>
