@@ -1,0 +1,156 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { ChevronDown, MapPin, Star, Home } from 'lucide-react';
+import Link from 'next/link';
+
+const stats = [
+  { icon: Home, value: '9+', label: 'Premium Units' },
+  { icon: Star, value: '4.9', label: 'Guest Rating' },
+  { icon: MapPin, value: 'Iloilo', label: 'City Center' },
+];
+
+export default function Hero() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
+      
+      {/* Decorative elements */}
+      <div className="absolute top-20 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+      
+      {/* Floating shapes */}
+      <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#14b8a6] rounded-full animate-float opacity-60" />
+      <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-[#fb923c] rounded-full animate-float opacity-60" style={{ animationDelay: '1s' }} />
+      <div className="absolute bottom-1/3 left-1/4 w-5 h-5 bg-[#d4b896] rounded-full animate-float opacity-40" style={{ animationDelay: '2s' }} />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Text content */}
+          <div
+            className={`transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+          >
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-[#faf3e6] mb-6">
+              <span className="w-2 h-2 bg-[#14b8a6] rounded-full animate-pulse" />
+              <span className="text-sm font-medium text-[#7d6349]">Premium Short-Term Rentals</span>
+            </div>
+
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-[#5f4a38] leading-tight mb-6">
+              Your{' '}
+              <span className="relative">
+                <span className="relative z-10">Cozy</span>
+                <span className="absolute bottom-2 left-0 w-full h-3 bg-[#14b8a6]/20 -z-0" />
+              </span>{' '}
+              Escape in{' '}
+              <span className="text-[#0d9488]">Iloilo City</span>
+            </h1>
+
+            <p className="text-lg text-[#7d6349] mb-8 max-w-xl">
+              Experience the perfect blend of comfort and convenience. Our handpicked condominiums offer modern amenities, stunning views, and prime locations across Iloilo City.
+            </p>
+
+            <div className="flex flex-wrap gap-4 mb-12">
+              <Link href="/properties" className="btn-primary text-lg px-8 py-4">
+                Explore Properties
+              </Link>
+              <a
+                href="https://m.me/cozycondoiloilocity"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-lg px-8 py-4"
+              >
+                Message Us
+              </a>
+            </div>
+
+            {/* Stats */}
+            <div className="flex flex-wrap gap-8">
+              {stats.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={index}
+                    className={`transition-all duration-700 ${
+                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
+                    }`}
+                    style={{ transitionDelay: `${(index + 2) * 150}ms` }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-[#14b8a6]" />
+                      </div>
+                      <div>
+                        <div className="font-display text-2xl font-semibold text-[#5f4a38]">
+                          {stat.value}
+                        </div>
+                        <div className="text-sm text-[#9a7d5e]">{stat.label}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Image composition */}
+          <div
+            className={`relative transition-all duration-1000 delay-300 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
+            }`}
+          >
+            <div className="relative">
+              {/* Main image placeholder */}
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white/80">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <span className="font-display text-4xl font-bold">CC</span>
+                    </div>
+                    <p className="text-lg font-medium">Cozy Condo</p>
+                    <p className="text-sm opacity-80">Premium Living</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating card */}
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 border border-[#faf3e6]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-[#14b8a6] flex items-center justify-center">
+                    <Star className="w-6 h-6 text-white fill-white" />
+                  </div>
+                  <div>
+                    <div className="font-display text-xl font-semibold text-[#5f4a38]">
+                      Highly Rated
+                    </div>
+                    <div className="text-sm text-[#9a7d5e]">by our guests</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative blob */}
+              <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#14b8a6]/20 rounded-full blur-2xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <a href="#properties" className="flex flex-col items-center text-[#9a7d5e] hover:text-[#0d9488] transition-colors">
+          <span className="text-sm mb-2">Scroll to explore</span>
+          <ChevronDown className="w-5 h-5" />
+        </a>
+      </div>
+    </section>
+  );
+}

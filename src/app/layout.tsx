@@ -1,0 +1,46 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import MessengerWidget from "@/components/MessengerWidget";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Cozy Condo - Premium Short-Term Rentals in Iloilo City",
+    template: "%s | Cozy Condo",
+  },
+  description: "Discover comfortable and convenient short-term rental condominiums in Iloilo City, Philippines. Modern amenities, prime locations, and exceptional hospitality.",
+  keywords: ["Iloilo City", "condo rental", "short-term rental", "Airbnb", "Philippines", "accommodation", "vacation rental"],
+  authors: [{ name: "Cozy Condo" }],
+  openGraph: {
+    type: "website",
+    locale: "en_PH",
+    siteName: "Cozy Condo Iloilo City",
+    title: "Cozy Condo - Premium Short-Term Rentals in Iloilo City",
+    description: "Discover comfortable and convenient short-term rental condominiums in Iloilo City, Philippines.",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="scroll-smooth">
+      <body className="font-body antialiased bg-[#fefdfb] text-[#5f4a38]">
+        <Navbar />
+        <main>{children}</main>
+        <Footer />
+        <MessengerWidget />
+      </body>
+    </html>
+  );
+}
