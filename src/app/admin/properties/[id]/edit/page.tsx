@@ -23,6 +23,7 @@ export default function EditProperty() {
     airbnbUrl: '',
     amenities: [] as string[],
     photos: [] as string[],
+    featuredPhotoIndex: 0,
   });
 
   const [newAmenity, setNewAmenity] = useState('');
@@ -53,6 +54,7 @@ export default function EditProperty() {
           airbnbUrl: propertyData.airbnbUrl,
           amenities: propertyData.amenities,
           photos: propertyData.photos,
+          featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
         });
       } catch (error) {
         console.error('Failed to load property:', error);
@@ -84,6 +86,7 @@ export default function EditProperty() {
         airbnbUrl: property.airbnbUrl,
         amenities: property.amenities,
         photos: property.photos,
+        featuredPhotoIndex: property.featuredPhotoIndex,
       });
 
       // Simulate save delay
@@ -443,7 +446,17 @@ export default function EditProperty() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {property.photos.map((photo, index) => (
                     <div key={index} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <div
+                        className={`aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer ${
+                          property.featuredPhotoIndex === index ? 'ring-4 ring-[#14b8a6]' : ''
+                        }`}
+                        onClick={() => {
+                          setProperty(prev => ({
+                            ...prev,
+                            featuredPhotoIndex: index
+                          }));
+                        }}
+                      >
                         <img
                           src={photo}
                           alt={`Property photo ${index + 1}`}
@@ -456,23 +469,33 @@ export default function EditProperty() {
                       <button
                         type="button"
                         onClick={() => {
-                          setProperty(prev => ({
-                            ...prev,
-                            photos: prev.photos.filter((_, i) => i !== index)
-                          }));
+                          setProperty(prev => {
+                            const newPhotos = prev.photos.filter((_, i) => i !== index);
+                            let newFeaturedIndex = prev.featuredPhotoIndex;
+                            if (index === prev.featuredPhotoIndex) {
+                              newFeaturedIndex = 0;
+                            } else if (index < prev.featuredPhotoIndex) {
+                              newFeaturedIndex--;
+                            }
+                            return {
+                              ...prev,
+                              photos: newPhotos,
+                              featuredPhotoIndex: newFeaturedIndex
+                            };
+                          });
                         }}
                         className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
                       <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                        {index === 0 ? 'Main' : index + 1}
+                        {property.featuredPhotoIndex === index ? '⭐ Featured' : `Photo ${index + 1}`}
                       </div>
                     </div>
                   ))}
                 </div>
                 <p className="text-xs text-[#9a7d5e] mt-2">
-                  Tip: The first photo will be used as the main property image. Drag to reorder.
+                  Tip: Click on any photo to set it as the featured image. The featured photo will be displayed first on the property listing.
                 </p>
               </div>
             )}

@@ -96,8 +96,28 @@ const properties = [
 ];
 
 export default function PropertiesPage() {
-  const featuredProperties = properties.filter(p => p.featured && p.active);
-  const otherProperties = properties.filter(p => !p.featured && p.active);
+  const [updatedProperties, setUpdatedProperties] = useState(properties);
+
+  useEffect(() => {
+    // Update properties with stored data
+    const updated = properties.map(prop => {
+      const storedProperty = getStoredProperty(prop.id);
+      if (storedProperty) {
+        return {
+          ...prop,
+          name: storedProperty.name,
+          location: storedProperty.location,
+          short_description: prop.short_description, // Keep original short description
+          amenities: storedProperty.amenities || prop.amenities,
+        };
+      }
+      return prop;
+    });
+    setUpdatedProperties(updated);
+  }, []);
+
+  const featuredProperties = updatedProperties.filter(p => p.featured && p.active);
+  const otherProperties = updatedProperties.filter(p => !p.featured && p.active);
 
   return (
     <div className="pt-20">
@@ -145,7 +165,7 @@ export default function PropertiesPage() {
                 All Properties
               </h2>
               <span className="text-sm text-[#9a7d5e] bg-[#faf3e6] px-3 py-1 rounded-full">
-                {properties.filter(p => p.active).length} units
+                {updatedProperties.filter(p => p.active).length} units
               </span>
             </div>
             
@@ -185,13 +205,24 @@ export default function PropertiesPage() {
 // Property Card Component
 function PropertyCard({ property }: { property: typeof properties[0] }) {
   const [displayPhoto, setDisplayPhoto] = useState<string>('');
+  const [propertyData, setPropertyData] = useState(property);
 
   useEffect(() => {
     const storedProperty = getStoredProperty(property.id);
-    if (storedProperty && storedProperty.photos && storedProperty.photos.length > 0) {
-      // Use featured photo if available, otherwise first photo
-      const featuredIndex = storedProperty.featuredPhotoIndex || 0;
-      setDisplayPhoto(storedProperty.photos[featuredIndex] || storedProperty.photos[0]);
+    if (storedProperty) {
+      // Update property data with stored values
+      setPropertyData({
+        ...property,
+        name: storedProperty.name,
+        location: storedProperty.location,
+        amenities: storedProperty.amenities || property.amenities,
+      });
+
+      if (storedProperty.photos && storedProperty.photos.length > 0) {
+        // Use featured photo if available, otherwise first photo
+        const featuredIndex = storedProperty.featuredPhotoIndex || 0;
+        setDisplayPhoto(storedProperty.photos[featuredIndex] || storedProperty.photos[0]);
+      }
     }
   }, [property.id]);
 
@@ -228,12 +259,12 @@ function PropertyCard({ property }: { property: typeof properties[0] }) {
       {/* Content */}
       <div className="p-5">
         <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-2 group-hover:text-[#0d9488] transition-colors">
-          {property.name}
+          {propertyData.name}
         </h3>
-        
+
         <div className="flex items-center gap-2 text-[#9a7d5e] text-sm mb-3">
           <MapPin className="w-4 h-4" />
-          <span>{property.location}</span>
+          <span>{propertyData.location}</span>
         </div>
 
         <p className="text-[#7d6349] text-sm mb-4 line-clamp-2">
@@ -241,7 +272,7 @@ function PropertyCard({ property }: { property: typeof properties[0] }) {
         </p>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {property.amenities.slice(0, 3).map((amenity, i) => (
+          {propertyData.amenities.slice(0, 3).map((amenity, i) => (
             <span
               key={i}
               className="px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full"
@@ -249,9 +280,9 @@ function PropertyCard({ property }: { property: typeof properties[0] }) {
               {amenity}
             </span>
           ))}
-          {property.amenities.length > 3 && (
+          {propertyData.amenities.length > 3 && (
             <span className="px-3 py-1 bg-[#faf3e6] text-[#9a7d5e] text-xs rounded-full">
-              +{property.amenities.length - 3} more
+              +{propertyData.amenities.length - 3} more
             </span>
           )}
         </div>
