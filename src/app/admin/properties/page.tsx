@@ -1,38 +1,59 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  Eye,
+  EyeOff,
   Star,
   MapPin,
   MoreVertical,
   ExternalLink,
   GripVertical
 } from 'lucide-react';
+import { getStoredProperties, getDefaultPropertyData } from '@/utils/propertyStorage';
 
-// Sample properties data
-const initialProperties = [
-  { id: '1', name: 'Artist Loft', location: 'Arts District', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
-  { id: '2', name: 'Garden View Suite', location: 'Smallville Complex', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
-  { id: '3', name: 'Downtown Retreat', location: 'City Proper', featured: true, active: true, airbnbUrl: 'https://airbnb.com' },
-  { id: '4', name: 'Sunset Bay Unit', location: 'Mandurriao', featured: false, active: true, airbnbUrl: '' },
-  { id: '5', name: 'Executive Suite', location: 'Iloilo Business Park', featured: false, active: true, airbnbUrl: '' },
-  { id: '6', name: 'Family Haven', location: 'Molo District', featured: false, active: true, airbnbUrl: '' },
-  { id: '7', name: 'Artist Loft', location: 'La Paz', featured: false, active: true, airbnbUrl: '' },
-  { id: '8', name: 'Riverside Studio', location: 'Jaro District', featured: false, active: true, airbnbUrl: '' },
-  { id: '9', name: 'Metro Central', location: 'City Proper', featured: false, active: true, airbnbUrl: '' },
-];
+// Default properties list with IDs
+const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 export default function PropertiesPage() {
-  const [properties, setProperties] = useState(initialProperties);
+  const [properties, setProperties] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load properties from storage or use defaults
+    const storedProperties = getStoredProperties();
+    const loadedProperties = propertyIds.map(id => {
+      const stored = storedProperties[id];
+      const defaultData = getDefaultPropertyData(id);
+      if (stored) {
+        // Use stored data with admin-specific fields
+        return {
+          id: stored.id,
+          name: stored.name,
+          location: stored.location,
+          featured: stored.featured ?? (id === '1' || id === '2' || id === '3'),
+          active: stored.active ?? true,
+          airbnbUrl: stored.airbnbUrl || ''
+        };
+      }
+      // Use default data
+      return {
+        id: defaultData.id,
+        name: defaultData.name,
+        location: defaultData.location,
+        featured: id === '1' || id === '2' || id === '3',
+        active: true,
+        airbnbUrl: defaultData.airbnbUrl || ''
+      };
+    });
+    setProperties(loadedProperties);
+  }, []);
 
   const filteredProperties = properties.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

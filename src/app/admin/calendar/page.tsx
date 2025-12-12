@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { 
-  Calendar as CalendarIcon, 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
+import { useState, useEffect } from 'react';
+import {
+  Calendar as CalendarIcon,
+  RefreshCw,
+  Plus,
+  Trash2,
   ExternalLink,
   Copy,
   Check,
@@ -14,19 +14,10 @@ import {
   X,
   Info
 } from 'lucide-react';
+import { getStoredProperties, getDefaultPropertyData } from '@/utils/propertyStorage';
 
-// Sample properties for calendar
-const properties = [
-  { id: '1', name: 'Cityscape Studio', icalUrl: '' },
-  { id: '2', name: 'Garden View Suite', icalUrl: '' },
-  { id: '3', name: 'Downtown Retreat', icalUrl: '' },
-  { id: '4', name: 'Sunset Bay Unit', icalUrl: '' },
-  { id: '5', name: 'Executive Suite', icalUrl: '' },
-  { id: '6', name: 'Family Haven', icalUrl: '' },
-  { id: '7', name: 'Artist Loft', icalUrl: '' },
-  { id: '8', name: 'Riverside Studio', icalUrl: '' },
-  { id: '9', name: 'Metro Central', icalUrl: '' },
-];
+// Property IDs
+const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 // Sample blocked dates
 const sampleBlockedDates = [
@@ -35,13 +26,39 @@ const sampleBlockedDates = [
 ];
 
 export default function CalendarPage() {
-  const [selectedProperty, setSelectedProperty] = useState(properties[0]);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [blockedDates, setBlockedDates] = useState(sampleBlockedDates);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showIcalModal, setShowIcalModal] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    // Load properties from storage
+    const storedProperties = getStoredProperties();
+    const loadedProperties = propertyIds.map(id => {
+      const stored = storedProperties[id];
+      const defaultData = getDefaultPropertyData(id);
+      if (stored) {
+        return {
+          id: stored.id,
+          name: stored.name,
+          icalUrl: stored.icalUrl || ''
+        };
+      }
+      return {
+        id: defaultData.id,
+        name: defaultData.name,
+        icalUrl: ''
+      };
+    });
+    setProperties(loadedProperties);
+    if (loadedProperties.length > 0) {
+      setSelectedProperty(loadedProperties[0]);
+    }
+  }, []);
 
   // Generate calendar days
   const getDaysInMonth = (date: Date) => {
