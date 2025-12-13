@@ -14,7 +14,7 @@ import {
   X,
   Info
 } from 'lucide-react';
-import { getStoredProperties, getDefaultPropertyData } from '@/utils/propertyStorage';
+import { getStoredProperties, getDefaultPropertyData, saveProperty } from '@/utils/propertyStorage';
 
 // Property IDs
 const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -34,6 +34,7 @@ export default function CalendarPage() {
   const [showIcalModal, setShowIcalModal] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [icalImportUrl, setIcalImportUrl] = useState('');
 
   useEffect(() => {
     // Load properties from storage
@@ -59,6 +60,13 @@ export default function CalendarPage() {
       setSelectedProperty(loadedProperties[0]);
     }
   }, []);
+
+  // Load iCal URL when selected property changes
+  useEffect(() => {
+    if (selectedProperty) {
+      setIcalImportUrl(selectedProperty.icalUrl || '');
+    }
+  }, [selectedProperty]);
 
   // Generate calendar days
   const getDaysInMonth = (date: Date) => {
@@ -96,13 +104,41 @@ export default function CalendarPage() {
   };
 
   // Generate iCal export URL
-  const icalExportUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/${selectedProperty?.id || 'unknown'}`;
+  const icalExportUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/${selectedProperty?.id || 'unknown'}.ics`;
 
   // Copy URL to clipboard
   const copyToClipboard = () => {
     navigator.clipboard.writeText(icalExportUrl);
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2000);
+  };
+
+  // Save iCal URL
+  const saveIcalUrl = () => {
+    if (selectedProperty) {
+      // Get full property data
+      const storedProperty = getStoredProperties()[selectedProperty.id];
+      const defaultProperty = getDefaultPropertyData(selectedProperty.id);
+      const fullPropertyData = storedProperty || defaultProperty;
+
+      // Save with updated iCal URL
+      saveProperty(selectedProperty.id, {
+        ...fullPropertyData,
+        icalUrl: icalImportUrl
+      });
+
+      // Update local state
+      setProperties(properties.map(p =>
+        p.id === selectedProperty.id
+          ? { ...p, icalUrl: icalImportUrl }
+          : p
+      ));
+
+      setSelectedProperty({
+        ...selectedProperty,
+        icalUrl: icalImportUrl
+      });
+    }
   };
 
   // Simulate sync
@@ -343,9 +379,16 @@ export default function CalendarPage() {
                   <input
                     type="url"
                     placeholder="Paste Airbnb iCal URL here..."
+                    value={icalImportUrl}
+                    onChange={(e) => setIcalImportUrl(e.target.value)}
                     className="form-input flex-1"
                   />
-                  <button className="btn-secondary">Save</button>
+                  <button
+                    onClick={saveIcalUrl}
+                    className="btn-secondary"
+                  >
+                    Save
+                  </button>
                 </div>
                 <p className="text-xs text-[#9a7d5e] mt-2 flex items-start gap-1">
                   <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
