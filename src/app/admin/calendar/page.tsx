@@ -405,7 +405,7 @@ export default function CalendarPage() {
         {/* Days of week */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="text-center text-sm font-medium text-[#9a7d5e] py-2">
+            <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
               {day}
             </div>
           ))}
@@ -422,8 +422,8 @@ export default function CalendarPage() {
                 key={index}
                 className={`
                   aspect-square p-1 rounded-lg text-center relative transition-all
-                  ${dayData.day === null ? 'bg-transparent' : 'bg-[#faf3e6] hover:bg-[#f5e6cc] cursor-pointer'}
-                  ${isToday ? 'ring-2 ring-[#14b8a6]' : ''}
+                  ${dayData.day === null ? 'bg-transparent' : 'bg-white hover:bg-gray-50 cursor-pointer border border-gray-200'}
+                  ${isToday ? 'ring-2 ring-teal-500' : ''}
                   ${blocked ? 'cursor-pointer' : ''}
                 `}
                 onClick={() => dayData.date && handleDateClick(dayData.date)}
@@ -433,24 +433,24 @@ export default function CalendarPage() {
                   <>
                     {blocked ? (
                       <div className="relative h-full flex flex-col justify-center">
-                        <div className={`text-xs font-bold ${isToday ? 'text-white' : 'text-white'}`}>
+                        <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
                           {dayData.day}
                         </div>
-                        <div className="text-[10px] text-white/90 leading-tight">
+                        <div className="text-xs text-white font-medium mt-0.5">
                           {blocked.source === 'airbnb' ? 'Airbnb' :
                            blocked.reason.length > 8 ? blocked.reason.substring(0, 6) + '..' : blocked.reason}
                         </div>
                         <div
                           className={`absolute inset-0 rounded ${
                             blocked.source === 'airbnb'
-                              ? 'bg-[#FF5A5F] border border-[#FF5A5F]'
-                              : 'bg-[#fb923c] border border-[#fb923c]'
+                              ? 'bg-red-500 border-2 border-red-600'
+                              : 'bg-orange-500 border-2 border-orange-600'
                           } -z-10`}
                           title={`${blocked.source === 'airbnb' ? 'Airbnb Booking' : 'Manual Block'}: ${blocked.reason}`}
                         />
                       </div>
                     ) : (
-                      <span className={`text-sm ${isToday ? 'font-bold text-[#14b8a6]' : 'text-[#7d6349]'}`}>
+                      <span className={`text-base font-medium ${isToday ? 'font-bold text-teal-600' : 'text-gray-700'}`}>
                         {dayData.day}
                       </span>
                     )}
@@ -462,26 +462,26 @@ export default function CalendarPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-[#faf3e6]">
-          <div className="flex items-center gap-2 text-sm text-[#7d6349]">
-            <div className="w-4 h-4 rounded bg-[#FF5A5F] text-white text-[8px] flex items-center justify-center font-bold">
+        <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <div className="w-4 h-4 rounded bg-red-500 text-white text-[8px] flex items-center justify-center font-bold">
               A
             </div>
-            <span>Airbnb Booking</span>
+            <span className="font-medium">Airbnb Booking</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#7d6349]">
-            <div className="w-4 h-4 rounded bg-[#fb923c] text-white text-[8px] flex items-center justify-center font-bold">
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <div className="w-4 h-4 rounded bg-orange-500 text-white text-[8px] flex items-center justify-center font-bold">
               M
             </div>
-            <span>Manual Block</span>
+            <span className="font-medium">Manual Block</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#7d6349]">
-            <div className="w-4 h-4 rounded ring-2 ring-[#14b8a6]" />
-            <span>Today</span>
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <div className="w-4 h-4 rounded bg-white border-2 border-teal-500" />
+            <span className="font-medium">Today</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#7d6349]">
-            <div className="w-4 h-4 rounded bg-[#faf3e6] border border-[#e5d3b3]" />
-            <span>Available (Click to block)</span>
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <div className="w-4 h-4 rounded bg-white border border-gray-300" />
+            <span className="font-medium">Available (Click to block)</span>
           </div>
         </div>
       </div>
