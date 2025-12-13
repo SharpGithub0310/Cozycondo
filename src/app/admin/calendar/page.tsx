@@ -141,20 +141,25 @@ export default function CalendarPage() {
     }
   };
 
-  // Parse iCal data from URL
+  // Parse iCal data from URL (using proxy to avoid CORS)
   const parseIcalData = async (url: string) => {
     try {
-      const response = await fetch(url, {
+      // Use our proxy API to fetch the iCal data (avoids CORS issues)
+      const response = await fetch('/api/ical/proxy', {
+        method: 'POST',
         headers: {
-          'User-Agent': 'CozyCondoCalendar/1.0',
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ url }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch iCal data: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to fetch iCal data: ${response.status}`);
       }
 
-      const icalText = await response.text();
+      const result = await response.json();
+      const icalText = result.data;
 
       // Simple parser for blocked dates (in production, use a proper iCal library)
       const events: any[] = [];
