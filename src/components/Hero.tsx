@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, MapPin, Star, Home } from 'lucide-react';
 import Link from 'next/link';
+import { getStoredSettings } from '@/utils/settingsStorage';
 
 const stats = [
   { icon: Home, value: '9+', label: 'Premium Units' },
@@ -12,19 +13,39 @@ const stats = [
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
+  const [heroBackground, setHeroBackground] = useState('');
 
   useEffect(() => {
     setIsVisible(true);
+
+    // Load hero background from settings
+    const settings = getStoredSettings();
+    if (settings.heroBackground) {
+      setHeroBackground(settings.heroBackground);
+    }
   }, []);
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
-      
-      {/* Decorative elements */}
-      <div className="absolute top-20 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+      {/* Background image or gradient */}
+      {heroBackground ? (
+        <>
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroBackground})` }}
+          />
+          <div className="absolute inset-0 bg-[#5f4a38]/40" />
+        </>
+      ) : (
+        <>
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
+
+          {/* Decorative elements */}
+          <div className="absolute top-20 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+        </>
+      )}
       
       {/* Floating shapes */}
       <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#14b8a6] rounded-full animate-float opacity-60" />
@@ -45,17 +66,17 @@ export default function Hero() {
               <span className="text-sm font-medium text-[#7d6349]">Premium Short-Term Rentals</span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold text-[#5f4a38] leading-tight mb-6">
+            <h1 className={`font-display text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight mb-6 ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
               Your{' '}
               <span className="relative">
                 <span className="relative z-10">Cozy</span>
                 <span className="absolute bottom-2 left-0 w-full h-3 bg-[#14b8a6]/20 -z-0" />
               </span>{' '}
               Escape in{' '}
-              <span className="text-[#0d9488]">Iloilo City</span>
+              <span className={heroBackground ? 'text-[#14b8a6]' : 'text-[#0d9488]'}>Iloilo City</span>
             </h1>
 
-            <p className="text-lg text-[#7d6349] mb-8 max-w-xl">
+            <p className={`text-lg mb-8 max-w-xl ${heroBackground ? 'text-white/90' : 'text-[#7d6349]'}`}>
               Experience the perfect blend of comfort and convenience. Our handpicked condominiums offer modern amenities, stunning views, and prime locations across Iloilo City.
             </p>
 
@@ -90,10 +111,10 @@ export default function Hero() {
                         <Icon className="w-5 h-5 text-[#14b8a6]" />
                       </div>
                       <div>
-                        <div className="font-display text-2xl font-semibold text-[#5f4a38]">
+                        <div className={`font-display text-2xl font-semibold ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
                           {stat.value}
                         </div>
-                        <div className="text-sm text-[#9a7d5e]">{stat.label}</div>
+                        <div className={`text-sm ${heroBackground ? 'text-white/80' : 'text-[#9a7d5e]'}`}>{stat.label}</div>
                       </div>
                     </div>
                   </div>
@@ -146,7 +167,7 @@ export default function Hero() {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <a href="#properties" className="flex flex-col items-center text-[#9a7d5e] hover:text-[#0d9488] transition-colors">
+        <a href="#properties" className={`flex flex-col items-center transition-colors ${heroBackground ? 'text-white/80 hover:text-white' : 'text-[#9a7d5e] hover:text-[#0d9488]'}`}>
           <span className="text-sm mb-2">Scroll to explore</span>
           <ChevronDown className="w-5 h-5" />
         </a>
