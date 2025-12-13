@@ -25,7 +25,7 @@ export default function PropertiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadProperties = () => {
     // Load properties from storage or use defaults
     const storedProperties = getStoredProperties();
     const loadedProperties = propertyIds.map(id => {
@@ -53,6 +53,39 @@ export default function PropertiesPage() {
       };
     });
     setProperties(loadedProperties);
+  };
+
+  useEffect(() => {
+    loadProperties();
+
+    // Reload data when page becomes visible (e.g., after editing)
+    const handleFocus = () => {
+      loadProperties();
+    };
+
+    // Reload on page visibility change
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadProperties();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Also reload on storage change (for cross-tab updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cozy_condo_properties') {
+        loadProperties();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const filteredProperties = properties.filter(p =>

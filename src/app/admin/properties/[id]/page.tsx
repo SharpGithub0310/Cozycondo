@@ -22,46 +22,65 @@ export default function PropertyDetail() {
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadProperty = async () => {
+    try {
+      setLoading(true);
+      // Get stored property data or fall back to defaults
+      const storedProperty = getStoredProperty(params.id as string);
+      const defaultProperty = getDefaultPropertyData(params.id as string);
+      const propertyData = storedProperty || defaultProperty;
+
+      // Transform to the format expected by the component
+      const mockProperty = {
+        id: params.id,
+        name: propertyData.name,
+        type: propertyData.type.charAt(0).toUpperCase() + propertyData.type.slice(1),
+        bedrooms: propertyData.bedrooms,
+        bathrooms: propertyData.bathrooms,
+        maxGuests: propertyData.maxGuests,
+        size: propertyData.size + ' sq m',
+        pricePerNight: parseInt(propertyData.pricePerNight),
+        location: propertyData.location,
+        description: propertyData.description,
+        amenities: propertyData.amenities,
+        photos: propertyData.photos,
+        airbnbUrl: propertyData.airbnbUrl,
+        createdAt: '2024-01-15',
+        lastBooking: '2024-12-01',
+        totalBookings: params.id === '1' ? 18 : 24,
+        rating: params.id === '1' ? 4.9 : 4.8,
+        status: 'active',
+      };
+
+      setProperty(mockProperty);
+    } catch (error) {
+      console.error('Failed to load property:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Load property data from localStorage or defaults
-    const loadProperty = async () => {
-      try {
-        // Get stored property data or fall back to defaults
-        const storedProperty = getStoredProperty(params.id as string);
-        const defaultProperty = getDefaultPropertyData(params.id as string);
-        const propertyData = storedProperty || defaultProperty;
+    loadProperty();
 
-        // Transform to the format expected by the component
-        const mockProperty = {
-          id: params.id,
-          name: propertyData.name,
-          type: propertyData.type.charAt(0).toUpperCase() + propertyData.type.slice(1),
-          bedrooms: propertyData.bedrooms,
-          bathrooms: propertyData.bathrooms,
-          maxGuests: propertyData.maxGuests,
-          size: propertyData.size + ' sq m',
-          pricePerNight: parseInt(propertyData.pricePerNight),
-          location: propertyData.location,
-          description: propertyData.description,
-          amenities: propertyData.amenities,
-          photos: propertyData.photos,
-          airbnbUrl: propertyData.airbnbUrl,
-          createdAt: '2024-01-15',
-          lastBooking: '2024-12-01',
-          totalBookings: params.id === '1' ? 18 : 24,
-          rating: params.id === '1' ? 4.9 : 4.8,
-          status: 'active',
-        };
+    // Reload data when page becomes visible
+    const handleFocus = () => {
+      loadProperty();
+    };
 
-        setProperty(mockProperty);
-      } catch (error) {
-        console.error('Failed to load property:', error);
-      } finally {
-        setLoading(false);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadProperty();
       }
     };
 
-    loadProperty();
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [params.id]);
 
   const handleDelete = async () => {
