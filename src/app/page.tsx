@@ -1,6 +1,10 @@
+'use client';
+
 import Hero from '@/components/Hero';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getStoredSettings } from '@/utils/settingsStorage';
 
 // Features section data
 const features = [
@@ -58,6 +62,15 @@ const sampleProperties = [
 ];
 
 export default function HomePage() {
+  const [aboutImage, setAboutImage] = useState('');
+
+  useEffect(() => {
+    const settings = getStoredSettings();
+    if (settings.aboutImage) {
+      setAboutImage(settings.aboutImage);
+    }
+  }, []);
+
   return (
     <>
       {/* Hero Section */}
@@ -184,8 +197,20 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Image side */}
             <div className="relative">
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-[#0d9488] to-[#14b8a6] shadow-2xl">
-                <div className="absolute inset-0 flex items-center justify-center">
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+                {aboutImage ? (
+                  <img
+                    src={aboutImage}
+                    alt="About Cozy Condo"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`aspect-[4/3] bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center ${aboutImage ? 'hidden' : ''}`}>
                   <div className="text-center text-white">
                     <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                       <span className="font-display text-3xl font-bold">CC</span>

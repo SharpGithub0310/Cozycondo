@@ -1,8 +1,20 @@
+'use client';
+
 import Link from 'next/link';
 import { Facebook, Phone, Mail, MapPin, MessageCircle, Heart } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { getStoredSettings } from '@/utils/settingsStorage';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [footerLogo, setFooterLogo] = useState('');
+
+  useEffect(() => {
+    const settings = getStoredSettings();
+    if (settings.footerLogo) {
+      setFooterLogo(settings.footerLogo);
+    }
+  }, []);
 
   return (
     <footer className="bg-[#5f4a38] text-[#fdf9f3]">
@@ -25,7 +37,19 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
+              {footerLogo ? (
+                <img
+                  src={footerLogo}
+                  alt="Cozy Condo Logo"
+                  className="h-12 w-auto object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center ${footerLogo ? 'hidden' : ''}`}>
                 <span className="text-white font-display text-xl font-bold">CC</span>
               </div>
               <div>

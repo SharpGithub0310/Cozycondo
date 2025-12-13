@@ -1,10 +1,8 @@
-import { Metadata } from 'next';
-import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send } from 'lucide-react';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Contact',
-  description: 'Get in touch with Cozy Condo for inquiries, bookings, and more. We\'re here to help you find your perfect stay in Iloilo City.',
-};
+import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { getStoredSettings } from '@/utils/settingsStorage';
 
 const contactMethods = [
   {
@@ -69,17 +67,40 @@ const faqs = [
 ];
 
 export default function ContactPage() {
+  const [contactImage, setContactImage] = useState('');
+
+  useEffect(() => {
+    const settings = getStoredSettings();
+    if (settings.contactImage) {
+      setContactImage(settings.contactImage);
+    }
+  }, []);
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+      <section className="relative py-16 md:py-24 overflow-hidden">
+        {/* Background image or gradient */}
+        {contactImage ? (
+          <>
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${contactImage})` }}
+            />
+            <div className="absolute inset-0 bg-[#5f4a38]/70" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+          </>
+        )}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-display text-4xl md:text-5xl font-semibold text-[#5f4a38] mb-4">
+          <h1 className={`font-display text-4xl md:text-5xl font-semibold mb-4 ${contactImage ? 'text-white' : 'text-[#5f4a38]'}`}>
             Get in Touch
           </h1>
-          <p className="text-lg text-[#7d6349] max-w-2xl mx-auto">
+          <p className={`text-lg max-w-2xl mx-auto ${contactImage ? 'text-white/90' : 'text-[#7d6349]'}`}>
             Have questions about our properties or need help with a booking? We&apos;re here to assist you every step of the way.
           </p>
         </div>
