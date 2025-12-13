@@ -1,74 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  Eye, 
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  Eye,
   EyeOff,
   Calendar,
   Clock,
   MoreVertical
 } from 'lucide-react';
+import { getStoredBlogPosts, deleteBlogPost, saveBlogPost } from '@/utils/blogStorage';
+import { seedBlogData } from '@/utils/seedBlogData';
 
-// Sample blog posts
-const initialPosts = [
-  { 
-    id: '1', 
-    title: 'Top 10 Things to Do in Iloilo City', 
-    slug: 'top-10-things-to-do-in-iloilo-city',
-    category: 'Travel Guide',
-    published: true,
-    publishedAt: '2024-12-01',
-    author: 'Cozy Condo Team'
-  },
-  { 
-    id: '2', 
-    title: 'Best Restaurants Near Our Properties', 
-    slug: 'best-restaurants-near-our-properties',
-    category: 'Food & Dining',
-    published: true,
-    publishedAt: '2024-11-15',
-    author: 'Cozy Condo Team'
-  },
-  { 
-    id: '3', 
-    title: 'Why Iloilo City is Perfect for Remote Work', 
-    slug: 'why-iloilo-city-is-perfect-for-remote-work',
-    category: 'Lifestyle',
-    published: true,
-    publishedAt: '2024-11-01',
-    author: 'Cozy Condo Team'
-  },
-  { 
-    id: '4', 
-    title: 'Getting Around Iloilo: Transportation Guide', 
-    slug: 'getting-around-iloilo-transportation-guide',
-    category: 'Travel Tips',
-    published: true,
-    publishedAt: '2024-10-20',
-    author: 'Cozy Condo Team'
-  },
-  { 
-    id: '5', 
-    title: 'Weekend Getaways from Iloilo City', 
-    slug: 'weekend-getaways-from-iloilo-city',
-    category: 'Travel Guide',
-    published: true,
-    publishedAt: '2024-10-05',
-    author: 'Cozy Condo Team'
-  },
-];
-
-const categories = ['All', 'Travel Guide', 'Food & Dining', 'Lifestyle', 'Travel Tips'];
+const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];
 
 export default function BlogAdminPage() {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    setPosts(getStoredBlogPosts());
+  }, []);
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -77,9 +34,25 @@ export default function BlogAdminPage() {
   });
 
   const togglePublished = (id: string) => {
-    setPosts(posts.map(p =>
-      p.id === id ? { ...p, published: !p.published } : p
-    ));
+    const updatedPosts = posts.map(p =>
+      p.id === id ? { ...p, status: p.status === 'published' ? 'draft' : 'published' } : p
+    );
+    setPosts(updatedPosts);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this post?')) {
+      deleteBlogPost(id);
+      setPosts(getStoredBlogPosts());
+    }
+  };
+
+  const handleSeedData = () => {
+    if (confirm('This will add sample blog posts. Continue?')) {
+      seedBlogData();
+      setPosts(getStoredBlogPosts());
+      alert('Sample blog posts added successfully!');
+    }
   };
 
   return (
@@ -90,10 +63,15 @@ export default function BlogAdminPage() {
           <h1 className="font-display text-2xl font-semibold text-[#5f4a38]">Blog Posts</h1>
           <p className="text-[#7d6349] mt-1">Create and manage blog content</p>
         </div>
-        <Link href="/admin/blog/new" className="btn-primary text-sm">
-          <Plus className="w-4 h-4 mr-2" />
-          New Post
-        </Link>
+        <div className="flex gap-2">
+          <button onClick={handleSeedData} className="btn-secondary text-sm">
+            Add Sample Posts
+          </button>
+          <Link href="/admin/blog/new" className="btn-primary text-sm">
+            <Plus className="w-4 h-4 mr-2" />
+            New Post
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
@@ -105,13 +83,13 @@ export default function BlogAdminPage() {
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Published</p>
           <p className="font-display text-2xl font-semibold text-[#14b8a6]">
-            {posts.filter(p => p.published).length}
+            {posts.filter(p => p.status === 'published').length}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Drafts</p>
           <p className="font-display text-2xl font-semibold text-[#fb923c]">
-            {posts.filter(p => !p.published).length}
+            {posts.filter(p => p.status === 'draft').length}
           </p>
         </div>
         <div className="admin-card">
@@ -157,7 +135,7 @@ export default function BlogAdminPage() {
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#faf3e6] text-[#7d6349]">
                     {post.category}
                   </span>
-                  {post.published ? (
+                  {post.status === 'published' ? (
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#14b8a6]/10 text-[#0f766e]">
                       Published
                     </span>
@@ -173,7 +151,7 @@ export default function BlogAdminPage() {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#9a7d5e]">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                    {new Date(post.publishDate).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric'
@@ -187,13 +165,13 @@ export default function BlogAdminPage() {
                 <button
                   onClick={() => togglePublished(post.id)}
                   className={`p-2 rounded-lg transition-colors ${
-                    post.published 
-                      ? 'text-[#14b8a6] hover:bg-[#14b8a6]/10' 
+                    post.status === 'published'
+                      ? 'text-[#14b8a6] hover:bg-[#14b8a6]/10'
                       : 'text-[#9a7d5e] hover:bg-[#faf3e6]'
                   }`}
-                  title={post.published ? 'Unpublish' : 'Publish'}
+                  title={post.status === 'published' ? 'Unpublish' : 'Publish'}
                 >
-                  {post.published ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  {post.status === 'published' ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
                 <Link
                   href={`/admin/blog/${post.id}`}
@@ -208,7 +186,10 @@ export default function BlogAdminPage() {
                 >
                   <Eye className="w-5 h-5" />
                 </Link>
-                <button className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors">
+                <button
+                  onClick={() => handleDelete(post.id)}
+                  className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors"
+                >
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>

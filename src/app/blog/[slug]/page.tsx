@@ -329,12 +329,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   href={`/blog/${relatedPost.slug}`}
                   className="group card bg-white"
                 >
-                  <div className="aspect-[16/10] bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-                        <span className="font-display text-xl font-bold text-white/80">CC</span>
+                  <div className="aspect-[16/10] overflow-hidden">
+                    {relatedPost.featuredImage ? (
+                      <img
+                        src={relatedPost.featuredImage}
+                        alt={relatedPost.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="bg-gradient-to-br from-[#d4b896] to-[#b89b7a] w-full h-full flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
+                          <span className="font-display text-xl font-bold text-white/80">CC</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   <div className="p-5">
                     <h3 className="font-display text-xl font-semibold text-[#5f4a38] group-hover:text-[#0d9488] transition-colors">
