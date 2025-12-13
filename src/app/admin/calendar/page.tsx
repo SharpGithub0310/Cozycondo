@@ -35,6 +35,11 @@ export default function CalendarPage() {
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [icalImportUrl, setIcalImportUrl] = useState('');
+  const [newBlock, setNewBlock] = useState({
+    startDate: '',
+    endDate: '',
+    reason: 'Manual Block'
+  });
 
   useEffect(() => {
     // Load properties from storage
@@ -216,6 +221,60 @@ export default function CalendarPage() {
     }
   };
 
+  // Handle clicking on a calendar date to create manual block
+  const handleDateClick = (dateStr: string) => {
+    if (!selectedProperty) return;
+
+    // Check if date is already blocked
+    const existingBlock = isDateBlocked(dateStr);
+    if (existingBlock) {
+      // If it's a manual block, we can delete it
+      if (existingBlock.source === 'manual') {
+        if (window.confirm(`Remove block for ${new Date(dateStr).toLocaleDateString()}?`)) {
+          setBlockedDates(blockedDates.filter(b =>
+            !(b.propertyId === selectedProperty.id &&
+              dateStr >= b.startDate &&
+              dateStr <= b.endDate &&
+              b.source === 'manual')
+          ));
+        }
+      } else {
+        alert('This date is blocked by Airbnb and cannot be modified manually.');
+      }
+      return;
+    }
+
+    // Set up new block with clicked date
+    setNewBlock({
+      startDate: dateStr,
+      endDate: dateStr,
+      reason: 'Manual Block'
+    });
+    setShowAddModal(true);
+  };
+
+  // Add new manual block
+  const addManualBlock = () => {
+    if (!selectedProperty || !newBlock.startDate || !newBlock.endDate) return;
+
+    const newBlockData = {
+      id: `manual-${Date.now()}`,
+      propertyId: selectedProperty.id,
+      startDate: newBlock.startDate,
+      endDate: newBlock.endDate,
+      reason: newBlock.reason || 'Manual Block',
+      source: 'manual'
+    };
+
+    setBlockedDates([...blockedDates, newBlockData]);
+    setShowAddModal(false);
+    setNewBlock({
+      startDate: '',
+      endDate: '',
+      reason: 'Manual Block'
+    });
+  };
+
   // Sync with external calendars
   const handleSync = async () => {
     if (!selectedProperty?.icalUrl) {
@@ -340,11 +399,13 @@ export default function CalendarPage() {
               <div
                 key={index}
                 className={`
-                  aspect-square p-1 rounded-lg text-center relative
-                  ${dayData.day === null ? 'bg-transparent' : 'bg-[#faf3e6]'}
+                  aspect-square p-1 rounded-lg text-center relative transition-all
+                  ${dayData.day === null ? 'bg-transparent' : 'bg-[#faf3e6] hover:bg-[#f5e6cc] cursor-pointer'}
                   ${isToday ? 'ring-2 ring-[#14b8a6]' : ''}
                   ${blocked ? 'cursor-pointer' : ''}
                 `}
+                onClick={() => dayData.date && handleDateClick(dayData.date)}
+                title={dayData.date ? `Click to ${blocked ? (blocked.source === 'manual' ? 'remove block' : 'view block') : 'add block'}` : ''}
               >
                 {dayData.day && (
                   <>
@@ -554,7 +615,7 @@ export default function CalendarPage() {
               </button>
             </div>
             
-            <form className="p-6 space-y-4">
+            <form className="p-6 space-y-4" onSubmit={(e) => { e.preventDefault(); addManualBlock(); }}>
               <div>
                 <label className="form-label">Property</label>
                 <input
@@ -567,33 +628,56 @@ export default function CalendarPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Start Date</label>
-                  <input type="date" className="form-input" />
+                  <input
+                    type="date"
+                    value={newBlock.startDate}
+                    onChange={(e) => setNewBlock({...newBlock, startDate: e.target.value})}
+                    className="form-input"
+                    required
+                  />
                 </div>
                 <div>
                   <label className="form-label">End Date</label>
-                  <input type="date" className="form-input" />
+                  <input
+                    type="date"
+                    value={newBlock.endDate}
+                    onChange={(e) => setNewBlock({...newBlock, endDate: e.target.value})}
+                    className="form-input"
+                    required
+                  />
                 </div>
               </div>
               <div>
-                <label className="form-label">Reason (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Maintenance, Personal use"
+                <label className="form-label">Reason</label>
+                <select
+                  value={newBlock.reason}
+                  onChange={(e) => setNewBlock({...newBlock, reason: e.target.value})}
                   className="form-input"
-                />
+                >
+                  <option value="Manual Block">Manual Block</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Personal Use">Personal Use</option>
+                  <option value="Phone Booking">Phone Booking</option>
+                  <option value="Hold/Reserve">Hold/Reserve</option>
+                  <option value="Cleaning">Cleaning</option>
+                  <option value="Inspection">Inspection</option>
+                </select>
               </div>
             </form>
 
             <div className="flex justify-end gap-3 p-6 border-t border-[#faf3e6]">
               <button
+                type="button"
                 onClick={() => setShowAddModal(false)}
                 className="btn-secondary"
               >
                 Cancel
               </button>
               <button
-                onClick={() => setShowAddModal(false)}
+                type="button"
+                onClick={addManualBlock}
                 className="btn-primary"
+                disabled={!newBlock.startDate || !newBlock.endDate}
               >
                 Block Dates
               </button>
