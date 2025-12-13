@@ -350,6 +350,17 @@ export default function CalendarPage() {
             iCal Settings
           </button>
           <button
+            onClick={() => {
+              // Copy export URL to clipboard
+              navigator.clipboard.writeText(icalExportUrl);
+              alert(`Export URL copied to clipboard!\n\n${icalExportUrl}\n\nPaste this into Airbnb's "Import Calendar" field.`);
+            }}
+            className="btn-secondary text-sm"
+          >
+            <CalendarIcon className="w-4 h-4 mr-2" />
+            Copy Export URL
+          </button>
+          <button
             onClick={() => window.open(icalExportUrl, '_blank')}
             className="btn-secondary text-sm"
           >
@@ -638,6 +649,28 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+
+      {/* Airbnb Sync Help */}
+      <div className="admin-card bg-blue-50 border-blue-200">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="space-y-2">
+            <h3 className="font-semibold text-blue-900">Airbnb Calendar Sync Instructions</h3>
+            <div className="text-sm text-blue-800 space-y-2">
+              <p><strong>To export your blocks to Airbnb:</strong></p>
+              <ol className="list-decimal list-inside space-y-1 ml-2">
+                <li>Click "Copy Export URL" above to copy your calendar URL</li>
+                <li>Go to Airbnb → Calendar → Availability → Connect calendars</li>
+                <li>Paste the URL into "Import a calendar" field</li>
+                <li>Name it "Cozy Condo" and click "Add calendar"</li>
+                <li>Airbnb will automatically refresh every 3 hours (or click "Refresh" manually)</li>
+              </ol>
+              <p className="mt-2"><strong>Important:</strong> Manual blocks created here will appear as "Blocked" on Airbnb after the next refresh.</p>
+              <p className="text-xs text-blue-600 mt-2">Your export URL ends with .ics as required by Airbnb ✓</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Add Block Modal */}
       {showAddModal && (
