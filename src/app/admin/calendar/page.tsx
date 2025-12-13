@@ -87,16 +87,16 @@ export default function CalendarPage() {
 
   // Check if date is blocked
   const isDateBlocked = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    return blockedDates.find(b => 
+    if (!dateStr || !selectedProperty) return null;
+    return blockedDates.find(b =>
       b.propertyId === selectedProperty.id &&
-      dateStr >= b.startDate && 
+      dateStr >= b.startDate &&
       dateStr <= b.endDate
     );
   };
 
   // Generate iCal export URL
-  const icalExportUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/${selectedProperty.id}`;
+  const icalExportUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/${selectedProperty?.id || 'unknown'}`;
 
   // Copy URL to clipboard
   const copyToClipboard = () => {
@@ -112,6 +112,20 @@ export default function CalendarPage() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsSyncing(false);
   };
+
+  // Show loading state if no properties are loaded yet
+  if (properties.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[#14b8a6] flex items-center justify-center animate-pulse">
+            <CalendarIcon className="w-6 h-6 text-white" />
+          </div>
+          <p className="text-[#7d6349]">Loading calendar...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -144,7 +158,7 @@ export default function CalendarPage() {
       <div className="admin-card">
         <label className="form-label">Select Property</label>
         <select
-          value={selectedProperty.id}
+          value={selectedProperty?.id || ''}
           onChange={(e) => setSelectedProperty(properties.find(p => p.id === e.target.value) || properties[0])}
           className="form-input max-w-md"
         >
@@ -243,7 +257,7 @@ export default function CalendarPage() {
       <div className="admin-card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-lg font-semibold text-[#5f4a38]">
-            Blocked Dates for {selectedProperty.name}
+            Blocked Dates for {selectedProperty?.name || 'No Property Selected'}
           </h2>
           <button
             onClick={() => setShowAddModal(true)}
@@ -257,7 +271,7 @@ export default function CalendarPage() {
         {/* Blocked dates list */}
         <div className="space-y-3">
           {blockedDates
-            .filter(b => b.propertyId === selectedProperty.id)
+            .filter(b => b.propertyId === selectedProperty?.id)
             .map((block) => (
               <div
                 key={block.id}
@@ -293,8 +307,8 @@ export default function CalendarPage() {
                 </div>
               </div>
             ))}
-          
-          {blockedDates.filter(b => b.propertyId === selectedProperty.id).length === 0 && (
+
+          {blockedDates.filter(b => b.propertyId === selectedProperty?.id).length === 0 && (
             <p className="text-center text-[#9a7d5e] py-8">
               No blocked dates for this property.
             </p>
@@ -308,7 +322,7 @@ export default function CalendarPage() {
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
             <div className="flex items-center justify-between p-6 border-b border-[#faf3e6]">
               <h3 className="font-display text-xl font-semibold text-[#5f4a38]">
-                iCal Settings for {selectedProperty.name}
+                iCal Settings for {selectedProperty?.name || 'No Property Selected'}
               </h3>
               <button
                 onClick={() => setShowIcalModal(false)}
@@ -406,7 +420,7 @@ export default function CalendarPage() {
                 <label className="form-label">Property</label>
                 <input
                   type="text"
-                  value={selectedProperty.name}
+                  value={selectedProperty?.name || ''}
                   disabled
                   className="form-input bg-[#faf3e6]"
                 />
