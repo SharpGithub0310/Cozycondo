@@ -14,6 +14,8 @@ interface PropertyData {
   pricePerNight: string;
   airbnbUrl: string;
   icalUrl?: string;
+  featured?: boolean;
+  active?: boolean;
   amenities: string[];
   photos: string[];
   featuredPhotoIndex?: number;
@@ -80,6 +82,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '3000',
       airbnbUrl: 'https://airbnb.com/rooms/artist-loft',
       icalUrl: '',
+      featured: true,
+      active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'Smart TV', 'High Ceilings', 'Natural Light', 'Workspace'],
       photos: [
         'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
@@ -99,6 +103,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '2800',
       airbnbUrl: 'https://airbnb.com/rooms/garden-suite',
       icalUrl: '',
+      featured: true,
+      active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Parking', 'Kitchen', 'Balcony', 'Smart TV', 'Washer'],
       photos: [
         'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
@@ -117,6 +123,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '2200',
       airbnbUrl: 'https://airbnb.com/rooms/metro-central',
       icalUrl: '',
+      featured: true,
+      active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
       photos: [
         'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
@@ -135,6 +143,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '2000',
       airbnbUrl: 'https://airbnb.com/rooms/riverside-studio',
       icalUrl: '',
+      featured: false,
+      active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'River View', 'Peaceful Setting', 'Historic Area'],
       photos: [
         'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
@@ -155,6 +165,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
     pricePerNight: '2500',
     airbnbUrl: 'https://airbnb.com/rooms/123456',
     icalUrl: '',
+    featured: false,
+    active: true,
     amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'TV', 'Balcony'],
     photos: [
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
