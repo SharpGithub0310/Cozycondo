@@ -60,9 +60,6 @@ export default function NewBlogPost() {
       let finalSlug = post.slug;
       if (!finalSlug) {
         finalSlug = generateUniqueSlug(post.title);
-      } else {
-        // Ensure slug is unique
-        finalSlug = generateUniqueSlug(finalSlug);
       }
 
       // Save the blog post
@@ -138,7 +135,7 @@ export default function NewBlogPost() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           <div className="admin-card">
-            <form onSubmit={handleSave} className="space-y-6">
+            <form id="blog-post-form" onSubmit={handleSave} className="space-y-6">
               {/* Title */}
               <div>
                 <label className="form-label">Title</label>
@@ -399,7 +396,8 @@ export default function NewBlogPost() {
           {/* Actions */}
           <div className="space-y-3">
             <button
-              onClick={handleSave}
+              type="submit"
+              form="blog-post-form"
               disabled={isSaving}
               className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
             >
