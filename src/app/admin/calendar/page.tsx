@@ -414,9 +414,9 @@ export default function CalendarPage() {
         </div>
 
         {/* Days of week */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-1 mb-3 bg-gray-100 rounded-lg p-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="text-center text-sm font-semibold text-gray-600 py-2">
+            <div key={day} className="text-center text-sm font-bold text-gray-700 py-1">
               {day}
             </div>
           ))}
@@ -432,10 +432,10 @@ export default function CalendarPage() {
               <div
                 key={index}
                 className={`
-                  aspect-square p-1 rounded-lg text-center relative transition-all
-                  ${dayData.day === null ? 'bg-transparent' : 'bg-white hover:bg-gray-50 cursor-pointer border border-gray-200'}
-                  ${isToday ? 'ring-2 ring-teal-500' : ''}
-                  ${blocked ? 'cursor-pointer' : ''}
+                  min-h-[80px] p-2 rounded-lg text-center relative transition-all
+                  ${dayData.day === null ? 'bg-transparent' : ''}
+                  ${!blocked && dayData.day ? 'bg-white hover:bg-gray-50 cursor-pointer border-2 border-gray-300' : ''}
+                  ${isToday && !blocked ? 'border-2 border-teal-500 shadow-md' : ''}
                 `}
                 onClick={() => dayData.date && handleDateClick(dayData.date)}
                 title={dayData.date ? `Click to ${blocked ? (blocked.source === 'manual' ? 'remove block' : 'view block') : 'add block'}` : ''}
@@ -443,27 +443,29 @@ export default function CalendarPage() {
                 {dayData.day && (
                   <>
                     {blocked ? (
-                      <div className="relative h-full flex flex-col justify-center">
-                        <div className={`text-sm font-bold ${isToday ? 'text-white' : 'text-white'}`}>
+                      <div className={`
+                        h-full min-h-[72px] flex flex-col justify-center items-center rounded-md p-1
+                        ${blocked.source === 'airbnb'
+                          ? 'bg-red-500 text-white border-2 border-red-600'
+                          : 'bg-orange-500 text-white border-2 border-orange-600'}
+                      `}>
+                        <div className="text-lg font-bold">
                           {dayData.day}
                         </div>
-                        <div className="text-xs text-white font-medium mt-0.5">
-                          {blocked.source === 'airbnb' ? 'Airbnb' :
-                           blocked.reason.length > 8 ? blocked.reason.substring(0, 6) + '..' : blocked.reason}
+                        <div className="text-xs font-semibold mt-1 px-1">
+                          {blocked.source === 'airbnb' ? '🏠 Airbnb' :
+                           blocked.reason.length > 10 ? blocked.reason.substring(0, 8) + '..' : blocked.reason}
                         </div>
-                        <div
-                          className={`absolute inset-0 rounded ${
-                            blocked.source === 'airbnb'
-                              ? 'bg-red-500 border-2 border-red-600'
-                              : 'bg-orange-500 border-2 border-orange-600'
-                          } -z-10`}
-                          title={`${blocked.source === 'airbnb' ? 'Airbnb Booking' : 'Manual Block'}: ${blocked.reason}`}
-                        />
                       </div>
                     ) : (
-                      <span className={`text-base font-medium ${isToday ? 'font-bold text-teal-600' : 'text-gray-700'}`}>
-                        {dayData.day}
-                      </span>
+                      <div className="flex flex-col justify-center min-h-[72px]">
+                        <span className={`text-lg font-semibold ${isToday ? 'text-teal-600' : 'text-gray-800'}`}>
+                          {dayData.day}
+                        </span>
+                        {isToday && (
+                          <span className="text-xs text-teal-600 font-medium">Today</span>
+                        )}
+                      </div>
                     )}
                   </>
                 )}
@@ -473,26 +475,22 @@ export default function CalendarPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <div className="w-4 h-4 rounded bg-red-500 text-white text-[8px] flex items-center justify-center font-bold">
-              A
-            </div>
-            <span className="font-medium">Airbnb Booking</span>
+        <div className="flex flex-wrap gap-6 mt-6 pt-4 border-t-2 border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-red-500 border-2 border-red-600" />
+            <span className="text-sm font-semibold text-gray-800">Airbnb Booking</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <div className="w-4 h-4 rounded bg-orange-500 text-white text-[8px] flex items-center justify-center font-bold">
-              M
-            </div>
-            <span className="font-medium">Manual Block</span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-orange-500 border-2 border-orange-600" />
+            <span className="text-sm font-semibold text-gray-800">Manual Block</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <div className="w-4 h-4 rounded bg-white border-2 border-teal-500" />
-            <span className="font-medium">Today</span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-white border-2 border-teal-500" />
+            <span className="text-sm font-semibold text-gray-800">Today</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <div className="w-4 h-4 rounded bg-white border border-gray-300" />
-            <span className="font-medium">Available (Click to block)</span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-white border-2 border-gray-300" />
+            <span className="text-sm font-semibold text-gray-800">Available</span>
           </div>
         </div>
       </div>
