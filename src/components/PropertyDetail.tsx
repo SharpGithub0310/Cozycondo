@@ -18,7 +18,11 @@ import {
   Dumbbell,
   Coffee,
   WashingMachine,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ZoomIn
 } from 'lucide-react';
 import { getStoredProperty } from '@/utils/propertyStorage';
 
@@ -44,6 +48,21 @@ interface PropertyDetailProps {
 export default function PropertyDetail({ slug, defaultProperty }: PropertyDetailProps) {
   const [property, setProperty] = useState(defaultProperty);
   const [displayPhotos, setDisplayPhotos] = useState<string[]>([]);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
+  const openLightbox = (index: number) => {
+    setCurrentPhotoIndex(index);
+    setShowLightbox(true);
+  };
+
+  const nextPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev + 1) % displayPhotos.length);
+  };
+
+  const prevPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev - 1 + displayPhotos.length) % displayPhotos.length);
+  };
 
   useEffect(() => {
     // Check if we have stored property data with photos
@@ -155,16 +174,24 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Main photo */}
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden">
+            <div
+              className="aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer relative group"
+              onClick={() => openLightbox(0)}
+            >
               {displayPhotos.length > 0 ? (
-                <img
-                  src={displayPhotos[0]}
-                  alt={`${property.name} main photo`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop';
-                  }}
-                />
+                <>
+                  <img
+                    src={displayPhotos[0]}
+                    alt={`${property.name} main photo`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <ZoomIn className="w-10 h-10 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </>
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#d4b896] to-[#b89b7a] flex items-center justify-center">
                   <div className="text-center text-white/80">
@@ -178,21 +205,36 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
             </div>
 
             {/* Thumbnail grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 relative">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="aspect-[4/3] rounded-xl overflow-hidden"
+                  className="aspect-[4/3] rounded-xl overflow-hidden cursor-pointer relative group"
+                  onClick={() => displayPhotos[i] && openLightbox(i)}
                 >
                   {displayPhotos[i] ? (
-                    <img
-                      src={displayPhotos[i]}
-                      alt={`${property.name} photo ${i + 1}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                      onError={(e) => {
-                        e.currentTarget.src = `https://images.unsplash.com/photo-152270832359${i}?w=300&h=200&fit=crop`;
-                      }}
-                    />
+                    <>
+                      <img
+                        src={displayPhotos[i]}
+                        alt={`${property.name} photo ${i + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://images.unsplash.com/photo-152270832359${i}?w=300&h=200&fit=crop`;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      {/* Show "View all" button on the last visible thumbnail if there are more photos */}
+                      {i === 3 && displayPhotos.length > 5 && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <span className="text-2xl font-bold">+{displayPhotos.length - 5}</span>
+                            <p className="text-sm mt-1">View all photos</p>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#e8d4a8] to-[#d4b896] flex items-center justify-center">
                       <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
@@ -205,9 +247,13 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
             </div>
           </div>
           {displayPhotos.length > 5 && (
-            <p className="text-sm text-[#9a7d5e] mt-4 text-center">
-              Showing {Math.min(5, displayPhotos.length)} of {displayPhotos.length} photos
-            </p>
+            <button
+              onClick={() => openLightbox(0)}
+              className="mt-4 mx-auto flex items-center gap-2 px-4 py-2 bg-[#14b8a6] text-white rounded-lg hover:bg-[#0d9488] transition-colors"
+            >
+              <ZoomIn className="w-4 h-4" />
+              View all {displayPhotos.length} photos
+            </button>
           )}
         </div>
       </section>
@@ -351,6 +397,80 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
           </div>
         </div>
       </section>
+
+      {/* Photo Lightbox Modal */}
+      {showLightbox && displayPhotos.length > 0 && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+          {/* Close button */}
+          <button
+            onClick={() => setShowLightbox(false)}
+            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Previous button */}
+          {displayPhotos.length > 1 && (
+            <button
+              onClick={prevPhoto}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+          )}
+
+          {/* Photo display */}
+          <div className="max-w-7xl max-h-[90vh] mx-auto px-4 relative">
+            <img
+              src={displayPhotos[currentPhotoIndex]}
+              alt={`${property.name} photo ${currentPhotoIndex + 1}`}
+              className="max-w-full max-h-[90vh] object-contain"
+              onError={(e) => {
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop';
+              }}
+            />
+
+            {/* Photo counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-lg">
+              {currentPhotoIndex + 1} / {displayPhotos.length}
+            </div>
+          </div>
+
+          {/* Next button */}
+          {displayPhotos.length > 1 && (
+            <button
+              onClick={nextPhoto}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+          )}
+
+          {/* Thumbnail strip at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4 overflow-x-auto">
+            <div className="flex gap-2 justify-center">
+              {displayPhotos.map((photo, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPhotoIndex(index)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    index === currentPhotoIndex ? 'border-white' : 'border-transparent opacity-50 hover:opacity-75'
+                  }`}
+                >
+                  <img
+                    src={photo}
+                    alt={`Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=100&h=100&fit=crop';
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
