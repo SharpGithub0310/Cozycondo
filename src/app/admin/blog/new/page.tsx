@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Save, Upload, Eye, Calendar, Tag, User, Image, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { saveBlogPost, generateUniqueSlug } from '@/utils/blogStorage';
 
 export default function NewBlogPost() {
   const router = useRouter();
@@ -36,22 +37,56 @@ export default function NewBlogPost() {
     setIsSaving(true);
 
     try {
-      // Auto-generate slug if empty
-      if (!post.slug) {
-        const slug = post.title
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .trim();
-        setPost(prev => ({ ...prev, slug }));
+      // Validate required fields
+      if (!post.title.trim()) {
+        alert('Please enter a title for the blog post.');
+        setIsSaving(false);
+        return;
       }
 
-      // In production, save to database
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!post.excerpt.trim()) {
+        alert('Please enter an excerpt for the blog post.');
+        setIsSaving(false);
+        return;
+      }
+
+      if (!post.content.trim()) {
+        alert('Please enter content for the blog post.');
+        setIsSaving(false);
+        return;
+      }
+
+      // Auto-generate unique slug if empty
+      let finalSlug = post.slug;
+      if (!finalSlug) {
+        finalSlug = generateUniqueSlug(post.title);
+      } else {
+        // Ensure slug is unique
+        finalSlug = generateUniqueSlug(finalSlug);
+      }
+
+      // Save the blog post
+      const savedPost = saveBlogPost({
+        title: post.title.trim(),
+        slug: finalSlug,
+        excerpt: post.excerpt.trim(),
+        content: post.content.trim(),
+        author: post.author.trim() || 'Cozy Condo Team',
+        category: post.category,
+        tags: post.tags,
+        featuredImage: post.featuredImage,
+        publishDate: post.publishDate,
+        status: post.status,
+      });
+
+      console.log('Blog post saved:', savedPost);
+
+      // Show success message and redirect
+      alert(`Blog post ${post.status === 'published' ? 'published' : 'saved as draft'} successfully!`);
       router.push('/admin/blog');
     } catch (error) {
       console.error('Failed to save blog post:', error);
+      alert('Failed to save blog post. Please try again.');
       setIsSaving(false);
     }
   };
@@ -74,13 +109,12 @@ export default function NewBlogPost() {
   };
 
   const generateSlug = () => {
-    const slug = post.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-    setPost({ ...post, slug });
+    if (!post.title.trim()) {
+      alert('Please enter a title first.');
+      return;
+    }
+    const uniqueSlug = generateUniqueSlug(post.title);
+    setPost({ ...post, slug: uniqueSlug });
   };
 
   return (
