@@ -259,7 +259,8 @@ export default function CalendarPage() {
     setNewBlock({
       startDate: dateStr,
       endDate: dateStr,
-      reason: 'Manual Block'
+      reason: 'Manual Block',
+      customReason: ''
     });
     setShowAddModal(true);
   };
