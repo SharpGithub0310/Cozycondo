@@ -141,12 +141,103 @@ export default function CalendarPage() {
     }
   };
 
-  // Simulate sync
+  // Parse iCal data from URL
+  const parseIcalData = async (url: string) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'CozyCondoCalendar/1.0',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch iCal data: ${response.status}`);
+      }
+
+      const icalText = await response.text();
+
+      // Simple parser for blocked dates (in production, use a proper iCal library)
+      const events: any[] = [];
+      const lines = icalText.split('\n');
+      let currentEvent: any = null;
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+
+        if (trimmed === 'BEGIN:VEVENT') {
+          currentEvent = {};
+        } else if (trimmed === 'END:VEVENT' && currentEvent) {
+          if (currentEvent.dtstart && currentEvent.dtend) {
+            events.push({
+              id: currentEvent.uid || `imported-${Date.now()}-${Math.random()}`,
+              propertyId: selectedProperty?.id,
+              startDate: currentEvent.dtstart,
+              endDate: currentEvent.dtend,
+              reason: currentEvent.summary || 'Airbnb Booking',
+              source: 'airbnb'
+            });
+          }
+          currentEvent = null;
+        } else if (currentEvent) {
+          const [key, ...valueParts] = trimmed.split(':');
+          const value = valueParts.join(':');
+
+          switch (key) {
+            case 'UID':
+              currentEvent.uid = value;
+              break;
+            case 'SUMMARY':
+              currentEvent.summary = value;
+              break;
+            case 'DTSTART;VALUE=DATE':
+            case 'DTSTART':
+              // Parse date (simple format: YYYYMMDD or YYYYMMDDTHHMMSS)
+              const startDateStr = value.replace(/T.*/, '').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+              currentEvent.dtstart = startDateStr;
+              break;
+            case 'DTEND;VALUE=DATE':
+            case 'DTEND':
+              const endDateStr = value.replace(/T.*/, '').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+              currentEvent.dtend = endDateStr;
+              break;
+          }
+        }
+      }
+
+      return events;
+    } catch (error) {
+      console.error('Error parsing iCal data:', error);
+      throw error;
+    }
+  };
+
+  // Sync with external calendars
   const handleSync = async () => {
+    if (!selectedProperty?.icalUrl) {
+      alert('No iCal URL configured for this property');
+      return;
+    }
+
     setIsSyncing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSyncing(false);
+    try {
+      // Parse iCal data from the configured URL
+      const importedEvents = await parseIcalData(selectedProperty.icalUrl);
+
+      // Remove old Airbnb bookings for this property and add new ones
+      const filteredBlockedDates = blockedDates.filter(
+        b => !(b.propertyId === selectedProperty.id && b.source === 'airbnb')
+      );
+
+      const newBlockedDates = [...filteredBlockedDates, ...importedEvents];
+      setBlockedDates(newBlockedDates);
+
+      alert(`Successfully imported ${importedEvents.length} bookings from Airbnb!`);
+    } catch (error) {
+      console.error('Sync failed:', error);
+      alert(`Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Show loading state if no properties are loaded yet
