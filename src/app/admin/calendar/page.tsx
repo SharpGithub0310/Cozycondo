@@ -14,22 +14,24 @@ import {
   X,
   Info
 } from 'lucide-react';
-import { getStoredProperties, getDefaultPropertyData, saveProperty } from '@/utils/propertyStorage';
+import {
+  getStoredProperties,
+  getDefaultPropertyData,
+  saveProperty,
+  getStoredCalendarBlocks,
+  addCalendarBlock,
+  removeCalendarBlock,
+  updatePropertyCalendarBlocks
+} from '@/utils/propertyStorage';
 
 // Property IDs
 const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-// Sample blocked dates
-const sampleBlockedDates = [
-  { id: '1', propertyId: '1', startDate: '2024-12-20', endDate: '2024-12-25', reason: 'Maintenance', source: 'manual' },
-  { id: '2', propertyId: '1', startDate: '2024-12-28', endDate: '2025-01-02', reason: 'Booked - Airbnb', source: 'airbnb' },
-];
 
 export default function CalendarPage() {
   const [properties, setProperties] = useState<any[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [blockedDates, setBlockedDates] = useState(sampleBlockedDates);
+  const [blockedDates, setBlockedDates] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showIcalModal, setShowIcalModal] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -40,6 +42,12 @@ export default function CalendarPage() {
     endDate: '',
     reason: 'Manual Block'
   });
+
+  // Load calendar data from storage
+  const loadCalendarData = () => {
+    const storedBlocks = getStoredCalendarBlocks();
+    setBlockedDates(storedBlocks);
+  };
 
   useEffect(() => {
     // Load properties from storage
@@ -64,6 +72,9 @@ export default function CalendarPage() {
     if (loadedProperties.length > 0) {
       setSelectedProperty(loadedProperties[0]);
     }
+
+    // Load calendar data
+    loadCalendarData();
   }, []);
 
   // Load iCal URL when selected property changes
@@ -231,12 +242,10 @@ export default function CalendarPage() {
       // If it's a manual block, we can delete it
       if (existingBlock.source === 'manual') {
         if (window.confirm(`Remove block for ${new Date(dateStr).toLocaleDateString()}?`)) {
-          setBlockedDates(blockedDates.filter(b =>
-            !(b.propertyId === selectedProperty.id &&
-              dateStr >= b.startDate &&
-              dateStr <= b.endDate &&
-              b.source === 'manual')
-          ));
+          // Remove from storage
+          removeCalendarBlock(existingBlock.id);
+          // Reload calendar data
+          loadCalendarData();
         }
       } else {
         alert('This date is blocked by Airbnb and cannot be modified manually.');
@@ -263,10 +272,14 @@ export default function CalendarPage() {
       startDate: newBlock.startDate,
       endDate: newBlock.endDate,
       reason: newBlock.reason || 'Manual Block',
-      source: 'manual'
+      source: 'manual' as const
     };
 
-    setBlockedDates([...blockedDates, newBlockData]);
+    // Save to storage
+    addCalendarBlock(newBlockData);
+    // Reload calendar data
+    loadCalendarData();
+
     setShowAddModal(false);
     setNewBlock({
       startDate: '',
@@ -287,13 +300,10 @@ export default function CalendarPage() {
       // Parse iCal data from the configured URL
       const importedEvents = await parseIcalData(selectedProperty.icalUrl);
 
-      // Remove old Airbnb bookings for this property and add new ones
-      const filteredBlockedDates = blockedDates.filter(
-        b => !(b.propertyId === selectedProperty.id && b.source === 'airbnb')
-      );
-
-      const newBlockedDates = [...filteredBlockedDates, ...importedEvents];
-      setBlockedDates(newBlockedDates);
+      // Update storage with new Airbnb events (preserves manual blocks)
+      updatePropertyCalendarBlocks(selectedProperty.id, importedEvents);
+      // Reload calendar data
+      loadCalendarData();
 
       alert(`Successfully imported ${importedEvents.length} bookings from Airbnb!`);
     } catch (error) {

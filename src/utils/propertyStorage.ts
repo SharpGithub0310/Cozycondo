@@ -66,6 +66,67 @@ export function clearStoredProperties(): void {
   localStorage.removeItem(STORAGE_KEY);
 }
 
+// Calendar data storage
+const CALENDAR_STORAGE_KEY = 'cozy_condo_calendar';
+
+interface CalendarBlock {
+  id: string;
+  propertyId: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
+  source: 'manual' | 'airbnb';
+}
+
+// Get all stored calendar blocks
+export function getStoredCalendarBlocks(): CalendarBlock[] {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const stored = localStorage.getItem(CALENDAR_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Error reading stored calendar blocks:', error);
+    return [];
+  }
+}
+
+// Save calendar blocks
+export function saveCalendarBlocks(blocks: CalendarBlock[]): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(blocks));
+  } catch (error) {
+    console.error('Error saving calendar blocks:', error);
+  }
+}
+
+// Add a new calendar block
+export function addCalendarBlock(block: CalendarBlock): void {
+  const blocks = getStoredCalendarBlocks();
+  const updatedBlocks = [...blocks, { ...block, id: block.id || `${block.source}-${Date.now()}` }];
+  saveCalendarBlocks(updatedBlocks);
+}
+
+// Remove a calendar block
+export function removeCalendarBlock(blockId: string): void {
+  const blocks = getStoredCalendarBlocks();
+  const updatedBlocks = blocks.filter(block => block.id !== blockId);
+  saveCalendarBlocks(updatedBlocks);
+}
+
+// Update calendar blocks for a property (replaces all Airbnb blocks for that property)
+export function updatePropertyCalendarBlocks(propertyId: string, newBlocks: CalendarBlock[]): void {
+  const allBlocks = getStoredCalendarBlocks();
+  // Keep manual blocks, replace Airbnb blocks
+  const manualBlocks = allBlocks.filter(block =>
+    !(block.propertyId === propertyId && block.source === 'airbnb')
+  );
+  const updatedBlocks = [...manualBlocks, ...newBlocks];
+  saveCalendarBlocks(updatedBlocks);
+}
+
 // Default property data
 export const getDefaultPropertyData = (id: string): PropertyData => {
   const defaults: Record<string, PropertyData> = {

@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ical, { ICalCalendarMethod } from 'ical-generator';
-import { getDefaultPropertyData } from '@/utils/propertyStorage';
+import { getDefaultPropertyData, getStoredCalendarBlocks } from '@/utils/propertyStorage';
 
-// Sample blocked dates for demo (will be replaced with actual storage data)
-const blockedDates: Record<string, Array<{ start: Date; end: Date; title: string; source: string }>> = {
-  '1': [
-    { start: new Date('2024-12-20'), end: new Date('2024-12-25'), title: 'Maintenance', source: 'manual' },
-    { start: new Date('2024-12-28'), end: new Date('2025-01-02'), title: 'Booked - Airbnb', source: 'airbnb' },
-  ],
-  '2': [
-    { start: new Date('2024-12-24'), end: new Date('2024-12-28'), title: 'Personal Use', source: 'manual' },
-  ],
-  '7': [
-    { start: new Date('2024-12-31'), end: new Date('2025-01-02'), title: 'New Year Block', source: 'manual' },
-  ],
-  '8': [
-    { start: new Date('2025-01-15'), end: new Date('2025-01-18'), title: 'Maintenance', source: 'manual' },
-  ],
-};
+// Get calendar blocks for a specific property
+function getPropertyCalendarBlocks(propertyId: string) {
+  try {
+    const allBlocks = getStoredCalendarBlocks();
+    return allBlocks
+      .filter(block => block.propertyId === propertyId)
+      .map(block => ({
+        start: new Date(block.startDate),
+        end: new Date(new Date(block.endDate).getTime() + 24 * 60 * 60 * 1000), // Add 1 day for end date
+        title: block.reason,
+        source: block.source
+      }));
+  } catch (error) {
+    console.error('Error loading calendar blocks:', error);
+    // Return sample data if storage fails
+    return propertyId === '1' ? [
+      { start: new Date('2024-12-20'), end: new Date('2024-12-25'), title: 'Maintenance', source: 'manual' }
+    ] : [];
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -41,8 +45,8 @@ export async function GET(
       timezone: 'Asia/Manila',
     });
 
-    // Get blocked dates for this property
-    const dates = blockedDates[propertyId] || [];
+    // Get blocked dates for this property from storage
+    const dates = getPropertyCalendarBlocks(propertyId);
 
     // Add events for each blocked date range
     dates.forEach((dateRange, index) => {
