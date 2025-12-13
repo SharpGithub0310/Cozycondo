@@ -41,7 +41,8 @@ export default function CalendarPage() {
   const [newBlock, setNewBlock] = useState({
     startDate: '',
     endDate: '',
-    reason: 'Manual Block'
+    reason: 'Manual Block',
+    customReason: ''
   });
 
   // Load calendar data from storage
@@ -267,12 +268,13 @@ export default function CalendarPage() {
   const addManualBlock = () => {
     if (!selectedProperty || !newBlock.startDate || !newBlock.endDate) return;
 
+    const finalReason = newBlock.reason === 'Custom' ? newBlock.customReason : newBlock.reason;
     const newBlockData = {
       id: `manual-${Date.now()}`,
       propertyId: selectedProperty.id,
       startDate: newBlock.startDate,
       endDate: newBlock.endDate,
-      reason: newBlock.reason || 'Manual Block',
+      reason: finalReason || 'Manual Block',
       source: 'manual' as const
     };
 
@@ -285,7 +287,8 @@ export default function CalendarPage() {
     setNewBlock({
       startDate: '',
       endDate: '',
-      reason: 'Manual Block'
+      reason: 'Manual Block',
+      customReason: ''
     });
   };
 
@@ -427,18 +430,28 @@ export default function CalendarPage() {
               >
                 {dayData.day && (
                   <>
-                    <span className={`text-sm ${isToday ? 'font-bold text-[#14b8a6]' : 'text-[#7d6349]'}`}>
-                      {dayData.day}
-                    </span>
-                    {blocked && (
-                      <div
-                        className={`absolute inset-1 rounded ${
-                          blocked.source === 'airbnb' 
-                            ? 'bg-[#FF5A5F]/20 border border-[#FF5A5F]/40' 
-                            : 'bg-[#fb923c]/20 border border-[#fb923c]/40'
-                        }`}
-                        title={blocked.reason}
-                      />
+                    {blocked ? (
+                      <div className="relative h-full flex flex-col justify-center">
+                        <div className={`text-xs font-bold ${isToday ? 'text-white' : 'text-white'}`}>
+                          {dayData.day}
+                        </div>
+                        <div className="text-[10px] text-white/90 leading-tight">
+                          {blocked.source === 'airbnb' ? 'Airbnb' :
+                           blocked.reason.length > 8 ? blocked.reason.substring(0, 6) + '..' : blocked.reason}
+                        </div>
+                        <div
+                          className={`absolute inset-0 rounded ${
+                            blocked.source === 'airbnb'
+                              ? 'bg-[#FF5A5F] border border-[#FF5A5F]'
+                              : 'bg-[#fb923c] border border-[#fb923c]'
+                          } -z-10`}
+                          title={`${blocked.source === 'airbnb' ? 'Airbnb Booking' : 'Manual Block'}: ${blocked.reason}`}
+                        />
+                      </div>
+                    ) : (
+                      <span className={`text-sm ${isToday ? 'font-bold text-[#14b8a6]' : 'text-[#7d6349]'}`}>
+                        {dayData.day}
+                      </span>
                     )}
                   </>
                 )}
@@ -450,16 +463,24 @@ export default function CalendarPage() {
         {/* Legend */}
         <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-[#faf3e6]">
           <div className="flex items-center gap-2 text-sm text-[#7d6349]">
-            <div className="w-4 h-4 rounded bg-[#FF5A5F]/20 border border-[#FF5A5F]/40" />
+            <div className="w-4 h-4 rounded bg-[#FF5A5F] text-white text-[8px] flex items-center justify-center font-bold">
+              A
+            </div>
             <span>Airbnb Booking</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-[#7d6349]">
-            <div className="w-4 h-4 rounded bg-[#fb923c]/20 border border-[#fb923c]/40" />
+            <div className="w-4 h-4 rounded bg-[#fb923c] text-white text-[8px] flex items-center justify-center font-bold">
+              M
+            </div>
             <span>Manual Block</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-[#7d6349]">
             <div className="w-4 h-4 rounded ring-2 ring-[#14b8a6]" />
             <span>Today</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-[#7d6349]">
+            <div className="w-4 h-4 rounded bg-[#faf3e6] border border-[#e5d3b3]" />
+            <span>Available (Click to block)</span>
           </div>
         </div>
       </div>
@@ -670,7 +691,7 @@ export default function CalendarPage() {
                 <select
                   value={newBlock.reason}
                   onChange={(e) => setNewBlock({...newBlock, reason: e.target.value})}
-                  className="form-input"
+                  className="form-input mb-2"
                 >
                   <option value="Manual Block">Manual Block</option>
                   <option value="Maintenance">Maintenance</option>
@@ -679,7 +700,18 @@ export default function CalendarPage() {
                   <option value="Hold/Reserve">Hold/Reserve</option>
                   <option value="Cleaning">Cleaning</option>
                   <option value="Inspection">Inspection</option>
+                  <option value="Custom">Custom Reason...</option>
                 </select>
+                {newBlock.reason === 'Custom' && (
+                  <input
+                    type="text"
+                    placeholder="Enter custom reason (e.g., 'Guest: John Smith', 'Repair: AC Unit')"
+                    value={newBlock.customReason || ''}
+                    onChange={(e) => setNewBlock({...newBlock, customReason: e.target.value})}
+                    className="form-input mt-2"
+                    autoFocus
+                  />
+                )}
               </div>
             </form>
 
