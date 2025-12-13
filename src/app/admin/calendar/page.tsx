@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Info
+  Info,
+  Eye
 } from 'lucide-react';
 import {
   getStoredProperties,
@@ -345,12 +346,19 @@ export default function CalendarPage() {
             iCal Settings
           </button>
           <button
+            onClick={() => window.open(icalExportUrl, '_blank')}
+            className="btn-secondary text-sm"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Test Export
+          </button>
+          <button
             onClick={handleSync}
             disabled={isSyncing}
             className="btn-primary text-sm"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
+            {isSyncing ? 'Import from Airbnb' : 'Import from Airbnb'}
           </button>
         </div>
       </div>
