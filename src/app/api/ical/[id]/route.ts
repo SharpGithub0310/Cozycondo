@@ -46,19 +46,23 @@ export async function GET(
 
     // Add events for each blocked date range
     dates.forEach((dateRange, index) => {
-      calendar.createEvent({
+      const event = calendar.createEvent({
         id: `${propertyId}-${index}-${Date.now()}`,
         start: dateRange.start,
         end: dateRange.end,
         summary: dateRange.title,
-        description: `${propertyData.name} - ${dateRange.title}`,
+        description: `${propertyData.name} - ${dateRange.title} (Source: ${dateRange.source})`,
         allDay: true,
-        // Add custom properties for source tracking
-        customAttributes: {
-          'X-COZY-SOURCE': dateRange.source,
-          'X-COZY-PROPERTY-ID': propertyId,
-        },
       });
+
+      // Add custom properties using the event's x method
+      try {
+        event.x('X-COZY-SOURCE', dateRange.source);
+        event.x('X-COZY-PROPERTY-ID', propertyId);
+      } catch (error) {
+        // Silently fail if x method is not available
+        console.log('Custom properties not supported in this iCal version');
+      }
     });
 
     // Return iCal file with proper headers
