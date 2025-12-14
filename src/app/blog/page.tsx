@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getPublishedBlogPosts } from '@/utils/blogStorage';
+import { getPublishedBlogPosts } from '@/utils/blogStorageSupabase';
 
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];
@@ -11,9 +11,22 @@ const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Up
 export default function BlogPage() {
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setBlogPosts(getPublishedBlogPosts());
+    const fetchPosts = async () => {
+      try {
+        const posts = await getPublishedBlogPosts();
+        setBlogPosts(posts);
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+        setBlogPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
   }, []);
 
   const filteredPosts = blogPosts.filter(post => {
@@ -67,8 +80,18 @@ export default function BlogPage() {
       {/* Blog Posts Grid */}
       <section className="section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[#14b8a6] flex items-center justify-center animate-pulse">
+                <span className="text-white font-display text-xl font-bold">CC</span>
+              </div>
+              <p className="text-[#7d6349]">Loading blog posts...</p>
+            </div>
+          )}
+
           {/* Featured Post */}
-          {filteredPosts[0] && (
+          {!loading && filteredPosts[0] && (
             <div className="mb-12">
               <Link
                 href={`/blog/${filteredPosts[0].slug}`}
@@ -77,9 +100,9 @@ export default function BlogPage() {
                 <div className="grid md:grid-cols-2 gap-8 p-6 rounded-3xl bg-[#faf3e6] hover:bg-[#f5e6cc] transition-colors">
                   {/* Featured Image */}
                   <div className="aspect-[16/10] rounded-2xl overflow-hidden">
-                    {filteredPosts[0].featuredImage ? (
+                    {filteredPosts[0].featured_image ? (
                       <img
-                        src={filteredPosts[0].featuredImage}
+                        src={filteredPosts[0].featured_image}
                         alt={filteredPosts[0].title}
                         className="w-full h-full object-cover"
                       />
@@ -109,7 +132,7 @@ export default function BlogPage() {
                     <div className="flex items-center gap-4 text-sm text-[#9a7d5e]">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {new Date(filteredPosts[0].publishDate).toLocaleDateString('en-US', {
+                        {new Date(filteredPosts[0].published_at || filteredPosts[0].created_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
@@ -127,6 +150,7 @@ export default function BlogPage() {
           )}
 
           {/* Other Posts Grid */}
+          {!loading && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredPosts.slice(1).map((post) => (
               <Link
@@ -136,9 +160,9 @@ export default function BlogPage() {
               >
                 {/* Featured Image */}
                 <div className="aspect-[16/10] overflow-hidden">
-                  {post.featuredImage ? (
+                  {post.featured_image ? (
                     <img
-                      src={post.featuredImage}
+                      src={post.featured_image}
                       alt={post.title}
                       className="w-full h-full object-cover"
                     />
@@ -165,7 +189,7 @@ export default function BlogPage() {
                   <div className="flex items-center gap-4 text-xs text-[#9a7d5e]">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      {new Date(post.publishDate).toLocaleDateString('en-US', {
+                      {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric'
                       })}
@@ -179,9 +203,10 @@ export default function BlogPage() {
               </Link>
             ))}
           </div>
+          )}
 
           {/* No Posts Message */}
-          {filteredPosts.length === 0 && (
+          {!loading && filteredPosts.length === 0 && (
             <div className="text-center mt-12">
               <p className="text-[#9a7d5e] mb-4">No blog posts found. Check the admin panel to add some posts!</p>
             </div>

@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Save, Upload, Eye, Calendar, Tag, User, Image, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { saveBlogPost, generateUniqueSlug } from '@/utils/blogStorage';
-import { compressImage, cleanupStorage } from '@/utils/imageCompression';
+import { saveBlogPost, generateUniqueSlug, uploadBlogImage } from '@/utils/blogStorageSupabase';
 
 export default function NewBlogPost() {
   const router = useRouter();
@@ -17,9 +16,9 @@ export default function NewBlogPost() {
     author: 'Cozy Condo Team',
     category: 'general',
     tags: [] as string[],
-    featuredImage: '',
-    publishDate: new Date().toISOString().split('T')[0],
-    status: 'draft' as 'draft' | 'published',
+    featured_image: '',
+    published: false,
+    published_at: null as string | null,
   });
 
   const [newTag, setNewTag] = useState('');
@@ -60,20 +59,14 @@ export default function NewBlogPost() {
       // Auto-generate unique slug if empty
       let finalSlug = post.slug;
       if (!finalSlug) {
-        finalSlug = generateUniqueSlug(post.title);
+        finalSlug = await generateUniqueSlug(post.title);
       }
 
-      // Clean up storage if needed
-      cleanupStorage();
-
-      // Compress featured image if it exists
-      let compressedFeaturedImage = post.featuredImage;
-      if (post.featuredImage && post.featuredImage.startsWith('data:image')) {
-        compressedFeaturedImage = await compressImage(post.featuredImage, 800);
-      }
+      // Handle featured image
+      let finalFeaturedImage = post.featured_image;
 
       // Save the blog post
-      const savedPost = saveBlogPost({
+      const savedPost = await saveBlogPost({
         title: post.title.trim(),
         slug: finalSlug,
         excerpt: post.excerpt.trim(),
@@ -81,15 +74,15 @@ export default function NewBlogPost() {
         author: post.author.trim() || 'Cozy Condo Team',
         category: post.category,
         tags: post.tags,
-        featuredImage: compressedFeaturedImage,
-        publishDate: post.publishDate,
-        status: post.status,
+        featured_image: finalFeaturedImage,
+        published: post.published,
+        published_at: post.published_at,
       });
 
       console.log('Blog post saved:', savedPost);
 
       // Show success message and redirect
-      alert(`Blog post ${post.status === 'published' ? 'published' : 'saved as draft'} successfully!`);
+      alert(`Blog post ${post.published ? 'published' : 'saved as draft'} successfully!`);
       router.push('/admin/blog');
     } catch (error) {
       console.error('Failed to save blog post:', error);
@@ -229,9 +222,9 @@ export default function NewBlogPost() {
                   Publish Date
                 </label>
                 <input
-                  type="date"
-                  value={post.publishDate}
-                  onChange={(e) => setPost({...post, publishDate: e.target.value})}
+                  type="datetime-local"
+                  value={post.published_at || ''}
+                  onChange={(e) => setPost({...post, published_at: e.target.value || null})}
                   className="form-input"
                 />
               </div>
@@ -239,8 +232,8 @@ export default function NewBlogPost() {
               <div>
                 <label className="form-label">Status</label>
                 <select
-                  value={post.status}
-                  onChange={(e) => setPost({...post, status: e.target.value as 'draft' | 'published'})}
+                  value={post.published ? 'published' : 'draft'}
+                  onChange={(e) => setPost({...post, published: e.target.value === 'published'})}
                   className="form-input"
                 >
                   <option value="draft">Draft</option>
@@ -352,14 +345,13 @@ export default function NewBlogPost() {
                         return;
                       }
 
-                      const reader = new FileReader();
-                      reader.onload = async (event) => {
-                        const imageUrl = event.target?.result as string;
-                        // Compress the image before storing
-                        const compressedImage = await compressImage(imageUrl, 800);
-                        setPost({...post, featuredImage: compressedImage});
-                      };
-                      reader.readAsDataURL(file);
+                      try {
+                        const imageUrl = await uploadBlogImage(file);
+                        setPost({...post, featured_image: imageUrl});
+                      } catch (error) {
+                        console.error('Error uploading image:', error);
+                        alert('Failed to upload image. Please try again.');
+                      }
                     }
                   }}
                   className="hidden"
@@ -379,19 +371,19 @@ export default function NewBlogPost() {
               <label className="form-label">Or enter image URL</label>
               <input
                 type="url"
-                value={post.featuredImage}
-                onChange={(e) => setPost({...post, featuredImage: e.target.value})}
+                value={post.featured_image}
+                onChange={(e) => setPost({...post, featured_image: e.target.value})}
                 className="form-input"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
 
             {/* Image Preview */}
-            {post.featuredImage && (
+            {post.featured_image && (
               <div className="mt-4 relative">
                 <div className="relative group">
                   <img
-                    src={post.featuredImage}
+                    src={post.featured_image}
                     alt="Featured image preview"
                     className="w-full h-48 object-cover rounded-lg border border-[#faf3e6]"
                     onError={(e) => {
@@ -400,7 +392,7 @@ export default function NewBlogPost() {
                   />
                   <button
                     type="button"
-                    onClick={() => setPost({...post, featuredImage: ''})}
+                    onClick={() => setPost({...post, featured_image: ''})}
                     className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -420,7 +412,7 @@ export default function NewBlogPost() {
               className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {isSaving ? 'Saving...' : `Save ${post.status === 'published' ? '& Publish' : 'Draft'}`}
+              {isSaving ? 'Saving...' : `Save ${post.published ? '& Publish' : 'Draft'}`}
             </button>
 
             <button

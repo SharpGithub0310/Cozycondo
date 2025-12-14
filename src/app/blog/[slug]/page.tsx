@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowLeft, User, Share2, Facebook, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, getPublishedBlogPosts } from '@/utils/blogStorage';
+import { getBlogPostBySlug, getPublishedBlogPosts } from '@/utils/blogStorageSupabase';
 
 const calculateReadTime = (content: string) => {
   const wordsPerMinute = 200;
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getBlogPostBySlug(slug);
+  const post = await getBlogPostBySlug(slug);
   
   if (!post) {
     return { title: 'Post Not Found' };
@@ -32,14 +32,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getBlogPostBySlug(slug);
+  const post = await getBlogPostBySlug(slug);
 
-  if (!post || post.status !== 'published') {
+  if (!post || !post.published) {
     notFound();
   }
 
   // Get related posts (same category, excluding current)
-  const allPosts = getPublishedBlogPosts();
+  const allPosts = await getPublishedBlogPosts();
   const relatedPosts = allPosts
     .filter(p => p.category === post.category && p.id !== post.id)
     .slice(0, 2);
@@ -76,7 +76,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </span>
               <span className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                {new Date(post.publishDate).toLocaleDateString('en-US', {
+                {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
                   month: 'long',
                   day: 'numeric',
                   year: 'numeric',
@@ -90,10 +90,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         </header>
 
-        {/* Featured Image Placeholder */}
+        {/* Featured Image */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
-          <div className="aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-[#0d9488] to-[#14b8a6] shadow-xl">
-            <div className="w-full h-full flex items-center justify-center">
+          <div className="aspect-[2/1] rounded-2xl overflow-hidden shadow-xl">
+            {post.featured_image ? (
+              <img
+                src={post.featured_image}
+                alt={post.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className={`w-full h-full bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center ${post.featured_image ? 'hidden' : ''}`}>
               <div className="text-center text-white">
                 <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-white/20 flex items-center justify-center">
                   <span className="font-display text-3xl font-bold">CC</span>
@@ -186,9 +197,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   className="group card bg-white"
                 >
                   <div className="aspect-[16/10] overflow-hidden">
-                    {relatedPost.featuredImage ? (
+                    {relatedPost.featured_image ? (
                       <img
-                        src={relatedPost.featuredImage}
+                        src={relatedPost.featured_image}
                         alt={relatedPost.title}
                         className="w-full h-full object-cover"
                       />
