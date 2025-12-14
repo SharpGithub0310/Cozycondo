@@ -6,11 +6,12 @@ export async function GET() {
 
   return NextResponse.json({
     timestamp: new Date().toISOString(),
+    deploy_version: '2025-12-14-v2', // Force cache bust
     env_check: {
       has_supabase_url: !!supabaseUrl,
       has_service_key: !!serviceRoleKey,
       supabase_url: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'NOT_SET',
     },
-    message: 'Test endpoint to verify deployment and environment variables'
+    message: 'Test endpoint to verify deployment and environment variables - Cache bust version'
   });
 }
