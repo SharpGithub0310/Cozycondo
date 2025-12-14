@@ -21,6 +21,10 @@ export interface BlogPost {
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   const adminClient = createAdminClient();
 
+  if (!adminClient) {
+    throw new Error('Admin client not available');
+  }
+
   const { data, error } = await adminClient
     .from('blog_posts')
     .select('*')
@@ -74,6 +78,10 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 export async function getBlogPostById(id: string): Promise<BlogPost | null> {
   const adminClient = createAdminClient();
 
+  if (!adminClient) {
+    throw new Error('Admin client not available');
+  }
+
   const { data, error } = await adminClient
     .from('blog_posts')
     .select('*')
@@ -105,6 +113,11 @@ export async function generateUniqueSlug(title: string, excludeId?: string): Pro
 
   while (true) {
     const adminClient = createAdminClient();
+
+    if (!adminClient) {
+      throw new Error('Admin client not available');
+    }
+
     let query = adminClient
       .from('blog_posts')
       .select('id')
@@ -135,6 +148,10 @@ export async function saveBlogPost(
   postData: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>
 ): Promise<BlogPost> {
   const adminClient = createAdminClient();
+
+  if (!adminClient) {
+    throw new Error('Admin client not available');
+  }
 
   // If no slug provided, generate one
   if (!postData.slug) {
@@ -171,6 +188,10 @@ export async function updateBlogPost(
 ): Promise<BlogPost> {
   const adminClient = createAdminClient();
 
+  if (!adminClient) {
+    throw new Error('Admin client not available');
+  }
+
   // If updating slug, ensure it's unique
   if (postData.slug) {
     postData.slug = await generateUniqueSlug(postData.title || '', id);
@@ -203,6 +224,10 @@ export async function updateBlogPost(
 export async function deleteBlogPost(id: string): Promise<void> {
   const adminClient = createAdminClient();
 
+  if (!adminClient) {
+    throw new Error('Admin client not available');
+  }
+
   const { error } = await adminClient
     .from('blog_posts')
     .delete()
@@ -217,6 +242,10 @@ export async function deleteBlogPost(id: string): Promise<void> {
 // Upload image to Supabase Storage
 export async function uploadBlogImage(file: File): Promise<string> {
   const adminClient = createAdminClient();
+
+  if (!adminClient) {
+    throw new Error('Admin client not available');
+  }
 
   // Generate unique filename
   const fileExt = file.name.split('.').pop();
