@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowLeft, User, Share2, Facebook, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, getPublishedBlogPosts } from '@/utils/blogStorageSupabase';
+import { getBlogPostBySlug, getPublishedBlogPosts } from '@/utils/blogStorageHybrid';
 
 const calculateReadTime = (content: string) => {
   const wordsPerMinute = 200;

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getPublishedBlogPosts } from '@/utils/blogStorageSupabase';
+import { getPublishedBlogPosts } from '@/utils/blogStorageHybrid';
 
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];

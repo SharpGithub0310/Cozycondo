@@ -13,8 +13,7 @@ import {
   Clock,
   MoreVertical
 } from 'lucide-react';
-import { getStoredBlogPosts, deleteBlogPost, saveBlogPost } from '@/utils/blogStorage';
-import { seedBlogData } from '@/utils/seedBlogData';
+import { getAllBlogPosts, deleteBlogPost, updateBlogPost } from '@/utils/blogStorageHybrid';
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];
 
@@ -24,7 +23,17 @@ export default function BlogAdminPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
-    setPosts(getStoredBlogPosts());
+    const loadPosts = async () => {
+      try {
+        const blogPosts = await getAllBlogPosts();
+        setPosts(blogPosts);
+      } catch (error) {
+        console.error('Error loading blog posts:', error);
+        setPosts([]);
+      }
+    };
+
+    loadPosts();
   }, []);
 
   const filteredPosts = posts.filter(post => {
@@ -33,27 +42,33 @@ export default function BlogAdminPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const togglePublished = (id: string) => {
-    const updatedPosts = posts.map(p =>
-      p.id === id ? { ...p, status: p.status === 'published' ? 'draft' : 'published' } : p
-    );
-    setPosts(updatedPosts);
+  const togglePublished = async (id: string) => {
+    const post = posts.find(p => p.id === id);
+    if (post) {
+      try {
+        await updateBlogPost(id, { published: !post.published });
+        const updatedPosts = await getAllBlogPosts();
+        setPosts(updatedPosts);
+      } catch (error) {
+        console.error('Error toggling publish status:', error);
+        alert('Failed to update post. Please try again.');
+      }
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this post?')) {
-      deleteBlogPost(id);
-      setPosts(getStoredBlogPosts());
+      try {
+        await deleteBlogPost(id);
+        const updatedPosts = await getAllBlogPosts();
+        setPosts(updatedPosts);
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        alert('Failed to delete post. Please try again.');
+      }
     }
   };
 
-  const handleSeedData = () => {
-    if (confirm('This will add sample blog posts. Continue?')) {
-      seedBlogData();
-      setPosts(getStoredBlogPosts());
-      alert('Sample blog posts added successfully!');
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -64,9 +79,6 @@ export default function BlogAdminPage() {
           <p className="text-[#7d6349] mt-1">Create and manage blog content</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleSeedData} className="btn-secondary text-sm">
-            Add Sample Posts
-          </button>
           <Link href="/admin/blog/new" className="btn-primary text-sm">
             <Plus className="w-4 h-4 mr-2" />
             New Post
@@ -83,13 +95,13 @@ export default function BlogAdminPage() {
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Published</p>
           <p className="font-display text-2xl font-semibold text-[#14b8a6]">
-            {posts.filter(p => p.status === 'published').length}
+            {posts.filter(p => p.published).length}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Drafts</p>
           <p className="font-display text-2xl font-semibold text-[#fb923c]">
-            {posts.filter(p => p.status === 'draft').length}
+            {posts.filter(p => !p.published).length}
           </p>
         </div>
         <div className="admin-card">
@@ -135,7 +147,7 @@ export default function BlogAdminPage() {
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#faf3e6] text-[#7d6349]">
                     {post.category}
                   </span>
-                  {post.status === 'published' ? (
+                  {post.published ? (
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#14b8a6]/10 text-[#0f766e]">
                       Published
                     </span>
@@ -151,7 +163,7 @@ export default function BlogAdminPage() {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#9a7d5e]">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {new Date(post.publishDate).toLocaleDateString('en-US', {
+                    {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric'
@@ -165,13 +177,13 @@ export default function BlogAdminPage() {
                 <button
                   onClick={() => togglePublished(post.id)}
                   className={`p-2 rounded-lg transition-colors ${
-                    post.status === 'published'
+                    post.published
                       ? 'text-[#14b8a6] hover:bg-[#14b8a6]/10'
                       : 'text-[#9a7d5e] hover:bg-[#faf3e6]'
                   }`}
-                  title={post.status === 'published' ? 'Unpublish' : 'Publish'}
+                  title={post.published ? 'Unpublish' : 'Publish'}
                 >
-                  {post.status === 'published' ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  {post.published ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
                 <Link
                   href={`/admin/blog/${post.id}`}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Save, Upload, Eye, Calendar, Tag, User, Image, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { saveBlogPost, generateUniqueSlug, uploadBlogImage } from '@/utils/blogStorageSupabase';
+import { saveBlogPost, generateUniqueSlug, uploadBlogImage } from '@/utils/blogStorageHybrid';
 
 export default function NewBlogPost() {
   const router = useRouter();
@@ -417,6 +417,23 @@ export default function NewBlogPost() {
 
             <button
               type="button"
+              onClick={() => {
+                if (!post.title.trim()) {
+                  alert('Please enter a title to preview the post.');
+                  return;
+                }
+                // Create a preview URL
+                const previewData = {
+                  title: post.title,
+                  content: post.content,
+                  excerpt: post.excerpt,
+                  author: post.author,
+                  category: post.category,
+                  featured_image: post.featured_image,
+                };
+                const previewUrl = `/blog/preview?data=${encodeURIComponent(JSON.stringify(previewData))}`;
+                window.open(previewUrl, '_blank');
+              }}
               className="w-full btn-secondary flex items-center justify-center gap-2"
             >
               <Eye className="w-4 h-4" />
