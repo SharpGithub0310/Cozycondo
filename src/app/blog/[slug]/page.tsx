@@ -2,158 +2,14 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowLeft, User, Share2, Facebook, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { getBlogPostBySlug, getPublishedBlogPosts } from '@/utils/blogStorage';
 
-// Sample blog posts (will be replaced with Supabase data)
-const blogPosts = [
-  {
-    id: '1',
-    title: 'Top 10 Things to Do in Iloilo City',
-    slug: 'top-10-things-to-do-in-iloilo-city',
-    excerpt: 'Discover the best attractions, hidden gems, and must-visit spots in the City of Love.',
-    content: `
-Iloilo City, known as the "City of Love," is a treasure trove of culture, history, and modern conveniences. Whether you're staying for a few days or an extended period, here are the top things you shouldn't miss.
-
-## 1. Visit the Historic Churches
-
-Iloilo is home to some of the Philippines' most beautiful Spanish colonial churches. Don't miss the Jaro Cathedral, the only basilica in Western Visayas, and the stunning Molo Church, known as the "feminist church" for its all-female saints.
-
-## 2. Explore Calle Real
-
-Take a walk down Calle Real (J.M. Basa Street) and admire the beautifully preserved heritage buildings. This historic street showcases Iloilo's rich past as a major trading hub.
-
-## 3. Dine at the Iloilo River Esplanade
-
-The Esplanade offers a scenic riverside walk with numerous restaurants and cafes. It's perfect for evening strolls and enjoying fresh seafood while watching the sunset.
-
-## 4. Shop at SM City Iloilo and Festive Walk
-
-For modern shopping experiences, head to these malls. Festive Walk in Iloilo Business Park is particularly impressive with its open-air design and diverse dining options.
-
-## 5. Try Authentic Ilonggo Cuisine
-
-No visit is complete without tasting local favorites like La Paz Batchoy, pancit molo, and fresh seafood. The city is a food lover's paradise!
-
-## 6. Visit Museo Iloilo
-
-Learn about the region's history, from pre-colonial times to the present, at this well-curated museum featuring archaeological artifacts and historical exhibits.
-
-## 7. Day Trip to Guimaras Island
-
-Just a 15-minute boat ride away, Guimaras is famous for its sweet mangoes, pristine beaches, and the Trappist Monastery. Perfect for a day trip!
-
-## 8. Experience the Dinagyang Festival
-
-If you're visiting in January, don't miss the Dinagyang Festival - one of the Philippines' most vibrant celebrations honoring the Santo Niño.
-
-## 9. Relax at Smallville Complex
-
-This entertainment hub comes alive at night with bars, restaurants, and live music venues. It's the go-to spot for nightlife in Iloilo.
-
-## 10. Explore Iloilo Business Park
-
-The newest development in the city features beautiful parks, modern architecture, and the impressive Iloilo Convention Center.
-
----
-
-*Ready to explore Iloilo City? Book your stay at Cozy Condo and experience comfortable living in prime locations across the city.*
-    `,
-    author: 'Cozy Condo Team',
-    published_at: '2024-12-01',
-    read_time: '5 min read',
-    category: 'Travel Guide',
-  },
-  {
-    id: '2',
-    title: 'Best Restaurants Near Our Properties',
-    slug: 'best-restaurants-near-our-properties',
-    excerpt: 'A curated list of the best dining spots within walking distance of our condo units.',
-    content: `
-One of the best things about staying at Cozy Condo is the amazing food scene right at your doorstep. Here's our curated guide to the best restaurants near our properties.
-
-## Near Iloilo Business Park
-
-### Breakthrough Restaurant
-Famous for their unlimited samgyupsal and Korean BBQ. Great for groups and meat lovers.
-
-### Farm to Table
-Fresh, locally-sourced ingredients in a cozy setting. Perfect for health-conscious diners.
-
-### Afritada
-Modern Filipino cuisine with a twist. Their crispy pata is legendary!
-
-## Near Smallville Complex
-
-### Tatoy's Manokan
-An Iloilo institution! Their chicken inasal is considered among the best in the city.
-
-### Deco's
-Another inasal favorite with generous servings and affordable prices.
-
-### Bourbon Street
-For those craving international flavors - great steaks and cocktails.
-
-## Near City Proper
-
-### Ted's Oldtimer La Paz Batchoy
-The original La Paz Batchoy experience. A must-try for every visitor!
-
-### Netong's Original Special La Paz Batchoy
-Another excellent batchoy option with its own loyal following.
-
-### Roberto's Siopao
-Famous for their jumbo siopao - perfect for a quick, filling meal.
-
----
-
-*Ask us for personalized restaurant recommendations based on your preferences and location!*
-    `,
-    author: 'Cozy Condo Team',
-    published_at: '2024-11-15',
-    read_time: '4 min read',
-    category: 'Food & Dining',
-  },
-  {
-    id: '3',
-    title: 'Why Iloilo City is Perfect for Remote Work',
-    slug: 'why-iloilo-city-is-perfect-for-remote-work',
-    excerpt: 'Discover why Iloilo City has become a top destination for remote workers and digital nomads in the Philippines.',
-    content: `
-Iloilo City has become an increasingly popular destination for remote workers and digital nomads. Here's why this charming Philippine city should be your next remote work destination.
-
-## Excellent Infrastructure
-
-Iloilo City boasts reliable internet connectivity with fiber optic networks throughout the metro area. Most cafes, coworking spaces, and accommodations offer high-speed WiFi perfect for video calls and collaborative work.
-
-## Affordable Cost of Living
-
-Your money goes much further in Iloilo compared to Metro Manila or Cebu. From accommodation to food to transportation, you can maintain a comfortable lifestyle at a fraction of the cost.
-
-## Rich Culture and History
-
-When you're not working, explore the city's rich heritage through its historic churches, museums, and colonial architecture. The city perfectly blends modern amenities with traditional Filipino culture.
-
-## Great Food Scene
-
-Iloilo is famous for its delicious local cuisine including La Paz Batchoy, Pancit Molo, and fresh seafood. The city offers everything from street food to fine dining.
-
-## Friendly Community
-
-Ilonggos are known for their warm hospitality. The local community is very welcoming to foreigners, making it easy to settle in and feel at home.
-
-## Perfect Location
-
-Iloilo serves as a gateway to beautiful destinations in the Visayas region. Weekend trips to Boracay, Guimaras, or Antique are just a few hours away.
-
----
-
-*Ready to experience remote work in Iloilo? Book your stay with us and discover why so many remote workers are choosing this beautiful city as their base.*
-    `,
-    author: 'Cozy Condo Team',
-    published_at: '2024-12-08',
-    read_time: '6 min read',
-    category: 'Remote Work',
-  },
-];
+const calculateReadTime = (content: string) => {
+  const wordsPerMinute = 200;
+  const wordCount = content.split(' ').length;
+  const readTime = Math.ceil(wordCount / wordsPerMinute);
+  return `${readTime} min read`;
+};
 
 export async function generateStaticParams() {
   // Return empty array for dynamic generation
@@ -220,7 +76,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </span>
               <span className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                {new Date(post.published_at).toLocaleDateString('en-US', {
+                {new Date(post.publishDate).toLocaleDateString('en-US', {
                   month: 'long',
                   day: 'numeric',
                   year: 'numeric',
@@ -228,7 +84,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </span>
               <span className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                {post.read_time}
+                {calculateReadTime(post.content)}
               </span>
             </div>
           </div>
