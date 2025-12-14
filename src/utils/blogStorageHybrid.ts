@@ -40,6 +40,23 @@ function saveLocalStoragePosts(posts: BlogPost[]): void {
     localStorage.setItem(BLOG_STORAGE_KEY, JSON.stringify(posts));
   } catch (error) {
     console.error('Error saving to localStorage:', error);
+
+    // If it's a quota error, try to clean up old posts
+    if (error instanceof Error && error.name === 'QuotaExceededError') {
+      try {
+        // Keep only the 3 most recent posts and try again
+        const recentPosts = posts.slice(0, 3);
+        localStorage.setItem(BLOG_STORAGE_KEY, JSON.stringify(recentPosts));
+        console.warn('Storage quota exceeded. Kept only the 3 most recent posts.');
+      } catch (retryError) {
+        console.error('Failed to save even after cleanup:', retryError);
+        // Clear all blog posts as last resort
+        localStorage.removeItem(BLOG_STORAGE_KEY);
+        throw new Error('Storage quota exceeded and cleanup failed. All blog posts have been cleared.');
+      }
+    } else {
+      throw error;
+    }
   }
 }
 
@@ -320,7 +337,7 @@ export async function deleteBlogPost(id: string): Promise<void> {
   saveLocalStoragePosts(filtered);
 }
 
-// Upload image to Supabase Storage or convert to base64
+// Upload image to Supabase Storage or compress for localStorage
 export async function uploadBlogImage(file: File): Promise<string> {
   if (isSupabaseConfigured()) {
     try {
@@ -344,18 +361,50 @@ export async function uploadBlogImage(file: File): Promise<string> {
 
       return urlData.publicUrl;
     } catch (error) {
-      console.error('Supabase storage error, falling back to base64:', error);
+      console.error('Supabase storage error, falling back to compressed image:', error);
     }
   }
 
-  // Fallback to base64 for localStorage
+  // Fallback to compressed base64 for localStorage to avoid quota issues
+  return compressImageForLocalStorage(file);
+}
+
+// Helper function to compress images for localStorage
+async function compressImageForLocalStorage(file: File, maxSize: number = 300): Promise<string> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      resolve(e.target?.result as string);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+      // Calculate new dimensions to fit within maxSize while maintaining aspect ratio
+      let { width, height } = img;
+
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width;
+          width = maxSize;
+        }
+      } else {
+        if (height > maxSize) {
+          width = (width * maxSize) / height;
+          height = maxSize;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw and compress
+      ctx?.drawImage(img, 0, 0, width, height);
+
+      // Convert to compressed base64
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+      resolve(compressedDataUrl);
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
   });
 }
 
@@ -363,6 +412,39 @@ export async function uploadBlogImage(file: File): Promise<string> {
 export function clearLocalStorageBlogPosts(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(BLOG_STORAGE_KEY);
+  }
+}
+
+// Check localStorage usage and warn if getting full
+export function checkLocalStorageUsage(): { percentage: number; message?: string } {
+  if (typeof window === 'undefined') return { percentage: 0 };
+
+  try {
+    // Estimate localStorage size
+    const allItems = Object.keys(localStorage);
+    let totalSize = 0;
+
+    for (const key of allItems) {
+      const item = localStorage.getItem(key);
+      if (item) {
+        totalSize += item.length;
+      }
+    }
+
+    // Estimate percentage (localStorage limit is typically 5MB)
+    const percentage = (totalSize / (5 * 1024 * 1024)) * 100;
+
+    let message;
+    if (percentage > 90) {
+      message = 'Storage is almost full! Consider setting up Supabase for unlimited storage.';
+    } else if (percentage > 75) {
+      message = 'Storage is getting full. Consider setting up Supabase for better performance.';
+    }
+
+    return { percentage: Math.min(percentage, 100), message };
+  } catch (error) {
+    console.error('Error checking localStorage usage:', error);
+    return { percentage: 100, message: 'Unable to check storage usage.' };
   }
 }
 
