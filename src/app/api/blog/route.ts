@@ -55,29 +55,31 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    if (!adminClient) {
-      return NextResponse.json({
-        error: 'Supabase not configured. Please add environment variables.'
-      }, { status: 500 });
+    // Try Supabase first if configured
+    if (adminClient) {
+      const { data, error } = await adminClient
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        // Convert UUIDs to strings for compatibility
+        const results = data.map(post => ({
+          ...post,
+          id: post.id.toString(),
+          tags: [] // Schema doesn't have tags column yet
+        }));
+        return NextResponse.json(results);
+      }
     }
 
-    const { data, error } = await adminClient
-      .from('blog_posts')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Fallback: return empty array for localStorage-only deployments
+    // The client-side will handle localStorage fetching
+    return NextResponse.json([]);
 
-    if (error) throw error;
-
-    // Convert UUIDs to strings for compatibility
-    const results = (data || []).map(post => ({
-      ...post,
-      id: post.id.toString(),
-      tags: [] // Schema doesn't have tags column yet
-    }));
-
-    return NextResponse.json(results);
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch blog posts' }, { status: 500 });
+    // Still return empty array instead of error to allow localStorage fallback
+    return NextResponse.json([]);
   }
 }
