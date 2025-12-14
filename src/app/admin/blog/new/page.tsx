@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Save, Upload, Eye, Calendar, Tag, User, Image, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { saveBlogPost, generateUniqueSlug } from '@/utils/blogStorage';
+import { compressImage, cleanupStorage } from '@/utils/imageCompression';
 
 export default function NewBlogPost() {
   const router = useRouter();
@@ -62,6 +63,15 @@ export default function NewBlogPost() {
         finalSlug = generateUniqueSlug(post.title);
       }
 
+      // Clean up storage if needed
+      cleanupStorage();
+
+      // Compress featured image if it exists
+      let compressedFeaturedImage = post.featuredImage;
+      if (post.featuredImage && post.featuredImage.startsWith('data:image')) {
+        compressedFeaturedImage = await compressImage(post.featuredImage, 800);
+      }
+
       // Save the blog post
       const savedPost = saveBlogPost({
         title: post.title.trim(),
@@ -71,7 +81,7 @@ export default function NewBlogPost() {
         author: post.author.trim() || 'Cozy Condo Team',
         category: post.category,
         tags: post.tags,
-        featuredImage: post.featuredImage,
+        featuredImage: compressedFeaturedImage,
         publishDate: post.publishDate,
         status: post.status,
       });
@@ -333,13 +343,21 @@ export default function NewBlogPost() {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file) {
+                      // Check file size
+                      if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size must be less than 5MB');
+                        return;
+                      }
+
                       const reader = new FileReader();
-                      reader.onload = (event) => {
+                      reader.onload = async (event) => {
                         const imageUrl = event.target?.result as string;
-                        setPost({...post, featuredImage: imageUrl});
+                        // Compress the image before storing
+                        const compressedImage = await compressImage(imageUrl, 800);
+                        setPost({...post, featuredImage: compressedImage});
                       };
                       reader.readAsDataURL(file);
                     }

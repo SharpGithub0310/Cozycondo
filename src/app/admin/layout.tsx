@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  HardDrive,
 } from 'lucide-react';
 
 const navigation = [
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Storage', href: '/admin/storage', icon: HardDrive },
 ];
 
 export default function AdminLayout({
