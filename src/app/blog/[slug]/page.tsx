@@ -156,14 +156,13 @@ Iloilo serves as a gateway to beautiful destinations in the Visayas region. Week
 ];
 
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }));
+  // Return empty array for dynamic generation
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find(p => p.slug === slug);
+  const post = getBlogPostBySlug(slug);
   
   if (!post) {
     return { title: 'Post Not Found' };
@@ -177,14 +176,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = blogPosts.find(p => p.slug === slug);
+  const post = getBlogPostBySlug(slug);
 
-  if (!post) {
+  if (!post || post.status !== 'published') {
     notFound();
   }
 
   // Get related posts (same category, excluding current)
-  const relatedPosts = blogPosts
+  const allPosts = getPublishedBlogPosts();
+  const relatedPosts = allPosts
     .filter(p => p.category === post.category && p.id !== post.id)
     .slice(0, 2);
 
