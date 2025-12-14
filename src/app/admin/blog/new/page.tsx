@@ -108,12 +108,12 @@ export default function NewBlogPost() {
     });
   };
 
-  const generateSlug = () => {
+  const generateSlug = async () => {
     if (!post.title.trim()) {
       alert('Please enter a title first.');
       return;
     }
-    const uniqueSlug = generateUniqueSlug(post.title);
+    const uniqueSlug = await generateUniqueSlug(post.title);
     setPost({ ...post, slug: uniqueSlug });
   };
 
