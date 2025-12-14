@@ -1,15 +1,9 @@
 'use client';
 
-import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getPublishedBlogPosts } from '@/utils/blogStorage';
-
-export const metadata: Metadata = {
-  title: 'Blog',
-  description: 'Discover travel tips, Iloilo City guides, and insights about staying in our properties. Your guide to the best of Iloilo.',
-};
 
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];

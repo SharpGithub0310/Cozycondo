@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { Database, Trash2, AlertTriangle, HardDrive } from 'lucide-react';
 import { getStorageInfo } from '@/utils/imageCompression';
 import { clearBlogPosts } from '@/utils/blogStorage';
-import { clearProperties } from '@/utils/propertyStorage';
-import { clearSettings } from '@/utils/settingsStorage';
+import { clearStoredProperties } from '@/utils/propertyStorage';
+import { clearStoredSettings } from '@/utils/settingsStorage';
 
 export default function StorageManagementPage() {
   const [storageInfo, setStorageInfo] = useState<any>(null);
@@ -28,7 +28,7 @@ export default function StorageManagementPage() {
 
   const clearPropertyData = () => {
     if (confirm('This will delete ALL property data. Are you sure?')) {
-      clearProperties();
+      clearStoredProperties();
       updateStorageInfo();
       alert('Property data cleared successfully!');
     }
@@ -36,7 +36,7 @@ export default function StorageManagementPage() {
 
   const clearSettingsData = () => {
     if (confirm('This will reset ALL settings. Are you sure?')) {
-      clearSettings();
+      clearStoredSettings();
       updateStorageInfo();
       alert('Settings cleared successfully!');
     }
