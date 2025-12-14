@@ -66,18 +66,21 @@ function saveLocalStoragePosts(posts: BlogPost[]): void {
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   if (isSupabaseConfigured()) {
     try {
-      const adminClient = createAdminClient();
-      if (!adminClient) throw new Error('Admin client not available');
+      // Use API route for server-side Supabase operations
+      const response = await fetch('/api/blog');
 
-      const { data, error } = await adminClient
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
 
-      if (error) throw error;
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       return data || [];
     } catch (error) {
-      console.error('Supabase error, falling back to localStorage:', error);
+      console.error('Supabase API error, falling back to localStorage:', error);
     }
   }
 
@@ -234,19 +237,27 @@ export async function saveBlogPost(
 
   if (isSupabaseConfigured()) {
     try {
-      const adminClient = createAdminClient();
-      if (!adminClient) throw new Error('Admin client not available');
+      // Use API route for server-side Supabase operations
+      const response = await fetch('/api/blog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPost)
+      });
 
-      const { data, error } = await adminClient
-        .from('blog_posts')
-        .insert([newPost])
-        .select()
-        .single();
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
 
-      if (error) throw error;
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       return data;
     } catch (error) {
-      console.error('Supabase error, falling back to localStorage:', error);
+      console.error('Supabase API error, falling back to localStorage:', error);
     }
   }
 
