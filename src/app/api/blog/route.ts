@@ -1,13 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const adminClient = createClient(supabaseUrl, serviceRoleKey);
+// Check if environment variables are available
+if (!supabaseUrl || !serviceRoleKey) {
+  console.error('Missing Supabase environment variables:', {
+    hasUrl: !!supabaseUrl,
+    hasServiceKey: !!serviceRoleKey
+  });
+}
+
+const adminClient = supabaseUrl && serviceRoleKey
+  ? createClient(supabaseUrl, serviceRoleKey)
+  : null;
 
 export async function POST(request: NextRequest) {
   try {
+    if (!adminClient) {
+      return NextResponse.json({
+        error: 'Supabase not configured. Please add environment variables.'
+      }, { status: 500 });
+    }
+
     const blogPost = await request.json();
 
     // Remove id, created_at, updated_at, tags - let Supabase handle these
@@ -39,6 +55,12 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
+    if (!adminClient) {
+      return NextResponse.json({
+        error: 'Supabase not configured. Please add environment variables.'
+      }, { status: 500 });
+    }
+
     const { data, error } = await adminClient
       .from('blog_posts')
       .select('*')
