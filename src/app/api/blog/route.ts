@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
 
     const blogPost = await request.json();
 
-    // Remove id, created_at, updated_at, tags - let Supabase handle these
-    const { id, created_at, updated_at, tags, ...insertData } = blogPost;
+    // Remove id, created_at, updated_at - let Supabase handle these
+    const { id, created_at, updated_at, ...insertData } = blogPost;
 
     const { data, error } = await adminClient
       .from('blog_posts')
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const result = {
       ...data,
       id: data.id.toString(),
-      tags: tags || [],
+      tags: data.tags || [],
       created_at: data.created_at,
       updated_at: data.updated_at
     };
@@ -67,7 +67,7 @@ export async function GET() {
         const results = data.map(post => ({
           ...post,
           id: post.id.toString(),
-          tags: [] // Schema doesn't have tags column yet
+          tags: post.tags || []
         }));
         return NextResponse.json(results);
       }

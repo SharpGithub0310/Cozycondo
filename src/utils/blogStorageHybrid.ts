@@ -90,6 +90,16 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
 
 // Get published blog posts only (public view)
 export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
+  // Always try localStorage first if in browser
+  if (typeof window !== 'undefined') {
+    const posts = getLocalStoragePosts();
+    const publishedPosts = posts.filter(post => post.published);
+    if (publishedPosts.length > 0) {
+      return publishedPosts;
+    }
+  }
+
+  // Then try Supabase if configured
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
@@ -105,13 +115,23 @@ export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
     }
   }
 
-  // Fallback to localStorage
+  // Final fallback to localStorage
   const posts = getLocalStoragePosts();
   return posts.filter(post => post.published);
 }
 
 // Get blog post by slug
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  // Always try localStorage first if in browser
+  if (typeof window !== 'undefined') {
+    const posts = getLocalStoragePosts();
+    const localPost = posts.find(post => post.slug === slug);
+    if (localPost) {
+      return localPost;
+    }
+  }
+
+  // Then try Supabase if configured
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
@@ -127,7 +147,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
     }
   }
 
-  // Fallback to localStorage
+  // Final fallback to localStorage
   const posts = getLocalStoragePosts();
   return posts.find(post => post.slug === slug) || null;
 }

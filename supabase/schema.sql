@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   published_at TIMESTAMP WITH TIME ZONE,
   author VARCHAR(255) DEFAULT 'Cozy Condo Team',
   category VARCHAR(100),
+  tags TEXT[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
