@@ -7,9 +7,12 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // GET /api/blog/[id] - Get a single blog post by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params (required in Next.js 15+)
+    const { id } = await params;
+
     // Check environment variables
     if (!supabaseUrl || !serviceRoleKey) {
       return NextResponse.json(
@@ -25,7 +28,7 @@ export async function GET(
     const { data, error } = await adminClient
       .from('blog_posts')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -57,9 +60,12 @@ export async function GET(
 // PUT /api/blog/[id] - Update a blog post
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params (required in Next.js 15+)
+    const { id: paramId } = await params;
+
     // Check environment variables
     if (!supabaseUrl || !serviceRoleKey) {
       return NextResponse.json(
@@ -84,7 +90,7 @@ export async function PUT(
         ...updateData,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', paramId)
       .select()
       .single();
 
@@ -110,9 +116,12 @@ export async function PUT(
 // DELETE /api/blog/[id] - Delete a blog post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params (required in Next.js 15+)
+    const { id } = await params;
+
     // Check environment variables
     if (!supabaseUrl || !serviceRoleKey) {
       return NextResponse.json(
@@ -128,7 +137,7 @@ export async function DELETE(
     const { error } = await adminClient
       .from('blog_posts')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Supabase error:', error);
