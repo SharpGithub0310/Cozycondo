@@ -27,8 +27,8 @@ export async function syncLocalStorageToSupabase(): Promise<{ success: boolean; 
         const imageSize = processedPost.featured_image.length;
         console.log(`Post "${post.slug}" has base64 image of ${Math.round(imageSize / 1024)}KB`);
 
-        // If image is too large (>1MB), skip it for now
-        if (imageSize > 1024 * 1024) {
+        // If image is too large (>100KB), skip it for now
+        if (imageSize > 100 * 1024) {
           console.warn(`Skipping large image for "${post.slug}" (${Math.round(imageSize / 1024)}KB)`);
           processedPost.featured_image = ''; // Remove large image to prevent sync issues
         }
