@@ -565,7 +565,7 @@ export async function uploadBlogImage(file: File): Promise<string> {
 }
 
 // Helper function to compress images for localStorage
-async function compressImageForLocalStorage(file: File, maxSize: number = 200): Promise<string> {
+async function compressImageForLocalStorage(file: File, maxSize: number = 800): Promise<string> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -593,36 +593,17 @@ async function compressImageForLocalStorage(file: File, maxSize: number = 200): 
       // Draw and compress
       ctx?.drawImage(img, 0, 0, width, height);
 
-      // Start with high compression and reduce quality until size is acceptable
-      let quality = 0.3; // Start with 30% quality
+      // Use reasonable quality (80%) for good-looking photos
+      let quality = 0.8;
       let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
 
-      // If still too large, reduce quality further
-      while (compressedDataUrl.length > 100 * 1024 && quality > 0.1) { // 100KB limit
-        quality -= 0.05;
+      // Only reduce quality if image is extremely large (>2MB base64)
+      while (compressedDataUrl.length > 2 * 1024 * 1024 && quality > 0.5) {
+        quality -= 0.1;
         compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
       }
 
-      // If still too large, make it even smaller
-      if (compressedDataUrl.length > 100 * 1024) {
-        // Try with even smaller dimensions
-        const smallerSize = Math.min(maxSize * 0.7, 150);
-
-        if (width > height) {
-          height = (height * smallerSize) / width;
-          width = smallerSize;
-        } else {
-          width = (width * smallerSize) / height;
-          height = smallerSize;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx?.drawImage(img, 0, 0, width, height);
-        compressedDataUrl = canvas.toDataURL('image/jpeg', 0.2); // 20% quality
-      }
-
-      console.log(`Compressed image: ${Math.round(compressedDataUrl.length / 1024)}KB`);
+      console.log(`Compressed image: ${Math.round(compressedDataUrl.length / 1024)}KB (${width}x${height} at ${Math.round(quality * 100)}% quality)`);
       resolve(compressedDataUrl);
     };
 

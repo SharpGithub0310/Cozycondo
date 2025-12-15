@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
         const postSize = JSON.stringify(post).length;
         console.log(`Post size: ${Math.round(postSize / 1024)}KB`);
 
-        // If post is too large, skip it
-        if (postSize > 2 * 1024 * 1024) { // 2MB limit
+        // Only skip truly massive posts (>10MB)
+        if (postSize > 10 * 1024 * 1024) { // 10MB limit
           results.push({
             success: false,
             slug: post.slug,
-            error: `Post too large (${Math.round(postSize / 1024)}KB). Skipped to prevent server issues.`
+            error: `Post extremely large (${Math.round(postSize / 1024)}KB). Skipped to prevent server issues.`
           });
           continue;
         }
