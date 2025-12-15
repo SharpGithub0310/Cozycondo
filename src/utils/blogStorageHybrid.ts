@@ -99,16 +99,17 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
 
 // Get published blog posts only (public view)
 export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
-  // Always try localStorage first if in browser
+  // Try both localStorage and Supabase, then combine results
+  let allPosts: BlogPost[] = [];
+
+  // First try localStorage if in browser
   if (typeof window !== 'undefined') {
-    const posts = getLocalStoragePosts();
-    const publishedPosts = posts.filter(post => post.published);
-    if (publishedPosts.length > 0) {
-      return publishedPosts;
-    }
+    const localPosts = getLocalStoragePosts();
+    const publishedLocalPosts = localPosts.filter(post => post.published);
+    allPosts.push(...publishedLocalPosts);
   }
 
-  // Then try Supabase if configured
+  // Then try Supabase if configured and add to results
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
@@ -117,16 +118,23 @@ export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
         .eq('published', true)
         .order('published_at', { ascending: false });
 
-      if (error) throw error;
-      return data || [];
+      if (!error && data) {
+        allPosts.push(...data);
+      }
     } catch (error) {
-      console.error('Supabase error, falling back to localStorage:', error);
+      console.error('Supabase error:', error);
     }
   }
 
-  // Final fallback to localStorage
-  const posts = getLocalStoragePosts();
-  return posts.filter(post => post.published);
+  // Remove duplicates by slug and return sorted by date
+  const uniquePosts = allPosts.filter((post, index, array) =>
+    array.findIndex(p => p.slug === post.slug) === index
+  );
+
+  return uniquePosts.sort((a, b) =>
+    new Date(b.published_at || b.created_at).getTime() -
+    new Date(a.published_at || a.created_at).getTime()
+  );
 }
 
 // Get blog post by slug
