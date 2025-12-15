@@ -178,9 +178,37 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
     if (localPost) {
       return localPost;
     }
+
+    // If in browser and not found in localStorage, check Supabase via API
+    if (isSupabaseConfigured()) {
+      try {
+        // Use API route for client-side Supabase operations
+        const response = await fetch(`/api/blog/${id}`);
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            return null;
+          }
+          throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        return data || null;
+      } catch (error) {
+        console.error('Supabase API error:', error);
+        return null;
+      }
+    }
+
+    // Not found in localStorage and no Supabase
+    return null;
   }
 
-  // Then try Supabase if configured
+  // Server-side: Try Supabase with admin client
   if (isSupabaseConfigured()) {
     try {
       const adminClient = createAdminClient();
@@ -217,7 +245,16 @@ export async function generateUniqueSlug(title: string, excludeId?: string): Pro
   let counter = 1;
 
   while (true) {
-    if (isSupabaseConfigured()) {
+    // On client-side, only use localStorage
+    if (typeof window !== 'undefined') {
+      const posts = getLocalStoragePosts();
+      const existing = posts.find(p => p.slug === slug && p.id !== excludeId);
+
+      if (!existing) {
+        return slug;
+      }
+    } else if (isSupabaseConfigured()) {
+      // Server-side: can use admin client
       try {
         const adminClient = createAdminClient();
         if (!adminClient) throw new Error('Admin client not available');
@@ -239,15 +276,22 @@ export async function generateUniqueSlug(title: string, excludeId?: string): Pro
         }
       } catch (error) {
         console.error('Supabase error, falling back to localStorage:', error);
+        // Fallback to localStorage check
+        const posts = getLocalStoragePosts();
+        const existing = posts.find(p => p.slug === slug && p.id !== excludeId);
+
+        if (!existing) {
+          return slug;
+        }
       }
-    }
+    } else {
+      // No Supabase, use localStorage
+      const posts = getLocalStoragePosts();
+      const existing = posts.find(p => p.slug === slug && p.id !== excludeId);
 
-    // Fallback to localStorage
-    const posts = getLocalStoragePosts();
-    const existing = posts.find(p => p.slug === slug && p.id !== excludeId);
-
-    if (!existing) {
-      return slug;
+      if (!existing) {
+        return slug;
+      }
     }
 
     slug = `${baseSlug}-${counter}`;
@@ -330,6 +374,33 @@ export async function updateBlogPost(
     postData.published_at = new Date().toISOString();
   }
 
+  // Client-side: Use API route
+  if (typeof window !== 'undefined' && isSupabaseConfigured()) {
+    try {
+      const response = await fetch(`/api/blog/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Supabase API error, falling back to localStorage:', error);
+    }
+  }
+
+  // Server-side: Use admin client
   if (isSupabaseConfigured()) {
     try {
       const adminClient = createAdminClient();
@@ -372,6 +443,29 @@ export async function updateBlogPost(
 
 // Delete blog post
 export async function deleteBlogPost(id: string): Promise<void> {
+  // Client-side: Use API route
+  if (typeof window !== 'undefined' && isSupabaseConfigured()) {
+    try {
+      const response = await fetch(`/api/blog/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      return;
+    } catch (error) {
+      console.error('Supabase API error, falling back to localStorage:', error);
+    }
+  }
+
+  // Server-side: Use admin client
   if (isSupabaseConfigured()) {
     try {
       const adminClient = createAdminClient();
@@ -397,6 +491,14 @@ export async function deleteBlogPost(id: string): Promise<void> {
 
 // Upload image to Supabase Storage or compress for localStorage
 export async function uploadBlogImage(file: File): Promise<string> {
+  // On client-side, skip Supabase and use compressed images
+  if (typeof window !== 'undefined') {
+    // For now, always use compressed base64 on client-side
+    // TODO: Could create an API route for image uploads if needed
+    return compressImageForLocalStorage(file);
+  }
+
+  // Server-side: can use Supabase storage
   if (isSupabaseConfigured()) {
     try {
       const adminClient = createAdminClient();
