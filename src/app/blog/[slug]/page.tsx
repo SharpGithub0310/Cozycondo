@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowLeft, User, Share2, Facebook, MessageCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { getBlogPostBySlug, getPublishedBlogPosts } from '@/utils/blogStorageHybrid';
+import { getBlogPostBySlug, getPublishedBlogPosts, BlogPost } from '@/utils/blogStorageHybrid';
 
 const calculateReadTime = (content: string) => {
   const wordsPerMinute = 200;
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     console.log(`[generateMetadata] Slug: ${slug}`);
 
-    const post = await getBlogPostBySlug(slug);
+    const post: BlogPost | null = await getBlogPostBySlug(slug);
     console.log(`[generateMetadata] Post loaded: ${post ? 'success' : 'not found'}`);
 
     if (!post) {
@@ -50,11 +50,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     console.log(`[BlogPostPage] Loading post: ${slug}`);
 
     // Add timeout protection for data fetching
-    let post = null;
+    let post: BlogPost | null = null;
     try {
       post = await Promise.race([
         getBlogPostBySlug(slug),
-        new Promise((_, reject) =>
+        new Promise<BlogPost | null>((_, reject) =>
           setTimeout(() => reject(new Error('Data fetch timeout')), 10000) // 10 second timeout
         )
       ]);
