@@ -4,11 +4,38 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, RefreshCw, Play, AlertTriangle, CheckCircle, Clock, Database, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+interface Stats {
+  localStorage?: {
+    totalPosts: number;
+    publishedPosts: number;
+    postsWithImages: number;
+    targetPostFound: boolean;
+  };
+  supabase?: {
+    totalPosts: number;
+    targetPostFound: boolean;
+    connectionOk: boolean;
+  };
+  blogPage?: {
+    status: number;
+    ok: boolean;
+    statusText: string;
+  };
+}
+
+interface LogEntry {
+  id: number;
+  timestamp: string;
+  type: 'info' | 'success' | 'error' | 'warning';
+  message: string;
+  data: string | null;
+}
+
 export default function BlogMonitorPage() {
   const router = useRouter();
   const [monitoring, setMonitoring] = useState(false);
-  const [logs, setLogs] = useState<any[]>([]);
-  const [stats, setStats] = useState<any>({});
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [stats, setStats] = useState<Stats>({});
   const [selectedSlug, setSelectedSlug] = useState('dinagyang');
 
   const addLog = (type: 'info' | 'success' | 'error' | 'warning', message: string, data?: any) => {
