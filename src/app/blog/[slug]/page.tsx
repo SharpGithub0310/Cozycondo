@@ -31,18 +31,87 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  try {
+    const { slug } = await params;
+    console.log(`[BlogPostPage] Loading post: ${slug}`);
 
-  if (!post || !post.published) {
-    notFound();
+    const post = await getBlogPostBySlug(slug);
+    console.log(`[BlogPostPage] Post loaded: ${post ? 'success' : 'not found'}`);
+
+    if (!post || !post.published) {
+      console.log(`[BlogPostPage] Post not found or unpublished: ${slug}`);
+      notFound();
+    }
+
+    // Log post details for debugging
+    console.log(`[BlogPostPage] Post details:`, {
+      id: post.id,
+      title: post.title,
+      hasImage: !!post.featured_image,
+      imageSize: post.featured_image ? Math.round(post.featured_image.length / 1024) : 0,
+      contentLength: post.content ? post.content.length : 0
+    });
+
+    // Sanitize post data for SSR safety
+    const safePost = {
+      ...post,
+      // Remove or truncate extremely large images that could crash SSR
+      featured_image: post.featured_image && post.featured_image.length > 3 * 1024 * 1024
+        ? '' // Clear image if > 3MB to prevent SSR issues
+        : post.featured_image,
+      // Ensure content is safe
+      content: post.content || 'No content available.',
+      title: post.title || 'Untitled Post',
+      excerpt: post.excerpt || '',
+      author: post.author || 'Unknown',
+      category: post.category || 'General'
+    };
+
+    console.log(`[BlogPostPage] Sanitized post for SSR, image size: ${safePost.featured_image ? Math.round(safePost.featured_image.length / 1024) : 0}KB`);
+
+    return await renderBlogPost(safePost, slug);
+
+  } catch (error) {
+    console.error(`[BlogPostPage] Critical error:`, error);
+    // Return a safe error page instead of crashing
+    return (
+      <div className="pt-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="font-display text-2xl font-semibold text-[#5f4a38] mb-4">
+              Blog Post Unavailable
+            </h1>
+            <p className="text-[#7d6349] mb-8">
+              This blog post is temporarily unavailable. Please try again later.
+            </p>
+            <a
+              href="/blog"
+              className="btn-primary"
+            >
+              Back to Blog
+            </a>
+          </div>
+        </div>
+      </div>
+    );
   }
+}
 
-  // Get related posts (same category, excluding current)
-  const allPosts = await getPublishedBlogPosts();
-  const relatedPosts = allPosts
-    .filter(p => p.category === post.category && p.id !== post.id)
-    .slice(0, 2);
+async function renderBlogPost(post: any, slug: string) {
+  try {
+    // Get related posts (same category, excluding current)
+    let relatedPosts = [];
+    try {
+      console.log(`[BlogPostPage] Loading related posts...`);
+      const allPosts = await getPublishedBlogPosts();
+      relatedPosts = allPosts
+        .filter(p => p.category === post.category && p.id !== post.id)
+        .slice(0, 2);
+      console.log(`[BlogPostPage] Found ${relatedPosts.length} related posts`);
+    } catch (error) {
+      console.error(`[BlogPostPage] Error loading related posts:`, error);
+      // Continue without related posts
+    }
 
   return (
     <div className="pt-20">
@@ -93,18 +162,40 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* Featured Image */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
           <div className="aspect-[2/1] rounded-2xl overflow-hidden shadow-xl">
-            {post.featured_image ? (
-              <img
-                src={post.featured_image}
-                alt={post.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-            ) : null}
-            <div className={`w-full h-full bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center ${post.featured_image ? 'hidden' : ''}`}>
+            {(() => {
+              // Safely check image conditions
+              try {
+                const hasImage = post.featured_image && typeof post.featured_image === 'string';
+                const imageSize = hasImage ? post.featured_image.length : 0;
+                const isReasonableSize = imageSize > 0 && imageSize < 5 * 1024 * 1024; // 5MB limit for SSR safety
+
+                console.log(`[BlogPostPage] Image check: hasImage=${hasImage}, size=${Math.round(imageSize/1024)}KB, reasonable=${isReasonableSize}`);
+
+                if (hasImage && isReasonableSize) {
+                  return (
+                    <img
+                      src={post.featured_image}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.log('[BlogPostPage] Image load error, showing fallback');
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  );
+                } else {
+                  if (hasImage && !isReasonableSize) {
+                    console.log(`[BlogPostPage] Image too large for SSR: ${Math.round(imageSize/1024)}KB`);
+                  }
+                  return null;
+                }
+              } catch (error) {
+                console.error('[BlogPostPage] Error checking image:', error);
+                return null;
+              }
+            })()}
+            <div className="w-full h-full bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center">
               <div className="text-center text-white">
                 <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-white/20 flex items-center justify-center">
                   <span className="font-display text-3xl font-bold">CC</span>
@@ -118,40 +209,53 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* Article Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="prose prose-lg max-w-none">
-            {post.content.split('\n').map((paragraph, i) => {
-              if (paragraph.startsWith('## ')) {
-                return (
-                  <h2 key={i} className="font-display text-2xl font-semibold text-[#5f4a38] mt-8 mb-4">
-                    {paragraph.replace('## ', '')}
-                  </h2>
-                );
+            {(() => {
+              try {
+                if (!post.content || typeof post.content !== 'string') {
+                  console.log('[BlogPostPage] No valid content found');
+                  return <p className="text-[#7d6349]">Content not available.</p>;
+                }
+
+                console.log(`[BlogPostPage] Rendering content: ${post.content.length} characters`);
+                return post.content.split('\n').map((paragraph, i) => {
+                  if (paragraph.startsWith('## ')) {
+                    return (
+                      <h2 key={i} className="font-display text-2xl font-semibold text-[#5f4a38] mt-8 mb-4">
+                        {paragraph.replace('## ', '')}
+                      </h2>
+                    );
+                  }
+                  if (paragraph.startsWith('### ')) {
+                    return (
+                      <h3 key={i} className="font-display text-xl font-semibold text-[#5f4a38] mt-6 mb-3">
+                        {paragraph.replace('### ', '')}
+                      </h3>
+                    );
+                  }
+                  if (paragraph.startsWith('---')) {
+                    return <hr key={i} className="my-8 border-[#faf3e6]" />;
+                  }
+                  if (paragraph.trim() === '') {
+                    return null;
+                  }
+                  if (paragraph.startsWith('*') && paragraph.endsWith('*')) {
+                    return (
+                      <p key={i} className="text-[#7d6349] italic my-4">
+                        {paragraph.slice(1, -1)}
+                      </p>
+                    );
+                  }
+                  return (
+                    <p key={i} className="text-[#7d6349] my-4 leading-relaxed">
+                      {paragraph}
+                    </p>
+                  );
+                });
+              } catch (error) {
+                console.error('[BlogPostPage] Error rendering content:', error);
+                return <p className="text-[#7d6349]">Error displaying content.</p>;
               }
-              if (paragraph.startsWith('### ')) {
-                return (
-                  <h3 key={i} className="font-display text-xl font-semibold text-[#5f4a38] mt-6 mb-3">
-                    {paragraph.replace('### ', '')}
-                  </h3>
-                );
-              }
-              if (paragraph.startsWith('---')) {
-                return <hr key={i} className="my-8 border-[#faf3e6]" />;
-              }
-              if (paragraph.trim() === '') {
-                return null;
-              }
-              if (paragraph.startsWith('*') && paragraph.endsWith('*')) {
-                return (
-                  <p key={i} className="text-[#7d6349] italic my-4">
-                    {paragraph.slice(1, -1)}
-                  </p>
-                );
-              }
-              return (
-                <p key={i} className="text-[#7d6349] my-4 leading-relaxed">
-                  {paragraph}
-                </p>
-              );
-            })}
+            })()}
           </div>
 
           {/* Share & CTA */}
@@ -197,7 +301,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   className="group card bg-white"
                 >
                   <div className="aspect-[16/10] overflow-hidden">
-                    {relatedPost.featured_image ? (
+                    {relatedPost.featured_image && relatedPost.featured_image.length < 10 * 1024 * 1024 ? (
                       <img
                         src={relatedPost.featured_image}
                         alt={relatedPost.title}
@@ -227,4 +331,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       )}
     </div>
   );
+  } catch (error) {
+    console.error(`[BlogPostPage] Error rendering blog post:`, error);
+    // Return simplified safe version if rendering fails
+    return (
+      <div className="pt-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="font-display text-2xl font-semibold text-[#5f4a38] mb-4">
+              {post.title || 'Blog Post'}
+            </h1>
+            <p className="text-[#7d6349] mb-8">
+              This blog post content could not be displayed properly.
+            </p>
+            <div className="w-full max-w-md mx-auto mb-8">
+              <div className="aspect-[2/1] rounded-2xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <span className="font-display text-3xl font-bold">CC</span>
+                  </div>
+                  <p className="text-lg font-medium">Cozy Condo Blog</p>
+                </div>
+              </div>
+            </div>
+            <a
+              href="/blog"
+              className="btn-primary"
+            >
+              Back to Blog
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
