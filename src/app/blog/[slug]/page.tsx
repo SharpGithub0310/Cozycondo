@@ -100,7 +100,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 async function renderBlogPost(post: any, slug: string) {
   try {
     // Get related posts (same category, excluding current)
-    let relatedPosts = [];
+    let relatedPosts: any[] = [];
     try {
       console.log(`[BlogPostPage] Loading related posts...`);
       const allPosts = await getPublishedBlogPosts();
