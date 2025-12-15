@@ -17,17 +17,31 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
-  
-  if (!post) {
-    return { title: 'Post Not Found' };
-  }
+  try {
+    console.log(`[generateMetadata] Starting metadata generation`);
+    const { slug } = await params;
+    console.log(`[generateMetadata] Slug: ${slug}`);
 
-  return {
-    title: post.title,
-    description: post.excerpt,
-  };
+    const post = await getBlogPostBySlug(slug);
+    console.log(`[generateMetadata] Post loaded: ${post ? 'success' : 'not found'}`);
+
+    if (!post) {
+      console.log(`[generateMetadata] Post not found, returning default metadata`);
+      return { title: 'Post Not Found' };
+    }
+
+    console.log(`[generateMetadata] Returning metadata for: ${post.title}`);
+    return {
+      title: post.title || 'Blog Post',
+      description: post.excerpt || 'Cozy Condo blog post',
+    };
+  } catch (error) {
+    console.error(`[generateMetadata] Error generating metadata:`, error);
+    return {
+      title: 'Blog Post',
+      description: 'Cozy Condo blog post'
+    };
+  }
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,8 +49,47 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const { slug } = await params;
     console.log(`[BlogPostPage] Loading post: ${slug}`);
 
-    const post = await getBlogPostBySlug(slug);
-    console.log(`[BlogPostPage] Post loaded: ${post ? 'success' : 'not found'}`);
+    // Add timeout protection for data fetching
+    let post = null;
+    try {
+      post = await Promise.race([
+        getBlogPostBySlug(slug),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Data fetch timeout')), 10000) // 10 second timeout
+        )
+      ]);
+      console.log(`[BlogPostPage] Post loaded: ${post ? 'success' : 'not found'}`);
+    } catch (fetchError) {
+      console.error(`[BlogPostPage] Error fetching post:`, fetchError);
+      // If fetching fails, show a safe fallback page
+      return (
+        <div className="pt-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-semibold text-[#5f4a38] mb-4">
+                Blog Post Temporarily Unavailable
+              </h1>
+              <p className="text-[#7d6349] mb-8">
+                This blog post is temporarily unavailable due to a technical issue.
+              </p>
+              <div className="w-full max-w-md mx-auto mb-8">
+                <div className="aspect-[2/1] rounded-2xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-white/20 flex items-center justify-center">
+                      <span className="font-display text-3xl font-bold">CC</span>
+                    </div>
+                    <p className="text-lg font-medium">Cozy Condo Blog</p>
+                  </div>
+                </div>
+              </div>
+              <a href="/blog" className="btn-primary">
+                Back to Blog
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (!post || !post.published) {
       console.log(`[BlogPostPage] Post not found or unpublished: ${slug}`);
@@ -52,19 +105,32 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       contentLength: post.content ? post.content.length : 0
     });
 
-    // Sanitize post data for SSR safety
+    // Sanitize post data for SSR safety - be very aggressive about large data
+    const imageSize = post.featured_image ? post.featured_image.length : 0;
+    const contentSize = post.content ? post.content.length : 0;
+    const totalPostSize = JSON.stringify(post).length;
+
+    console.log(`[BlogPostPage] Post data sizes - Image: ${Math.round(imageSize/1024)}KB, Content: ${Math.round(contentSize/1024)}KB, Total: ${Math.round(totalPostSize/1024)}KB`);
+
+    // Be very conservative with SSR - remove any large data that could cause issues
     const safePost = {
-      ...post,
-      // Remove or truncate extremely large images that could crash SSR
-      featured_image: post.featured_image && post.featured_image.length > 3 * 1024 * 1024
-        ? '' // Clear image if > 3MB to prevent SSR issues
-        : post.featured_image,
-      // Ensure content is safe
-      content: post.content || 'No content available.',
+      id: post.id || '',
       title: post.title || 'Untitled Post',
+      slug: post.slug || slug,
       excerpt: post.excerpt || '',
+      // Truncate content if extremely large
+      content: post.content && post.content.length > 50000
+        ? post.content.substring(0, 50000) + '...'
+        : post.content || 'No content available.',
       author: post.author || 'Unknown',
-      category: post.category || 'General'
+      category: post.category || 'General',
+      tags: Array.isArray(post.tags) ? post.tags.slice(0, 10) : [], // Limit tags
+      // Remove images larger than 1MB for SSR safety
+      featured_image: imageSize > 0 && imageSize < 1024 * 1024 ? post.featured_image : '',
+      published: post.published || false,
+      published_at: post.published_at || null,
+      created_at: post.created_at || new Date().toISOString(),
+      updated_at: post.updated_at || new Date().toISOString()
     };
 
     console.log(`[BlogPostPage] Sanitized post for SSR, image size: ${safePost.featured_image ? Math.round(safePost.featured_image.length / 1024) : 0}KB`);
