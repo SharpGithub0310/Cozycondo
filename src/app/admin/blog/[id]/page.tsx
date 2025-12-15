@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, Trash2, Eye, Calendar, Tag, User, Upload, Image } from 'lucide-react';
+import { getBlogPostById, updateBlogPost, deleteBlogPost, uploadBlogImage, generateUniqueSlug } from '@/utils/blogStorageHybrid';
 
 export default function EditBlogPost() {
   const params = useParams();
@@ -17,9 +18,9 @@ export default function EditBlogPost() {
     author: 'Cozy Condo Team',
     category: 'general',
     tags: [] as string[],
-    featuredImage: '',
-    publishDate: '',
-    status: 'draft' as 'draft' | 'published',
+    featured_image: '',
+    published: false,
+    published_at: null as string | null,
   });
 
   const [newTag, setNewTag] = useState('');
@@ -36,44 +37,60 @@ export default function EditBlogPost() {
   useEffect(() => {
     const loadPost = async () => {
       try {
-        // In production, fetch from API
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const blogPost = await getBlogPostById(params.id as string);
 
-        // Mock data for demonstration
-        const mockPost = {
-          title: `Blog Post ${params.id}`,
-          slug: `blog-post-${params.id}`,
-          excerpt: 'This is a sample blog post excerpt for demonstration.',
-          content: 'This is the content of the blog post. In a real application, this would be loaded from your database.',
-          author: 'Cozy Condo Team',
-          category: 'general',
-          tags: ['travel', 'accommodation'],
-          featuredImage: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=500&h=300&fit=crop',
-          publishDate: new Date().toISOString().split('T')[0],
-          status: 'published' as 'draft' | 'published',
-        };
-
-        setPost(mockPost);
+        if (blogPost) {
+          setPost({
+            title: blogPost.title,
+            slug: blogPost.slug,
+            excerpt: blogPost.excerpt,
+            content: blogPost.content,
+            author: blogPost.author,
+            category: blogPost.category,
+            tags: blogPost.tags || [],
+            featured_image: blogPost.featured_image,
+            published: blogPost.published,
+            published_at: blogPost.published_at,
+          });
+        } else {
+          // Post not found, redirect to blog list
+          router.push('/admin/blog');
+        }
       } catch (error) {
         console.error('Failed to load blog post:', error);
+        router.push('/admin/blog');
       } finally {
         setLoading(false);
       }
     };
 
     loadPost();
-  }, [params.id]);
+  }, [params.id, router]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      // In production, save to database
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await updateBlogPost(params.id as string, {
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        content: post.content,
+        author: post.author,
+        category: post.category,
+        tags: post.tags,
+        featured_image: post.featured_image,
+        published: post.published,
+        published_at: post.published_at,
+      });
+
+      alert('Blog post updated successfully!');
       router.push('/admin/blog');
     } catch (error) {
       console.error('Failed to save blog post:', error);
+      alert('Failed to save blog post. Please try again.');
+    } finally {
       setIsSaving(false);
     }
   };
@@ -81,11 +98,12 @@ export default function EditBlogPost() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this blog post?')) {
       try {
-        // In production, call delete API
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await deleteBlogPost(params.id as string);
+        alert('Blog post deleted successfully!');
         router.push('/admin/blog');
       } catch (error) {
         console.error('Failed to delete blog post:', error);
+        alert('Failed to delete blog post. Please try again.');
       }
     }
   };
@@ -107,14 +125,17 @@ export default function EditBlogPost() {
     });
   };
 
-  const generateSlug = () => {
-    const slug = post.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-    setPost({ ...post, slug });
+  const generateSlug = async () => {
+    if (!post.title.trim()) {
+      alert('Please enter a title first.');
+      return;
+    }
+    try {
+      const uniqueSlug = await generateUniqueSlug(post.title, params.id as string);
+      setPost({ ...post, slug: uniqueSlug });
+    } catch (error) {
+      console.error('Error generating slug:', error);
+    }
   };
 
   if (loading) {
@@ -245,9 +266,9 @@ export default function EditBlogPost() {
                   Publish Date
                 </label>
                 <input
-                  type="date"
-                  value={post.publishDate}
-                  onChange={(e) => setPost({...post, publishDate: e.target.value})}
+                  type="datetime-local"
+                  value={post.published_at ? post.published_at.substring(0, 16) : ''}
+                  onChange={(e) => setPost({...post, published_at: e.target.value || null})}
                   className="form-input"
                 />
               </div>
@@ -255,8 +276,8 @@ export default function EditBlogPost() {
               <div>
                 <label className="form-label">Status</label>
                 <select
-                  value={post.status}
-                  onChange={(e) => setPost({...post, status: e.target.value as 'draft' | 'published'})}
+                  value={post.published ? 'published' : 'draft'}
+                  onChange={(e) => setPost({...post, published: e.target.value === 'published'})}
                   className="form-input"
                 >
                   <option value="draft">Draft</option>
@@ -359,15 +380,22 @@ export default function EditBlogPost() {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        const imageUrl = event.target?.result as string;
-                        setPost({...post, featuredImage: imageUrl});
-                      };
-                      reader.readAsDataURL(file);
+                      // Check file size
+                      if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size must be less than 5MB');
+                        return;
+                      }
+
+                      try {
+                        const imageUrl = await uploadBlogImage(file);
+                        setPost({...post, featured_image: imageUrl});
+                      } catch (error) {
+                        console.error('Error uploading image:', error);
+                        alert('Failed to upload image. Please try again.');
+                      }
                     }
                   }}
                   className="hidden"
@@ -387,19 +415,19 @@ export default function EditBlogPost() {
               <label className="form-label">Or enter image URL</label>
               <input
                 type="url"
-                value={post.featuredImage}
-                onChange={(e) => setPost({...post, featuredImage: e.target.value})}
+                value={post.featured_image}
+                onChange={(e) => setPost({...post, featured_image: e.target.value})}
                 className="form-input"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
 
             {/* Image Preview */}
-            {post.featuredImage && (
+            {post.featured_image && (
               <div className="mt-4 relative">
                 <div className="relative group">
                   <img
-                    src={post.featuredImage}
+                    src={post.featured_image}
                     alt="Featured image preview"
                     className="w-full h-48 object-cover rounded-lg border border-[#faf3e6]"
                     onError={(e) => {
@@ -408,7 +436,7 @@ export default function EditBlogPost() {
                   />
                   <button
                     type="button"
-                    onClick={() => setPost({...post, featuredImage: ''})}
+                    onClick={() => setPost({...post, featured_image: ''})}
                     className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -427,7 +455,7 @@ export default function EditBlogPost() {
               className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {isSaving ? 'Saving...' : `Update ${post.status === 'published' ? '& Publish' : 'Draft'}`}
+              {isSaving ? 'Saving...' : `Update ${post.published ? '& Publish' : 'Draft'}`}
             </button>
 
             <button
