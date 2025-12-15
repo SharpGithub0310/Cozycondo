@@ -217,7 +217,7 @@ async function renderBlogPost(post: any, slug: string) {
                 }
 
                 console.log(`[BlogPostPage] Rendering content: ${post.content.length} characters`);
-                return post.content.split('\n').map((paragraph, i) => {
+                return post.content.split('\n').map((paragraph: string, i: number) => {
                   if (paragraph.startsWith('## ')) {
                     return (
                       <h2 key={i} className="font-display text-2xl font-semibold text-[#5f4a38] mt-8 mb-4">
