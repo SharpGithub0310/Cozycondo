@@ -18,6 +18,23 @@ export async function POST(request: NextRequest) {
 
     for (const post of posts) {
       try {
+        // Log sync attempt
+        console.log(`Syncing post: ${post.slug} (${post.title})`);
+
+        // Check post size
+        const postSize = JSON.stringify(post).length;
+        console.log(`Post size: ${Math.round(postSize / 1024)}KB`);
+
+        // If post is too large, skip it
+        if (postSize > 2 * 1024 * 1024) { // 2MB limit
+          results.push({
+            success: false,
+            slug: post.slug,
+            error: `Post too large (${Math.round(postSize / 1024)}KB). Skipped to prevent server issues.`
+          });
+          continue;
+        }
+
         // Call the main blog API to save the post
         const saveResponse = await fetch(`${request.nextUrl.origin}/api/blog`, {
           method: 'POST',
@@ -29,12 +46,15 @@ export async function POST(request: NextRequest) {
 
         if (saveResponse.ok) {
           const savedPost = await saveResponse.json();
+          console.log(`✅ Successfully synced: ${post.slug}`);
           results.push({ success: true, slug: post.slug, id: savedPost.id });
         } else {
           const error = await saveResponse.text();
-          results.push({ success: false, slug: post.slug, error });
+          console.error(`❌ Failed to sync ${post.slug}:`, error);
+          results.push({ success: false, slug: post.slug, error: `API Error: ${error}` });
         }
       } catch (error) {
+        console.error(`❌ Exception syncing ${post.slug}:`, error);
         results.push({
           success: false,
           slug: post.slug,

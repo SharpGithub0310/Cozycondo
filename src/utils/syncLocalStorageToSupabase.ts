@@ -18,13 +18,32 @@ export async function syncLocalStorageToSupabase(): Promise<{ success: boolean; 
 
     console.log(`Found ${posts.length} posts in localStorage, syncing to Supabase...`);
 
+    // Process posts and handle large images
+    const processedPosts = posts.map(post => {
+      const processedPost = { ...post };
+
+      // Check if featured_image is a large base64 string
+      if (processedPost.featured_image && processedPost.featured_image.startsWith('data:')) {
+        const imageSize = processedPost.featured_image.length;
+        console.log(`Post "${post.slug}" has base64 image of ${Math.round(imageSize / 1024)}KB`);
+
+        // If image is too large (>1MB), skip it for now
+        if (imageSize > 1024 * 1024) {
+          console.warn(`Skipping large image for "${post.slug}" (${Math.round(imageSize / 1024)}KB)`);
+          processedPost.featured_image = ''; // Remove large image to prevent sync issues
+        }
+      }
+
+      return processedPost;
+    });
+
     // Send to sync API
     const response = await fetch('/api/blog/sync', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ posts })
+      body: JSON.stringify({ posts: processedPosts })
     });
 
     if (!response.ok) {
