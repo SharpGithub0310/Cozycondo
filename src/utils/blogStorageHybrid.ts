@@ -139,16 +139,35 @@ export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
 
 // Get blog post by slug
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-  // Always try localStorage first if in browser
+  // Client-side: Check localStorage first
   if (typeof window !== 'undefined') {
     const posts = getLocalStoragePosts();
     const localPost = posts.find(post => post.slug === slug);
     if (localPost) {
       return localPost;
     }
+
+    // If not in localStorage, try Supabase via client
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+        return data || null;
+      } catch (error) {
+        console.error('Supabase error:', error);
+        return null;
+      }
+    }
+
+    return null;
   }
 
-  // Then try Supabase if configured
+  // Server-side: First try Supabase, then check for localStorage data via API
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase
@@ -157,16 +176,17 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
         .eq('slug', slug)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      if (!error && data) {
+        return data;
+      }
     } catch (error) {
-      console.error('Supabase error, falling back to localStorage:', error);
+      console.error('Supabase error on server:', error);
     }
   }
 
-  // Final fallback to localStorage
-  const posts = getLocalStoragePosts();
-  return posts.find(post => post.slug === slug) || null;
+  // If we're on server and not found in Supabase, it might only exist in localStorage
+  // In this case, return null (the client will need to handle this case)
+  return null;
 }
 
 // Get blog post by ID (admin)
