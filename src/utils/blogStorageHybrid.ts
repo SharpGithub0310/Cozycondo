@@ -171,6 +171,16 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
 // Get blog post by ID (admin)
 export async function getBlogPostById(id: string): Promise<BlogPost | null> {
+  // Always try localStorage first if in browser
+  if (typeof window !== 'undefined') {
+    const posts = getLocalStoragePosts();
+    const localPost = posts.find(post => post.id === id);
+    if (localPost) {
+      return localPost;
+    }
+  }
+
+  // Then try Supabase if configured
   if (isSupabaseConfigured()) {
     try {
       const adminClient = createAdminClient();
@@ -189,7 +199,7 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
     }
   }
 
-  // Fallback to localStorage
+  // Final fallback to localStorage
   const posts = getLocalStoragePosts();
   return posts.find(post => post.id === id) || null;
 }
