@@ -49,7 +49,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json({ error: 'Failed to save blog post' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Failed to save blog post',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
