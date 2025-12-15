@@ -167,17 +167,20 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
     return null;
   }
 
-  // Server-side: First try Supabase, then check for localStorage data via API
+  // Server-side: First try Supabase with admin client
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .single();
+      const adminClient = createAdminClient();
+      if (adminClient) {
+        const { data, error } = await adminClient
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .single();
 
-      if (!error && data) {
-        return data;
+        if (!error && data) {
+          return data;
+        }
       }
     } catch (error) {
       console.error('Supabase error on server:', error);
