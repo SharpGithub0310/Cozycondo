@@ -90,10 +90,15 @@ export default function NewBlogPost() {
 
       // Show success message and redirect
       alert(`Blog post ${post.published ? 'published' : 'saved as draft'} successfully!`);
-      router.push('/admin/blog');
+
+      // Small delay to ensure alert is shown before redirect
+      setTimeout(() => {
+        router.push('/admin/blog');
+      }, 100);
     } catch (error) {
       console.error('Failed to save blog post:', error);
       alert('Failed to save blog post. Please try again.');
+    } finally {
       setIsSaving(false);
     }
   };

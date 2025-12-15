@@ -64,6 +64,15 @@ function saveLocalStoragePosts(posts: BlogPost[]): void {
 
 // Get all blog posts (admin view)
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
+  // Always try localStorage first if in browser
+  if (typeof window !== 'undefined') {
+    const localPosts = getLocalStoragePosts();
+    if (localPosts.length > 0) {
+      return localPosts;
+    }
+  }
+
+  // Then try Supabase if configured
   if (isSupabaseConfigured()) {
     try {
       // Use API route for server-side Supabase operations
@@ -84,7 +93,7 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
     }
   }
 
-  // Fallback to localStorage
+  // Final fallback to localStorage
   return getLocalStoragePosts();
 }
 
