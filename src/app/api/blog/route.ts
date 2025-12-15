@@ -26,6 +26,15 @@ export async function POST(request: NextRequest) {
 
     const blogPost = await request.json();
 
+    // Check post size before processing
+    const postSize = JSON.stringify(blogPost).length;
+    console.log(`Saving blog post "${blogPost.title}": ${Math.round(postSize / 1024)}KB`);
+
+    // Warn if post is large but still allow it
+    if (postSize > 1024 * 1024) { // 1MB
+      console.warn(`Large blog post detected: ${Math.round(postSize / 1024)}KB`);
+    }
+
     // Remove id, created_at, updated_at - let Supabase handle these
     const { id, created_at, updated_at, ...insertData } = blogPost;
 
