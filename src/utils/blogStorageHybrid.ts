@@ -112,14 +112,26 @@ export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
   // Then try Supabase if configured and add to results
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('published', true)
-        .order('published_at', { ascending: false });
+      // Use appropriate client based on environment
+      let supabaseClient;
+      if (typeof window !== 'undefined') {
+        // Client-side: use regular client
+        supabaseClient = supabase;
+      } else {
+        // Server-side: use admin client
+        supabaseClient = createAdminClient();
+      }
 
-      if (!error && data) {
-        allPosts.push(...data);
+      if (supabaseClient) {
+        const { data, error } = await supabaseClient
+          .from('blog_posts')
+          .select('*')
+          .eq('published', true)
+          .order('published_at', { ascending: false });
+
+        if (!error && data) {
+          allPosts.push(...data);
+        }
       }
     } catch (error) {
       console.error('Supabase error:', error);
