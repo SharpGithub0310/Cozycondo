@@ -91,9 +91,57 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       );
     }
 
-    if (!post || !post.published) {
-      console.log(`[BlogPostPage] Post not found or unpublished: ${slug}`);
-      notFound();
+    if (!post) {
+      console.log(`[BlogPostPage] Post not found: ${slug}`);
+      // Instead of notFound(), return a proper 404 page to avoid 500 errors
+      return (
+        <div className="pt-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-semibold text-[#5f4a38] mb-4">
+                Blog Post Not Found
+              </h1>
+              <p className="text-[#7d6349] mb-8">
+                The blog post you're looking for doesn't exist or may have been moved.
+              </p>
+              <div className="w-full max-w-md mx-auto mb-8">
+                <div className="aspect-[2/1] rounded-2xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-white/20 flex items-center justify-center">
+                      <span className="font-display text-3xl font-bold">CC</span>
+                    </div>
+                    <p className="text-lg font-medium">Cozy Condo Blog</p>
+                  </div>
+                </div>
+              </div>
+              <a href="/blog" className="btn-primary">
+                Back to Blog
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (!post.published) {
+      console.log(`[BlogPostPage] Post unpublished: ${slug}`);
+      return (
+        <div className="pt-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-semibold text-[#5f4a38] mb-4">
+                Blog Post Not Available
+              </h1>
+              <p className="text-[#7d6349] mb-8">
+                This blog post is not currently published.
+              </p>
+              <a href="/blog" className="btn-primary">
+                Back to Blog
+              </a>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     // Log post details for debugging
