@@ -12,6 +12,34 @@ const calculateReadTime = (content: string) => {
   return `${readTime} min read`;
 };
 
+const processContent = (content: string) => {
+  if (!content) return '';
+
+  // If content already has HTML tags, return as is
+  if (content.includes('<p>') || content.includes('<div>') || content.includes('<h1>')) {
+    return content;
+  }
+
+  // Convert plain text to HTML with proper paragraphs
+  return content
+    .split('\n\n')
+    .filter(paragraph => paragraph.trim())
+    .map(paragraph => {
+      const trimmed = paragraph.trim();
+      // Handle headings
+      if (trimmed.startsWith('## ')) {
+        return `<h2>${trimmed.substring(3)}</h2>`;
+      } else if (trimmed.startsWith('# ')) {
+        return `<h1>${trimmed.substring(2)}</h1>`;
+      } else if (trimmed.startsWith('### ')) {
+        return `<h3>${trimmed.substring(4)}</h3>`;
+      }
+      // Regular paragraphs
+      return `<p>${trimmed}</p>`;
+    })
+    .join('');
+};
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -159,7 +187,7 @@ export default function BlogPostPage({ params }: PageProps) {
           {/* Article Content */}
           <div
             className="prose prose-lg max-w-none text-[#4a5568] leading-relaxed [&>p]:mb-6 [&>h1]:mb-6 [&>h2]:mb-4 [&>h2]:mt-8 [&>h3]:mb-3 [&>h3]:mt-6 [&>h4]:mb-2 [&>h4]:mt-4 [&>ul]:mb-6 [&>ol]:mb-6 [&>blockquote]:mb-6 [&>blockquote]:mt-6"
-            dangerouslySetInnerHTML={{ __html: post.content || '' }}
+            dangerouslySetInnerHTML={{ __html: processContent(post.content || '') }}
           />
 
           {/* Tags */}
