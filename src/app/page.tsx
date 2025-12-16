@@ -5,6 +5,7 @@ import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, Ar
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getStoredSettings } from '@/utils/settingsStorage';
+import { getStoredProperties, getDefaultPropertyData } from '@/utils/propertyStorage';
 
 // Features section data
 const features = [
@@ -30,45 +31,62 @@ const features = [
   },
 ];
 
-// Sample properties for demo (will be replaced with database fetch later)
-const sampleProperties = [
-  {
-    id: '1',
-    name: 'Cityscape Studio',
-    slug: 'cityscape-studio',
-    location: 'Iloilo Business Park',
-    short_description: 'Modern studio with stunning city views. Perfect for business travelers and couples.',
-    amenities: ['WiFi', 'Air-conditioning', 'Kitchen'],
-    featured: true,
-  },
-  {
-    id: '2',
-    name: 'Garden View Suite',
-    slug: 'garden-view-suite',
-    location: 'Smallville Complex',
-    short_description: 'Spacious 1-bedroom suite overlooking lush gardens. Ideal for extended stays.',
-    amenities: ['WiFi', 'Air-conditioning', 'Parking'],
-    featured: true,
-  },
-  {
-    id: '3',
-    name: 'Downtown Retreat',
-    slug: 'downtown-retreat',
-    location: 'City Proper',
-    short_description: 'Cozy unit in the heart of downtown. Walking distance to SM City Iloilo.',
-    amenities: ['WiFi', 'Air-conditioning', 'Smart TV'],
-    featured: true,
-  },
-];
+// Property IDs to load
+const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 export default function HomePage() {
   const [aboutImage, setAboutImage] = useState('');
+  const [featuredProperties, setFeaturedProperties] = useState<any[]>([]);
 
   useEffect(() => {
+    // Load settings
     const settings = getStoredSettings();
     if (settings.aboutImage) {
       setAboutImage(settings.aboutImage);
     }
+
+    // Load properties
+    const storedProperties = getStoredProperties();
+    const loadedProperties = propertyIds.map(id => {
+      const stored = storedProperties[id];
+      const defaultData = getDefaultPropertyData(id);
+
+      if (stored) {
+        return {
+          id: stored.id,
+          name: stored.name,
+          slug: stored.name.toLowerCase().replace(/\s+/g, '-'),
+          location: stored.location,
+          short_description: stored.description,
+          amenities: stored.amenities,
+          featured: stored.featured,
+          active: stored.active,
+          photos: stored.photos || []
+        };
+      }
+
+      return {
+        id: defaultData.id,
+        name: defaultData.name,
+        slug: defaultData.name.toLowerCase().replace(/\s+/g, '-'),
+        location: defaultData.location,
+        short_description: defaultData.description,
+        amenities: defaultData.amenities,
+        featured: defaultData.featured,
+        active: defaultData.active,
+        photos: defaultData.photos || []
+      };
+    });
+
+    // Filter to show only active and featured properties
+    let featured = loadedProperties.filter(p => p.active && p.featured);
+
+    // If no featured properties, show first 3 active properties
+    if (featured.length === 0) {
+      featured = loadedProperties.filter(p => p.active).slice(0, 3);
+    }
+
+    setFeaturedProperties(featured);
   }, []);
 
   return (
@@ -87,15 +105,27 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sampleProperties.map((property, index) => (
+            {featuredProperties.map((property, index) => (
               <div
                 key={property.id}
                 className="card group animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                {/* Image placeholder */}
+                {/* Image */}
                 <div className="relative aspect-[4/3] bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  {property.photos && property.photos.length > 0 ? (
+                    <img
+                      src={property.photos[property.featuredPhotoIndex || 0]}
+                      alt={property.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className={`absolute inset-0 flex items-center justify-center ${property.photos && property.photos.length > 0 ? 'hidden' : ''}`}>
                     <div className="text-center text-white/80">
                       <div className="w-16 h-16 mx-auto mb-2 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                         <span className="font-display text-2xl font-bold">CC</span>
