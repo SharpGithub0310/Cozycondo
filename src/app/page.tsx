@@ -156,7 +156,7 @@ export default function HomePage() {
                   </p>
 
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {property.amenities.map((amenity, i) => (
+                    {property.amenities.map((amenity: string, i: number) => (
                       <span
                         key={i}
                         className="px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full"
