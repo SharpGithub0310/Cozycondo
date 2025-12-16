@@ -20,6 +20,22 @@ export default function AdminSettings() {
     contactImage: '',
     footerLogo: '',
     favicon: '',
+
+    // Homepage Content
+    heroBadgeText: '',
+    heroTitle: 'Your Cozy Escape in Iloilo City',
+    heroSubtitle: '',
+    heroDescription: 'Experience the perfect blend of comfort and convenience. Our handpicked condominiums offer modern amenities, stunning views, and prime locations across Iloilo City.',
+    statsUnits: '9+',
+    statsUnitsLabel: 'Premium Units',
+    statsRating: '4.9',
+    statsRatingLabel: 'Guest Rating',
+    statsLocation: 'Iloilo',
+    statsLocationLabel: 'City Center',
+    highlyRatedTitle: 'Highly Rated',
+    highlyRatedSubtitle: 'by our guests',
+    featuredTitle: 'Featured Properties',
+    featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
   });
 
   useEffect(() => {
@@ -45,6 +61,20 @@ export default function AdminSettings() {
         aboutImage: settings.aboutImage,
         contactImage: settings.contactImage,
         favicon: settings.favicon,
+        heroBadgeText: settings.heroBadgeText,
+        heroTitle: settings.heroTitle,
+        heroSubtitle: settings.heroSubtitle,
+        heroDescription: settings.heroDescription,
+        statsUnits: settings.statsUnits,
+        statsUnitsLabel: settings.statsUnitsLabel,
+        statsRating: settings.statsRating,
+        statsRatingLabel: settings.statsRatingLabel,
+        statsLocation: settings.statsLocation,
+        statsLocationLabel: settings.statsLocationLabel,
+        highlyRatedTitle: settings.highlyRatedTitle,
+        highlyRatedSubtitle: settings.highlyRatedSubtitle,
+        featuredTitle: settings.featuredTitle,
+        featuredSubtitle: settings.featuredSubtitle,
       });
       setSaveMessage('Settings saved successfully!');
       setTimeout(() => setSaveMessage(''), 3000);
@@ -192,6 +222,174 @@ export default function AdminSettings() {
                   <option value="EUR">EUR - Euro</option>
                   <option value="GBP">GBP - British Pound</option>
                 </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Homepage Content */}
+          <div className="pt-6 border-t border-[#faf3e6]">
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Homepage Content
+            </h3>
+
+            {/* Hero Section */}
+            <div className="mb-6">
+              <h4 className="font-medium text-[#5f4a38] mb-3">Hero Section</h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="form-label">Badge Text (Optional)</label>
+                  <input
+                    type="text"
+                    value={settings.heroBadgeText}
+                    onChange={(e) => setSettings({...settings, heroBadgeText: e.target.value})}
+                    className="form-input"
+                    placeholder="Leave empty to hide badge (removes 'Premium Short-Term Rentals')"
+                  />
+                  <p className="text-xs text-[#9a7d5e] mt-1">Leave empty to remove the badge entirely</p>
+                </div>
+
+                <div>
+                  <label className="form-label">Main Title</label>
+                  <input
+                    type="text"
+                    value={settings.heroTitle}
+                    onChange={(e) => setSettings({...settings, heroTitle: e.target.value})}
+                    className="form-input"
+                    placeholder="Your Cozy Escape in Iloilo City"
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label">Description</label>
+                  <textarea
+                    value={settings.heroDescription}
+                    onChange={(e) => setSettings({...settings, heroDescription: e.target.value})}
+                    className="form-input min-h-[80px]"
+                    placeholder="Experience the perfect blend of comfort and convenience..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Statistics */}
+            <div className="mb-6">
+              <h4 className="font-medium text-[#5f4a38] mb-3">Statistics Section</h4>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="form-label">Units Count</label>
+                  <input
+                    type="text"
+                    value={settings.statsUnits}
+                    onChange={(e) => setSettings({...settings, statsUnits: e.target.value})}
+                    className="form-input"
+                    placeholder="9+"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="form-label">Units Label</label>
+                  <input
+                    type="text"
+                    value={settings.statsUnitsLabel}
+                    onChange={(e) => setSettings({...settings, statsUnitsLabel: e.target.value})}
+                    className="form-input"
+                    placeholder="Premium Units"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="form-label">Rating</label>
+                  <input
+                    type="text"
+                    value={settings.statsRating}
+                    onChange={(e) => setSettings({...settings, statsRating: e.target.value})}
+                    className="form-input"
+                    placeholder="4.9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="form-label">Rating Label</label>
+                  <input
+                    type="text"
+                    value={settings.statsRatingLabel}
+                    onChange={(e) => setSettings({...settings, statsRatingLabel: e.target.value})}
+                    className="form-input"
+                    placeholder="Guest Rating"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="form-label">Location</label>
+                  <input
+                    type="text"
+                    value={settings.statsLocation}
+                    onChange={(e) => setSettings({...settings, statsLocation: e.target.value})}
+                    className="form-input"
+                    placeholder="Iloilo"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="form-label">Location Label</label>
+                  <input
+                    type="text"
+                    value={settings.statsLocationLabel}
+                    onChange={(e) => setSettings({...settings, statsLocationLabel: e.target.value})}
+                    className="form-input"
+                    placeholder="City Center"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Highly Rated Section */}
+            <div className="mb-6">
+              <h4 className="font-medium text-[#5f4a38] mb-3">"Highly Rated" Card</h4>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label">Title</label>
+                  <input
+                    type="text"
+                    value={settings.highlyRatedTitle}
+                    onChange={(e) => setSettings({...settings, highlyRatedTitle: e.target.value})}
+                    className="form-input"
+                    placeholder="Highly Rated"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Subtitle</label>
+                  <input
+                    type="text"
+                    value={settings.highlyRatedSubtitle}
+                    onChange={(e) => setSettings({...settings, highlyRatedSubtitle: e.target.value})}
+                    className="form-input"
+                    placeholder="by our guests"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Properties Section */}
+            <div className="mb-6">
+              <h4 className="font-medium text-[#5f4a38] mb-3">Featured Properties Section</h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="form-label">Section Title</label>
+                  <input
+                    type="text"
+                    value={settings.featuredTitle}
+                    onChange={(e) => setSettings({...settings, featuredTitle: e.target.value})}
+                    className="form-input"
+                    placeholder="Featured Properties"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Section Description</label>
+                  <textarea
+                    value={settings.featuredSubtitle}
+                    onChange={(e) => setSettings({...settings, featuredSubtitle: e.target.value})}
+                    className="form-input min-h-[60px]"
+                    placeholder="Handpicked condominiums offering the perfect balance of comfort, convenience, and style."
+                    rows={2}
+                  />
+                </div>
               </div>
             </div>
           </div>

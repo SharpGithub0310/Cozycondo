@@ -37,12 +37,15 @@ const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 export default function HomePage() {
   const [aboutImage, setAboutImage] = useState('');
   const [featuredProperties, setFeaturedProperties] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     // Load settings
-    const settings = getStoredSettings();
-    if (settings.aboutImage) {
-      setAboutImage(settings.aboutImage);
+    const loadedSettings = getStoredSettings();
+    setSettings(loadedSettings);
+
+    if (loadedSettings.aboutImage) {
+      setAboutImage(loadedSettings.aboutImage);
     }
 
     // Load properties
@@ -98,9 +101,9 @@ export default function HomePage() {
       <section id="properties" className="section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="section-title">Featured Properties</h2>
+            <h2 className="section-title">{settings?.featuredTitle || 'Featured Properties'}</h2>
             <p className="section-subtitle mx-auto">
-              Handpicked condominiums offering the perfect balance of comfort, convenience, and style.
+              {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
             </p>
           </div>
 

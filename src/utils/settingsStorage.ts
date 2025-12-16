@@ -8,6 +8,29 @@ interface WebsiteSettings {
   aboutImage: string;
   contactImage: string;
   favicon: string;
+
+  // Hero Section Content
+  heroBadgeText: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroDescription: string;
+
+  // Statistics
+  statsUnits: string;
+  statsUnitsLabel: string;
+  statsRating: string;
+  statsRatingLabel: string;
+  statsLocation: string;
+  statsLocationLabel: string;
+
+  // Highly Rated Section
+  highlyRatedTitle: string;
+  highlyRatedSubtitle: string;
+
+  // Featured Properties Section
+  featuredTitle: string;
+  featuredSubtitle: string;
+
   updatedAt?: string;
 }
 
@@ -52,6 +75,28 @@ function getDefaultSettings(): WebsiteSettings {
     aboutImage: '',
     contactImage: '',
     favicon: '',
+
+    // Hero Section Content
+    heroBadgeText: '',  // Remove "Premium Short-Term Rentals"
+    heroTitle: 'Your Cozy Escape in Iloilo City',
+    heroSubtitle: '',
+    heroDescription: 'Experience the perfect blend of comfort and convenience. Our handpicked condominiums offer modern amenities, stunning views, and prime locations across Iloilo City.',
+
+    // Statistics
+    statsUnits: '9+',
+    statsUnitsLabel: 'Premium Units',
+    statsRating: '4.9',
+    statsRatingLabel: 'Guest Rating',
+    statsLocation: 'Iloilo',
+    statsLocationLabel: 'City Center',
+
+    // Highly Rated Section
+    highlyRatedTitle: 'Highly Rated',
+    highlyRatedSubtitle: 'by our guests',
+
+    // Featured Properties Section
+    featuredTitle: 'Featured Properties',
+    featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
   };
 }
 

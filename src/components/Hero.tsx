@@ -5,25 +5,32 @@ import { ChevronDown, MapPin, Star, Home } from 'lucide-react';
 import Link from 'next/link';
 import { getStoredSettings } from '@/utils/settingsStorage';
 
-const stats = [
-  { icon: Home, value: '9+', label: 'Premium Units' },
-  { icon: Star, value: '4.9', label: 'Guest Rating' },
-  { icon: MapPin, value: 'Iloilo', label: 'City Center' },
-];
+// Stats will be loaded from settings
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
   const [heroBackground, setHeroBackground] = useState('');
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     setIsVisible(true);
 
-    // Load hero background from settings
-    const settings = getStoredSettings();
-    if (settings.heroBackground) {
-      setHeroBackground(settings.heroBackground);
+    // Load settings
+    const loadedSettings = getStoredSettings();
+    setSettings(loadedSettings);
+
+    if (loadedSettings.heroBackground) {
+      setHeroBackground(loadedSettings.heroBackground);
     }
   }, []);
+
+  if (!settings) return null;
+
+  const stats = [
+    { icon: Home, value: settings.statsUnits, label: settings.statsUnitsLabel },
+    { icon: Star, value: settings.statsRating, label: settings.statsRatingLabel },
+    { icon: MapPin, value: settings.statsLocation, label: settings.statsLocationLabel },
+  ];
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -61,23 +68,19 @@ export default function Hero() {
             }`}
           >
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-[#faf3e6] mb-6">
-              <span className="w-2 h-2 bg-[#14b8a6] rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-[#7d6349]">Premium Short-Term Rentals</span>
-            </div>
+            {settings.heroBadgeText && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-[#faf3e6] mb-6">
+                <span className="w-2 h-2 bg-[#14b8a6] rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-[#7d6349]">{settings.heroBadgeText}</span>
+              </div>
+            )}
 
             <h1 className={`font-display text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight mb-6 ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
-              Your{' '}
-              <span className="relative">
-                <span className="relative z-10">Cozy</span>
-                <span className="absolute bottom-2 left-0 w-full h-3 bg-[#14b8a6]/20 -z-0" />
-              </span>{' '}
-              Escape in{' '}
-              <span className={heroBackground ? 'text-[#14b8a6]' : 'text-[#0d9488]'}>Iloilo City</span>
+              {settings.heroTitle}
             </h1>
 
             <p className={`text-lg mb-8 max-w-xl ${heroBackground ? 'text-white/90' : 'text-[#7d6349]'}`}>
-              Experience the perfect blend of comfort and convenience. Our handpicked condominiums offer modern amenities, stunning views, and prime locations across Iloilo City.
+              {settings.heroDescription}
             </p>
 
             <div className="flex flex-wrap gap-4 mb-12">
@@ -151,9 +154,9 @@ export default function Hero() {
                   </div>
                   <div>
                     <div className="font-display text-xl font-semibold text-[#5f4a38]">
-                      Highly Rated
+                      {settings.highlyRatedTitle}
                     </div>
-                    <div className="text-sm text-[#9a7d5e]">by our guests</div>
+                    <div className="text-sm text-[#9a7d5e]">{settings.highlyRatedSubtitle}</div>
                   </div>
                 </div>
               </div>
