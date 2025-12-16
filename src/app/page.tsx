@@ -65,8 +65,8 @@ export default function HomePage() {
           location: stored.location,
           short_description: stored.description,
           amenities: stored.amenities,
-          featured: stored.featured,
-          active: stored.active,
+          featured: stored.featured ?? false, // Default to false if undefined
+          active: stored.active ?? true,      // Default to true if undefined
           photos: stored.photos || []
         };
       }
