@@ -37,7 +37,7 @@ export default function PropertiesPage() {
           id: stored.id,
           name: stored.name,
           location: stored.location,
-          featured: stored.featured ?? (id === '1' || id === '2' || id === '3'),
+          featured: stored.featured ?? false,
           active: stored.active ?? true,
           airbnbUrl: stored.airbnbUrl || ''
         };
@@ -47,7 +47,7 @@ export default function PropertiesPage() {
         id: defaultData.id,
         name: defaultData.name,
         location: defaultData.location,
-        featured: id === '1' || id === '2' || id === '3',
+        featured: false,
         active: true,
         airbnbUrl: defaultData.airbnbUrl || ''
       };

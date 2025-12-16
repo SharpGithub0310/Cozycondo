@@ -174,7 +174,7 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '3000',
       airbnbUrl: 'https://airbnb.com/rooms/artist-loft',
       icalUrl: '',
-      featured: true,
+      featured: false,
       active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'Smart TV', 'High Ceilings', 'Natural Light', 'Workspace'],
       photos: [
@@ -195,7 +195,7 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '2800',
       airbnbUrl: 'https://airbnb.com/rooms/garden-suite',
       icalUrl: '',
-      featured: true,
+      featured: false,
       active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Parking', 'Kitchen', 'Balcony', 'Smart TV', 'Washer'],
       photos: [
@@ -215,7 +215,7 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       pricePerNight: '2200',
       airbnbUrl: 'https://airbnb.com/rooms/metro-central',
       icalUrl: '',
-      featured: true,
+      featured: false,
       active: true,
       amenities: ['WiFi', 'Air Conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
       photos: [
