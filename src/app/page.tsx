@@ -50,11 +50,14 @@ export default function HomePage() {
 
     // Load properties
     const storedProperties = getStoredProperties();
+    console.log('Stored properties from localStorage:', storedProperties);
+
     const loadedProperties = propertyIds.map(id => {
       const stored = storedProperties[id];
       const defaultData = getDefaultPropertyData(id);
 
       if (stored) {
+        console.log(`Property ${id} using stored data:`, { featured: stored.featured, active: stored.active });
         return {
           id: stored.id,
           name: stored.name,
@@ -68,6 +71,7 @@ export default function HomePage() {
         };
       }
 
+      console.log(`Property ${id} using default data:`, { featured: defaultData.featured, active: defaultData.active });
       return {
         id: defaultData.id,
         name: defaultData.name,
@@ -81,12 +85,16 @@ export default function HomePage() {
       };
     });
 
+    console.log('All loaded properties:', loadedProperties);
+
     // Filter to show only active and featured properties
     let featured = loadedProperties.filter(p => p.active && p.featured);
+    console.log('Filtered featured properties:', featured);
 
     // If no featured properties, show first 3 active properties
     if (featured.length === 0) {
       featured = loadedProperties.filter(p => p.active).slice(0, 3);
+      console.log('No featured properties, using first 3 active:', featured);
     }
 
     setFeaturedProperties(featured);
