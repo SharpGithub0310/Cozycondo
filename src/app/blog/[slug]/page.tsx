@@ -173,8 +173,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       author: post.author || 'Unknown',
       category: post.category || 'General',
       tags: Array.isArray(post.tags) ? post.tags.slice(0, 10) : [], // Limit tags
-      // Remove images larger than 1MB for SSR safety
-      featured_image: imageSize > 0 && imageSize < 1024 * 1024 ? post.featured_image : '',
+      // Remove images larger than 50KB for SSR safety to prevent memory issues
+      featured_image: imageSize > 0 && imageSize < 50 * 1024 ? post.featured_image : '',
       published: post.published || false,
       published_at: post.published_at || null,
       created_at: post.created_at || new Date().toISOString(),
@@ -213,11 +213,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
 async function renderBlogPost(post: any, slug: string) {
   try {
-    // Get related posts (same category, excluding current)
+    // Get related posts (same category, excluding current) with timeout protection
     let relatedPosts: any[] = [];
     try {
       console.log(`[BlogPostPage] Loading related posts...`);
-      const allPosts = await getPublishedBlogPosts();
+      const allPosts = await Promise.race([
+        getPublishedBlogPosts(),
+        new Promise<any[]>((_, reject) =>
+          setTimeout(() => reject(new Error('Related posts timeout')), 3000)
+        )
+      ]);
       relatedPosts = allPosts
         .filter(p => p.category === post.category && p.id !== post.id)
         .slice(0, 2);
