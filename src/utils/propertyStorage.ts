@@ -60,6 +60,37 @@ export function getStoredProperty(id: string): PropertyData | null {
   return stored[id] || null;
 }
 
+// Update property status (featured/active) without full property data
+export function updatePropertyStatus(id: string, updates: { featured?: boolean; active?: boolean }): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const stored = getStoredProperties();
+    const existing = stored[id];
+
+    if (existing) {
+      // Update existing property
+      stored[id] = {
+        ...existing,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      // Create minimal property record with default data and status
+      const defaultData = getDefaultPropertyData(id);
+      stored[id] = {
+        ...defaultData,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  } catch (error) {
+    console.error('Error updating property status:', error);
+  }
+}
+
 // Clear all stored properties (useful for development)
 export function clearStoredProperties(): void {
   if (typeof window === 'undefined') return;

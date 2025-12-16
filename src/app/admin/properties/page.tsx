@@ -15,7 +15,7 @@ import {
   ExternalLink,
   GripVertical
 } from 'lucide-react';
-import { getStoredProperties, getDefaultPropertyData } from '@/utils/propertyStorage';
+import { getStoredProperties, getDefaultPropertyData, updatePropertyStatus } from '@/utils/propertyStorage';
 
 // Default properties list with IDs
 const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -94,15 +94,33 @@ export default function PropertiesPage() {
   );
 
   const toggleFeatured = (id: string) => {
-    setProperties(properties.map(p =>
+    const updatedProperties = properties.map(p =>
       p.id === id ? { ...p, featured: !p.featured } : p
-    ));
+    );
+
+    // Update local state
+    setProperties(updatedProperties);
+
+    // Save to localStorage
+    const property = updatedProperties.find(p => p.id === id);
+    if (property) {
+      updatePropertyStatus(id, { featured: property.featured });
+    }
   };
 
   const toggleActive = (id: string) => {
-    setProperties(properties.map(p =>
+    const updatedProperties = properties.map(p =>
       p.id === id ? { ...p, active: !p.active } : p
-    ));
+    );
+
+    // Update local state
+    setProperties(updatedProperties);
+
+    // Save to localStorage
+    const property = updatedProperties.find(p => p.id === id);
+    if (property) {
+      updatePropertyStatus(id, { active: property.active });
+    }
   };
 
   return (
