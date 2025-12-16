@@ -26,6 +26,7 @@ interface WebsiteSettings {
   // Highly Rated Section
   highlyRatedTitle: string;
   highlyRatedSubtitle: string;
+  highlyRatedImage: string;
 
   // Featured Properties Section
   featuredTitle: string;
@@ -93,6 +94,7 @@ function getDefaultSettings(): WebsiteSettings {
     // Highly Rated Section
     highlyRatedTitle: 'Highly Rated',
     highlyRatedSubtitle: 'by our guests',
+    highlyRatedImage: '',
 
     // Featured Properties Section
     featuredTitle: 'Featured Properties',

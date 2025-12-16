@@ -133,9 +133,21 @@ export default function Hero() {
             }`}
           >
             <div className="relative">
-              {/* Main image placeholder */}
+              {/* Main image */}
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
-                <div className="absolute inset-0 flex items-center justify-center">
+                {settings.highlyRatedImage ? (
+                  <img
+                    src={settings.highlyRatedImage}
+                    alt="Highly rated property"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`absolute inset-0 flex items-center justify-center ${settings.highlyRatedImage ? 'hidden' : ''}`}>
                   <div className="text-center text-white/80">
                     <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                       <span className="font-display text-4xl font-bold">CC</span>

@@ -34,6 +34,7 @@ export default function AdminSettings() {
     statsLocationLabel: 'City Center',
     highlyRatedTitle: 'Highly Rated',
     highlyRatedSubtitle: 'by our guests',
+    highlyRatedImage: '',
     featuredTitle: 'Featured Properties',
     featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
   });
@@ -73,6 +74,7 @@ export default function AdminSettings() {
         statsLocationLabel: settings.statsLocationLabel,
         highlyRatedTitle: settings.highlyRatedTitle,
         highlyRatedSubtitle: settings.highlyRatedSubtitle,
+        highlyRatedImage: settings.highlyRatedImage,
         featuredTitle: settings.featuredTitle,
         featuredSubtitle: settings.featuredSubtitle,
       });
@@ -363,6 +365,66 @@ export default function AdminSettings() {
                     placeholder="by our guests"
                   />
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="form-label">Card Background Image (Optional)</label>
+                <div className="border-2 border-dashed border-[#faf3e6] rounded-xl p-4 text-center hover:border-[#14b8a6] transition-colors mb-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const imageUrl = event.target?.result as string;
+                          const updatedSettings = {...settings, highlyRatedImage: imageUrl};
+                          setSettings(updatedSettings);
+                          saveSettings({ highlyRatedImage: imageUrl });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="hidden"
+                    id="highly-rated-img-upload"
+                  />
+                  <label htmlFor="highly-rated-img-upload" className="cursor-pointer">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-[#9a7d5e]" />
+                    <p className="text-[#5f4a38] text-sm font-medium">Upload Image</p>
+                    <p className="text-[#9a7d5e] text-xs">Replaces "CC" placeholder</p>
+                  </label>
+                </div>
+                <input
+                  type="url"
+                  value={settings.highlyRatedImage}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setSettings({...settings, highlyRatedImage: newValue});
+                    saveSettings({ highlyRatedImage: newValue });
+                  }}
+                  className="form-input text-sm"
+                  placeholder="Or enter image URL"
+                />
+                {settings.highlyRatedImage && (
+                  <div className="mt-2 relative group">
+                    <img
+                      src={settings.highlyRatedImage}
+                      alt="Highly rated card image preview"
+                      className="w-24 h-24 object-cover rounded border border-[#faf3e6]"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y5ZmFmYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2YjczODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBub3QgZm91bmQ8L3RleHQ+PC9zdmc+';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setSettings({...settings, highlyRatedImage: ''})}
+                      className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
