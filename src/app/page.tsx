@@ -113,6 +113,9 @@ export default function HomePage() {
             <p className="section-subtitle mx-auto">
               {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
             </p>
+            <div className="text-sm text-gray-600 mt-2">
+              DEBUG: Showing {featuredProperties.length} properties | Settings loaded: {settings ? 'Yes' : 'No'}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -177,6 +180,9 @@ export default function HomePage() {
                     ))}
                   </div>
 
+                  <div className="text-xs text-gray-500 mb-2">
+                    ID: {property.id} | Featured: {property.featured ? 'Yes' : 'No'} | Active: {property.active ? 'Yes' : 'No'}
+                  </div>
                   <Link
                     href={`/properties/${property.slug}`}
                     className="inline-flex items-center gap-1 text-[#0d9488] font-medium text-sm hover:gap-2 transition-all"
