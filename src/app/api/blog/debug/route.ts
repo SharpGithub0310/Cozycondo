@@ -52,10 +52,9 @@ export async function GET(request: NextRequest) {
         const queryStart = Date.now();
 
         // Test basic connection with a simple query
-        const { data: testData, error: testError } = await adminClient
+        const { data: testData, error: testError, count } = await adminClient
           .from('blog_posts')
-          .select('count(*)')
-          .single();
+          .select('*', { count: 'exact', head: true });
 
         response.performance.connectionTestTime = Date.now() - queryStart;
 
@@ -190,38 +189,41 @@ export async function GET(request: NextRequest) {
         response.errors.push(`Function test failed: ${functionError.message}`);
       }
 
-      // Test 3: Test blog page access
+      // Test 3: Test blog API endpoint instead of full page to avoid circular dependency
       try {
-        addLog('Testing blog page access...');
-        const pageTestStart = Date.now();
+        addLog('Testing blog API endpoint...');
+        const apiTestStart = Date.now();
 
-        const pageResponse = await fetch(`${request.nextUrl.origin}/blog/${checkSlug}`, {
-          method: 'HEAD', // Use HEAD to avoid loading full content
+        const apiResponse = await fetch(`${request.nextUrl.origin}/api/blog/slug/${checkSlug}`, {
+          method: 'GET',
           headers: {
             'User-Agent': 'Debug-API-Test'
           }
         });
 
-        response.performance.pageTestTime = Date.now() - pageTestStart;
+        response.performance.apiTestTime = Date.now() - apiTestStart;
 
-        response.pageTest = {
-          status: pageResponse.status,
-          ok: pageResponse.ok,
-          statusText: pageResponse.statusText,
+        response.apiTest = {
+          status: apiResponse.status,
+          ok: apiResponse.ok,
+          statusText: apiResponse.statusText,
           headers: {
-            contentType: pageResponse.headers.get('content-type'),
-            cacheControl: pageResponse.headers.get('cache-control'),
+            contentType: apiResponse.headers.get('content-type'),
           }
         };
 
-        addLog(`Page test: ${pageResponse.status} ${pageResponse.statusText}`);
+        if (apiResponse.ok) {
+          addLog(`API test: ${apiResponse.status} ${apiResponse.statusText} - Blog post accessible via API`);
+        } else {
+          addLog(`API test: ${apiResponse.status} ${apiResponse.statusText} - API endpoint failed`);
+        }
 
-      } catch (pageError: any) {
-        addLog('Page test failed', { error: pageError.message });
-        response.pageTest = {
-          error: pageError.message
+      } catch (apiError: any) {
+        addLog('API test failed', { error: apiError.message });
+        response.apiTest = {
+          error: apiError.message
         };
-        response.errors.push(`Page test failed: ${pageError.message}`);
+        response.errors.push(`API test failed: ${apiError.message}`);
       }
     }
 
@@ -234,7 +236,7 @@ export async function GET(request: NextRequest) {
       postsInSupabase: response.supabase.posts?.length || 0,
       slugFound: response.slugCheck?.found || false,
       functionWorking: response.functionTest?.success || false,
-      pageAccessible: response.pageTest?.ok || false,
+      apiAccessible: response.apiTest?.ok || false,
       totalErrors: response.errors.length,
       recommendation: response.errors.length > 0
         ? 'Check errors array for specific issues'

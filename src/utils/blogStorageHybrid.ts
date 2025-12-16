@@ -179,23 +179,70 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
     return null;
   }
 
-  // Server-side: First try Supabase with admin client
+  // Server-side: For production/edge environments, prefer API routes over direct Supabase
+  // This avoids potential edge runtime limitations with direct database connections
   if (isSupabaseConfigured()) {
     try {
+      // In production/edge, use API route to avoid edge runtime issues
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+        try {
+          console.log(`[getBlogPostBySlug SSR] Using API route for ${slug}`);
+          const apiUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://cozycondo.net'}/api/blog/slug/${slug}`;
+
+          const response = await Promise.race([
+            fetch(apiUrl),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('API timeout')), 8000))
+          ]) as Response;
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`[getBlogPostBySlug SSR] API success for ${slug}`);
+            return data;
+          } else {
+            console.warn(`[getBlogPostBySlug SSR] API failed ${response.status} for ${slug}`);
+          }
+        } catch (apiError) {
+          console.error(`[getBlogPostBySlug SSR] API error for ${slug}:`, apiError);
+        }
+      }
+
+      // Fallback: try direct admin client (for development or non-edge environments)
       const adminClient = createAdminClient();
       if (adminClient) {
-        const { data, error } = await adminClient
+        console.log(`[getBlogPostBySlug SSR] Using direct Supabase for ${slug}`);
+
+        // Add timeout protection for server-side Supabase operations
+        const queryPromise = adminClient
           .from('blog_posts')
           .select('*')
           .eq('slug', slug)
           .single();
 
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Supabase query timeout')), 5000)
+        );
+
+        let data, error;
+        try {
+          const result = await Promise.race([queryPromise, timeoutPromise]);
+          data = result.data;
+          error = result.error;
+        } catch (timeoutError) {
+          console.warn(`[getBlogPostBySlug SSR] Supabase timeout for ${slug}:`, timeoutError);
+          return null; // Return null on timeout instead of throwing
+        }
+
         if (!error && data) {
+          console.log(`[getBlogPostBySlug SSR] Direct Supabase success for ${slug}`);
           return data;
+        }
+
+        if (error && error.code !== 'PGRST116') {
+          console.warn(`[getBlogPostBySlug SSR] Supabase error for ${slug}:`, error);
         }
       }
     } catch (error) {
-      console.error('Supabase error on server:', error);
+      console.error(`[getBlogPostBySlug SSR] Critical error for ${slug}:`, error);
     }
   }
 
