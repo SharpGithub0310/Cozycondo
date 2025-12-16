@@ -224,7 +224,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
         let data, error;
         try {
-          const result = await Promise.race([queryPromise, timeoutPromise]);
+          const result = await Promise.race([queryPromise, timeoutPromise]) as any;
           data = result.data;
           error = result.error;
         } catch (timeoutError) {
