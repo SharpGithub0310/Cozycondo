@@ -15,7 +15,7 @@ import {
   clearStoredProperties,
   getStoredCalendarBlocks,
   saveCalendarBlocks as saveStoredCalendarBlocks,
-  addCalendarBlock,
+  addCalendarBlock as addStoredCalendarBlock,
   removeCalendarBlock,
   updatePropertyCalendarBlocks,
   getDefaultPropertyData
@@ -424,7 +424,7 @@ class DatabaseService {
 
         if (error) throw error;
       },
-      () => addCalendarBlock(block),
+      () => addStoredCalendarBlock(block),
       'Add calendar block'
     );
   }
@@ -646,7 +646,7 @@ export const {
   saveWebsiteSettings,
   getCalendarBlocks,
   saveCalendarBlocks: databaseService.saveCalendarBlocks,
-  addCalendarBlock,
+  addCalendarBlock: databaseService.addCalendarBlock,
   removeCalendarBlock,
   updatePropertyCalendarBlocks,
   migrateFromLocalStorage,
