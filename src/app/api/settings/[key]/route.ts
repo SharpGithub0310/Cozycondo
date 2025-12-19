@@ -9,7 +9,7 @@ import {
 // GET /api/settings/[key] - Get specific setting by key
 export async function GET(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
     // Apply rate limiting
@@ -35,7 +35,7 @@ export async function GET(
       );
     }
 
-    const { key } = params;
+    const { key } = await params;
 
     // Convert camelCase to snake_case if needed
     const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
@@ -101,7 +101,7 @@ export async function GET(
 // PUT /api/settings/[key] - Update specific setting (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
     // Apply rate limiting for admin operations
@@ -124,7 +124,7 @@ export async function PUT(
         return errorResponse('Database not configured', 503);
       }
 
-      const { key } = params;
+      const { key } = await params;
       const body = await req.json();
 
       if (body.value === undefined) {
@@ -199,7 +199,7 @@ export async function PUT(
 // DELETE /api/settings/[key] - Delete specific setting (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
     // Apply rate limiting for admin operations
@@ -222,7 +222,7 @@ export async function DELETE(
         return errorResponse('Database not configured', 503);
       }
 
-      const { key } = params;
+      const { key } = await params;
 
       // Convert camelCase to snake_case if needed
       const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
