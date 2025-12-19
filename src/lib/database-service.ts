@@ -10,7 +10,7 @@ import { supabase, isSupabaseConfigured } from './supabase';
 import {
   getStoredProperties,
   getStoredProperty,
-  saveProperty,
+  saveProperty as saveStoredProperty,
   updatePropertyStatus,
   clearStoredProperties,
   getStoredCalendarBlocks,
@@ -252,7 +252,7 @@ class DatabaseService {
 
         if (error) throw error;
       },
-      () => saveProperty(id, propertyData),
+      () => saveStoredProperty(id, propertyData),
       'Save property'
     );
   }
