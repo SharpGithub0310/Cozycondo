@@ -23,6 +23,10 @@ import {
   saveSettings,
   clearStoredSettings
 } from '../utils/settingsStorage';
+import {
+  getProductionFallbackProperties,
+  getProductionFallbackSettings
+} from './production-fallback-service';
 
 // =============================================
 // TYPESCRIPT INTERFACES
@@ -157,7 +161,16 @@ class EnhancedDatabaseService {
     return this.apiCall(
       '/api/properties',
       { method: 'GET' },
-      () => getStoredProperties()
+      () => {
+        // Try localStorage first
+        const stored = getStoredProperties();
+        if (Object.keys(stored).length > 0) {
+          return stored;
+        }
+        // Fall back to production defaults if localStorage is empty
+        console.log('Using production fallback properties');
+        return getProductionFallbackProperties() as Record<string, PropertyData>;
+      }
     );
   }
 
@@ -199,7 +212,17 @@ class EnhancedDatabaseService {
     return this.apiCall(
       '/api/settings',
       { method: 'GET' },
-      () => getStoredSettings()
+      () => {
+        // Try localStorage first
+        const stored = getStoredSettings();
+        // Check if we have actual settings (not just defaults)
+        if (stored.logo || stored.heroBackground) {
+          return stored;
+        }
+        // Fall back to production defaults if localStorage is empty
+        console.log('Using production fallback settings');
+        return getProductionFallbackSettings() as WebsiteSettings;
+      }
     );
   }
 

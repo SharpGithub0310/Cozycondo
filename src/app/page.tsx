@@ -53,8 +53,8 @@ export default function HomePage() {
           enhancedDatabaseService.getProperties()
         ]);
 
-        console.log('Loaded settings from database:', loadedSettings);
-        console.log('Loaded properties from database:', propertiesData);
+        // console.log('Loaded settings from database:', loadedSettings);
+        // console.log('Loaded properties from database:', propertiesData);
 
         setSettings(loadedSettings);
 
@@ -75,16 +75,16 @@ export default function HomePage() {
           photos: property.photos || property.images || []
         }));
 
-        console.log('Converted properties array:', propertiesArray);
+        // console.log('Converted properties array:', propertiesArray);
 
         // Filter to show only active and featured properties
         let featured = propertiesArray.filter(p => p.active && p.featured);
-        console.log('Filtered featured properties:', featured);
+        // console.log('Filtered featured properties:', featured);
 
         // If no featured properties, show first 3 active properties
         if (featured.length === 0) {
           featured = propertiesArray.filter(p => p.active).slice(0, 3);
-          console.log('No featured properties, using first 3 active:', featured);
+          // console.log('No featured properties, using first 3 active:', featured);
         }
 
         setFeaturedProperties(featured);
@@ -112,21 +112,7 @@ export default function HomePage() {
             <p className="section-subtitle text-fluid-lg mx-auto">
               {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
             </p>
-            {loading && (
-              <div className="text-sm text-gray-600 mt-2">
-                Loading properties and settings...
-              </div>
-            )}
-            {error && (
-              <div className="text-sm text-red-600 mt-2">
-                {error}
-              </div>
-            )}
-            {!loading && !error && (
-              <div className="text-sm text-gray-600 mt-2">
-                Showing {featuredProperties.length} featured properties | Data source: Database
-              </div>
-            )}
+            {/* Remove debug messages in production */}
           </div>
 
           {loading ? (
