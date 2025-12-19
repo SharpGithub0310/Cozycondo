@@ -17,7 +17,7 @@ import {
   saveCalendarBlocks as saveStoredCalendarBlocks,
   addCalendarBlock as addStoredCalendarBlock,
   removeCalendarBlock as removeStoredCalendarBlock,
-  updatePropertyCalendarBlocks,
+  updatePropertyCalendarBlocks as updateStoredPropertyCalendarBlocks,
   getDefaultPropertyData
 } from '../utils/propertyStorage';
 import {
@@ -474,7 +474,7 @@ class DatabaseService {
           if (insertError) throw insertError;
         }
       },
-      () => updatePropertyCalendarBlocks(propertyId, newBlocks),
+      () => updateStoredPropertyCalendarBlocks(propertyId, newBlocks),
       'Update property calendar blocks'
     );
   }
@@ -648,7 +648,7 @@ export const {
   saveCalendarBlocks: databaseService.saveCalendarBlocks,
   addCalendarBlock: databaseService.addCalendarBlock,
   removeCalendarBlock: databaseService.removeCalendarBlock,
-  updatePropertyCalendarBlocks,
+  updatePropertyCalendarBlocks: databaseService.updatePropertyCalendarBlocks,
   migrateFromLocalStorage,
   clearLocalStorageData,
   validateDataSync
