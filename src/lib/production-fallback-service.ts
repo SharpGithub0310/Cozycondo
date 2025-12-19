@@ -233,6 +233,15 @@ export const DEFAULT_SETTINGS = {
 
   featuredTitle: 'Featured Properties',
   featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
+
+  phone: '+63 917 123 4567',
+  email: 'info@cozycondo.net',
+  address: 'Iloilo City, Philippines',
+  website: 'https://cozycondo.net',
+  checkinTime: '3:00 PM',
+  checkoutTime: '11:00 AM',
+  timezone: 'Asia/Manila',
+  currency: 'PHP',
 };
 
 export function getProductionFallbackProperties() {

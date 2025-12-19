@@ -75,6 +75,14 @@ export interface WebsiteSettings {
   highlyRatedImage: string;
   featuredTitle: string;
   featuredSubtitle: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  website?: string;
+  checkinTime?: string;
+  checkoutTime?: string;
+  timezone?: string;
+  currency?: string;
   updatedAt?: string;
 }
 
