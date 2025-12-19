@@ -11,6 +11,7 @@ export interface APIResponse<T = any> {
     page?: number;
     limit?: number;
     timestamp?: string;
+    migrationId?: string;
   };
 }
 
