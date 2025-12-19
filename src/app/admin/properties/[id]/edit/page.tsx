@@ -87,6 +87,10 @@ export default function EditProperty() {
         amenities: property.amenities,
         photos: property.photos,
         featuredPhotoIndex: property.featuredPhotoIndex,
+        icalUrl: property.icalUrl || '',
+        featured: property.featured || false,
+        active: property.active !== false,
+        updatedAt: new Date().toISOString(),
       });
 
       // Simulate save delay
