@@ -153,7 +153,7 @@ class DatabaseService {
 
         const result: Record<string, PropertyData> = {};
 
-        properties?.forEach((prop) => {
+        properties?.forEach((prop: any) => {
           result[prop.slug] = {
             id: prop.slug,
             name: prop.name || '',
