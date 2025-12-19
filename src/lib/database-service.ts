@@ -11,7 +11,7 @@ import {
   getStoredProperties,
   getStoredProperty,
   saveProperty as saveStoredProperty,
-  updatePropertyStatus,
+  updatePropertyStatus as updateStoredPropertyStatus,
   clearStoredProperties,
   getStoredCalendarBlocks,
   saveCalendarBlocks,
@@ -267,7 +267,7 @@ class DatabaseService {
 
         if (error) throw error;
       },
-      () => updatePropertyStatus(id, updates),
+      () => updateStoredPropertyStatus(id, updates),
       'Update property status'
     );
   }
@@ -641,7 +641,7 @@ export const {
   getProperties,
   getProperty,
   saveProperty,
-  updatePropertyStatus,
+  updatePropertyStatus: databaseService.updatePropertyStatus,
   getWebsiteSettings,
   saveWebsiteSettings,
   getCalendarBlocks,
