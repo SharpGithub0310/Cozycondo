@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
 
           const dbSettingsObj: Record<string, string> = {};
           dbSettings?.forEach(s => {
-            const camelKey = s.setting_key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+            const camelKey = s.setting_key.replace(/_([a-z])/g, (_: string, letter: string) => letter.toUpperCase());
             dbSettingsObj[camelKey] = s.setting_value || '';
           });
 
