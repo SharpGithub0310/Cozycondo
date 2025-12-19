@@ -9,14 +9,14 @@
 import {
   getStoredProperties,
   getStoredProperty,
-  saveProperty,
-  updatePropertyStatus,
+  saveProperty as saveStoredProperty,
+  updatePropertyStatus as updateStoredPropertyStatus,
   clearStoredProperties,
   getStoredCalendarBlocks,
-  saveCalendarBlocks,
-  addCalendarBlock,
-  removeCalendarBlock,
-  updatePropertyCalendarBlocks
+  saveCalendarBlocks as saveStoredCalendarBlocks,
+  addCalendarBlock as addStoredCalendarBlock,
+  removeCalendarBlock as removeStoredCalendarBlock,
+  updatePropertyCalendarBlocks as updateStoredPropertyCalendarBlocks
 } from '../utils/propertyStorage';
 import {
   getStoredSettings,
@@ -189,7 +189,7 @@ class EnhancedDatabaseService {
         method: 'POST',
         body: JSON.stringify({ id, ...propertyData }),
       },
-      () => saveProperty(id, propertyData)
+      () => saveStoredProperty(id, propertyData)
     );
   }
 
@@ -200,7 +200,7 @@ class EnhancedDatabaseService {
         method: 'PUT',
         body: JSON.stringify({ id, updates }),
       },
-      () => updatePropertyStatus(id, updates)
+      () => updateStoredPropertyStatus(id, updates)
     );
   }
 
@@ -256,7 +256,7 @@ class EnhancedDatabaseService {
         method: 'POST',
         body: JSON.stringify(blocks),
       },
-      () => saveCalendarBlocks(blocks)
+      () => saveStoredCalendarBlocks(blocks)
     );
   }
 
@@ -267,7 +267,7 @@ class EnhancedDatabaseService {
         method: 'PUT',
         body: JSON.stringify({ action: 'add', blocks: block }),
       },
-      () => addCalendarBlock(block)
+      () => addStoredCalendarBlock(block)
     );
   }
 
@@ -278,7 +278,7 @@ class EnhancedDatabaseService {
         method: 'PUT',
         body: JSON.stringify({ action: 'remove', blockId }),
       },
-      () => removeCalendarBlock(blockId)
+      () => removeStoredCalendarBlock(blockId)
     );
   }
 
@@ -289,7 +289,7 @@ class EnhancedDatabaseService {
         method: 'PUT',
         body: JSON.stringify({ action: 'updateProperty', propertyId, blocks: newBlocks }),
       },
-      () => updatePropertyCalendarBlocks(propertyId, newBlocks)
+      () => updateStoredPropertyCalendarBlocks(propertyId, newBlocks)
     );
   }
 
@@ -346,7 +346,7 @@ class EnhancedDatabaseService {
 
     clearStoredProperties();
     clearStoredSettings();
-    saveCalendarBlocks([]);
+    saveStoredCalendarBlocks([]);
     console.log('Cleared all localStorage data');
   }
 
@@ -408,7 +408,7 @@ class EnhancedDatabaseService {
 
         // Save to localStorage
         for (const [id, property] of Object.entries(dbProperties)) {
-          saveProperty(id, property);
+          saveStoredProperty(id, property);
         }
 
         console.log(`Synced ${Object.keys(dbProperties).length} properties from database`);
@@ -440,7 +440,7 @@ class EnhancedDatabaseService {
           { method: 'GET' }
         );
 
-        saveCalendarBlocks(dbBlocks);
+        saveStoredCalendarBlocks(dbBlocks);
         console.log(`Synced ${dbBlocks.length} calendar blocks from database`);
       } catch (error) {
         const errorMsg = `Failed to sync calendar blocks: ${error}`;

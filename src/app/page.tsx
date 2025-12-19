@@ -4,7 +4,7 @@ import Hero from '@/components/Hero';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData, WebsiteSettings } from '@/lib/enhanced-database-service';
 
 // Features section data
@@ -49,8 +49,8 @@ export default function HomePage() {
 
         // Load settings and properties from database
         const [loadedSettings, propertiesData] = await Promise.all([
-          enhancedDatabaseService.getWebsiteSettings(),
-          enhancedDatabaseService.getProperties()
+          postMigrationDatabaseService.getWebsiteSettings(),
+          postMigrationDatabaseService.getProperties()
         ]);
 
         // console.log('Loaded settings from database:', loadedSettings);

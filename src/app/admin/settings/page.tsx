@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2 } from 'lucide-react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { WebsiteSettings } from '@/lib/enhanced-database-service';
 
 export default function AdminSettings() {
@@ -39,7 +39,7 @@ export default function AdminSettings() {
         setLoading(true);
         setError(null);
 
-        const dbSettings = await enhancedDatabaseService.getWebsiteSettings();
+        const dbSettings = await postMigrationDatabaseService.getWebsiteSettings();
         console.log('Admin Settings: Loaded from database:', dbSettings);
 
         setSettings(dbSettings);
@@ -64,7 +64,7 @@ export default function AdminSettings() {
 
     try {
       // Save to database
-      await enhancedDatabaseService.saveWebsiteSettings(settings);
+      await postMigrationDatabaseService.saveWebsiteSettings(settings);
       setSaveMessage('Settings saved successfully! Changes will appear on the website immediately.');
       console.log('Admin Settings: Successfully saved to database');
       setTimeout(() => setSaveMessage(''), 3000);
@@ -80,7 +80,7 @@ export default function AdminSettings() {
   const saveIndividualSetting = async (key: keyof WebsiteSettings, value: string) => {
     try {
       const updatedSettings = { ...settings, [key]: value };
-      await enhancedDatabaseService.saveWebsiteSettings({ [key]: value });
+      await postMigrationDatabaseService.saveWebsiteSettings({ [key]: value });
       setSettings(updatedSettings);
       console.log(`Admin Settings: Saved ${key} immediately`);
     } catch (error) {

@@ -15,7 +15,7 @@ import {
   ExternalLink,
   GripVertical
 } from 'lucide-react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/enhanced-database-service';
 
 // Default properties list with IDs
@@ -34,7 +34,7 @@ export default function PropertiesPage() {
       setError(null);
 
       // Load properties from database
-      const dbProperties = await enhancedDatabaseService.getProperties();
+      const dbProperties = await postMigrationDatabaseService.getProperties();
       console.log('Admin: Loaded properties from database:', dbProperties);
 
       // Convert to admin format
@@ -93,7 +93,7 @@ export default function PropertiesPage() {
 
     try {
       // Update in database first
-      await enhancedDatabaseService.updatePropertyStatus(id, { featured: newFeaturedStatus });
+      await postMigrationDatabaseService.updatePropertyStatus(id, { featured: newFeaturedStatus });
 
       // Update local state on success
       setProperties(prev => prev.map(p =>
@@ -115,7 +115,7 @@ export default function PropertiesPage() {
 
     try {
       // Update in database first
-      await enhancedDatabaseService.updatePropertyStatus(id, { active: newActiveStatus });
+      await postMigrationDatabaseService.updatePropertyStatus(id, { active: newActiveStatus });
 
       // Update local state on success
       setProperties(prev => prev.map(p =>
