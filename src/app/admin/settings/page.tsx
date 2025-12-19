@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import type { WebsiteSettings } from '@/lib/enhanced-database-service';
+import type { WebsiteSettings } from '@/lib/types';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<WebsiteSettings>({

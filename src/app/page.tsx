@@ -5,7 +5,8 @@ import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, Ar
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import type { PropertyData, WebsiteSettings } from '@/lib/enhanced-database-service';
+import type { PropertyData } from '@/lib/types';
+import type { WebsiteSettings } from '@/lib/types';
 
 // Features section data
 const features = [

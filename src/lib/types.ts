@@ -18,6 +18,28 @@ export interface Property {
   updated_at: string;
 }
 
+// Legacy PropertyData interface for backwards compatibility
+export interface PropertyData {
+  id: string;
+  name: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
+  maxGuests: number;
+  size: string;
+  description: string;
+  location: string;
+  pricePerNight: string;
+  airbnbUrl: string;
+  icalUrl: string;
+  featured: boolean;
+  active: boolean;
+  amenities: string[];
+  photos: string[];
+  featuredPhotoIndex: number;
+  updatedAt?: string;
+}
+
 export interface PropertyPhoto {
   id: string;
   property_id: string;
@@ -74,6 +96,40 @@ export interface SiteSettings {
   about_content: string;
   created_at: string;
   updated_at: string;
+}
+
+// Website Settings interface
+export interface WebsiteSettings {
+  logo: string;
+  footerLogo: string;
+  heroBackground: string;
+  aboutImage: string;
+  contactImage: string;
+  favicon: string;
+  heroBadgeText: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroDescription: string;
+  statsUnits: string;
+  statsUnitsLabel: string;
+  statsRating: string;
+  statsRatingLabel: string;
+  statsLocation: string;
+  statsLocationLabel: string;
+  highlyRatedTitle: string;
+  highlyRatedSubtitle: string;
+  highlyRatedImage: string;
+  featuredTitle: string;
+  featuredSubtitle: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  website?: string;
+  checkinTime?: string;
+  checkoutTime?: string;
+  timezone?: string;
+  currency?: string;
+  updatedAt?: string;
 }
 
 // Amenity icon mapping

@@ -7,6 +7,7 @@
  */
 
 import { supabase, isSupabaseConfigured } from './supabase';
+import { PropertyData, WebsiteSettings } from './types';
 import {
   getStoredProperties,
   getStoredProperty,
@@ -30,51 +31,6 @@ import {
 // TYPESCRIPT INTERFACES
 // =============================================
 
-export interface PropertyData {
-  id: string;
-  name: string;
-  type: string;
-  bedrooms: number;
-  bathrooms: number;
-  maxGuests: number;
-  size: string;
-  description: string;
-  location: string;
-  pricePerNight: string;
-  airbnbUrl: string;
-  icalUrl?: string;
-  featured?: boolean;
-  active?: boolean;
-  amenities: string[];
-  photos: string[];
-  featuredPhotoIndex?: number;
-  updatedAt?: string;
-}
-
-export interface WebsiteSettings {
-  logo: string;
-  footerLogo: string;
-  heroBackground: string;
-  aboutImage: string;
-  contactImage: string;
-  favicon: string;
-  heroBadgeText: string;
-  heroTitle: string;
-  heroSubtitle: string;
-  heroDescription: string;
-  statsUnits: string;
-  statsUnitsLabel: string;
-  statsRating: string;
-  statsRatingLabel: string;
-  statsLocation: string;
-  statsLocationLabel: string;
-  highlyRatedTitle: string;
-  highlyRatedSubtitle: string;
-  highlyRatedImage: string;
-  featuredTitle: string;
-  featuredSubtitle: string;
-  updatedAt?: string;
-}
 
 export interface CalendarBlock {
   id: string;
@@ -286,10 +242,10 @@ class DatabaseService {
         if (error) throw error;
 
         const settingsObj: any = {};
-        settings?.forEach((setting) => {
+        settings?.forEach((setting: any) => {
           // Convert snake_case to camelCase
           const camelKey = setting.setting_key
-            .replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
+            .replace(/_([a-z])/g, (match: string, letter: string) => letter.toUpperCase());
           settingsObj[camelKey] = setting.setting_value || '';
         });
 
@@ -361,7 +317,7 @@ class DatabaseService {
 
         if (error) throw error;
 
-        return (blocks || []).map((block) => ({
+        return (blocks || []).map((block: any) => ({
           id: block.id,
           propertyId: block.property_id,
           startDate: block.start_date,
@@ -641,14 +597,14 @@ export const {
   getProperties,
   getProperty,
   saveProperty,
-  updatePropertyStatus: databaseService.updatePropertyStatus,
+  updatePropertyStatus,
   getWebsiteSettings,
   saveWebsiteSettings,
   getCalendarBlocks,
-  saveCalendarBlocks: databaseService.saveCalendarBlocks,
-  addCalendarBlock: databaseService.addCalendarBlock,
-  removeCalendarBlock: databaseService.removeCalendarBlock,
-  updatePropertyCalendarBlocks: databaseService.updatePropertyCalendarBlocks,
+  saveCalendarBlocks,
+  addCalendarBlock,
+  removeCalendarBlock,
+  updatePropertyCalendarBlocks,
   migrateFromLocalStorage,
   clearLocalStorageData,
   validateDataSync

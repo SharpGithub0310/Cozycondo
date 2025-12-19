@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, MapPin, Star, Home } from 'lucide-react';
 import Link from 'next/link';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import type { WebsiteSettings } from '@/lib/enhanced-database-service';
+import type { WebsiteSettings } from '@/lib/types';
 
 // Stats will be loaded from settings
 

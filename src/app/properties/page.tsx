@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { MapPin, ArrowRight, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
-import type { PropertyData } from '@/lib/enhanced-database-service';
+import type { PropertyData } from '@/lib/types';
 
 // export const metadata: Metadata = {
 //   title: 'Properties',

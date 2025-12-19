@@ -16,7 +16,7 @@ import {
   GripVertical
 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import type { PropertyData } from '@/lib/enhanced-database-service';
+import type { PropertyData } from '@/lib/types';
 
 // Default properties list with IDs
 const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];

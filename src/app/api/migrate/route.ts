@@ -1,26 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
-
-interface PropertyData {
-  id: string;
-  name: string;
-  type: string;
-  bedrooms: number;
-  bathrooms: number;
-  maxGuests: number;
-  size: string;
-  description: string;
-  location: string;
-  pricePerNight: string;
-  airbnbUrl: string;
-  icalUrl?: string;
-  featured?: boolean;
-  active?: boolean;
-  amenities: string[];
-  photos: string[];
-  featuredPhotoIndex?: number;
-  updatedAt?: string;
-}
+import { PropertyData } from '@/lib/types';
 
 interface WebsiteSettings {
   logo: string;

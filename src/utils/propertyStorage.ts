@@ -1,26 +1,7 @@
 // Simple storage utility for managing property data with photos
 // In production, this would be replaced with API calls to your backend/Supabase
 
-interface PropertyData {
-  id: string;
-  name: string;
-  type: string;
-  bedrooms: number;
-  bathrooms: number;
-  maxGuests: number;
-  size: string;
-  description: string;
-  location: string;
-  pricePerNight: string;
-  airbnbUrl: string;
-  icalUrl?: string;
-  featured?: boolean;
-  active?: boolean;
-  amenities: string[];
-  photos: string[];
-  featuredPhotoIndex?: number;
-  updatedAt?: string;
-}
+import { PropertyData } from '@/lib/types';
 
 const STORAGE_KEY = 'cozy_condo_properties';
 
@@ -181,6 +162,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
         'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
         'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
       ],
+      featuredPhotoIndex: 0,
+      updatedAt: new Date().toISOString(),
     },
     '2': {
       id: '2',
@@ -201,6 +184,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       photos: [
         'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
       ],
+      featuredPhotoIndex: 0,
+      updatedAt: new Date().toISOString(),
     },
     '7': {
       id: '7',
@@ -221,6 +206,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       photos: [
         'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
       ],
+      featuredPhotoIndex: 0,
+      updatedAt: new Date().toISOString(),
     },
     '8': {
       id: '8',
@@ -241,6 +228,8 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
       photos: [
         'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&h=300&fit=crop',
       ],
+      featuredPhotoIndex: 0,
+      updatedAt: new Date().toISOString(),
     },
   };
 
@@ -263,5 +252,6 @@ export const getDefaultPropertyData = (id: string): PropertyData => {
     photos: [
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
     ],
+    featuredPhotoIndex: 0,
   };
 };

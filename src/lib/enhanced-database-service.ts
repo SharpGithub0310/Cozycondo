@@ -6,6 +6,7 @@
  * and provides fallbacks for offline functionality.
  */
 
+import { PropertyData, WebsiteSettings } from './types';
 import {
   getStoredProperties,
   getStoredProperty,
@@ -32,59 +33,7 @@ import {
 // TYPESCRIPT INTERFACES
 // =============================================
 
-export interface PropertyData {
-  id: string;
-  name: string;
-  type: string;
-  bedrooms: number;
-  bathrooms: number;
-  maxGuests: number;
-  size: string;
-  description: string;
-  location: string;
-  pricePerNight: string;
-  airbnbUrl: string;
-  icalUrl?: string;
-  featured?: boolean;
-  active?: boolean;
-  amenities: string[];
-  photos: string[];
-  featuredPhotoIndex?: number;
-  updatedAt?: string;
-}
 
-export interface WebsiteSettings {
-  logo: string;
-  footerLogo: string;
-  heroBackground: string;
-  aboutImage: string;
-  contactImage: string;
-  favicon: string;
-  heroBadgeText: string;
-  heroTitle: string;
-  heroSubtitle: string;
-  heroDescription: string;
-  statsUnits: string;
-  statsUnitsLabel: string;
-  statsRating: string;
-  statsRatingLabel: string;
-  statsLocation: string;
-  statsLocationLabel: string;
-  highlyRatedTitle: string;
-  highlyRatedSubtitle: string;
-  highlyRatedImage: string;
-  featuredTitle: string;
-  featuredSubtitle: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  website?: string;
-  checkinTime?: string;
-  checkoutTime?: string;
-  timezone?: string;
-  currency?: string;
-  updatedAt?: string;
-}
 
 export interface CalendarBlock {
   id: string;
@@ -195,7 +144,7 @@ class EnhancedDatabaseService {
       '/api/properties',
       {
         method: 'POST',
-        body: JSON.stringify({ id, ...propertyData }),
+        body: JSON.stringify({ ...propertyData, id }),
       },
       () => saveStoredProperty(id, propertyData)
     );
