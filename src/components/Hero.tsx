@@ -23,7 +23,7 @@ export default function Hero() {
         setLoading(true);
         setError(null);
 
-        const loadedSettings = await enhancedDatabaseService.getWebsiteSettings();
+        const loadedSettings = await postMigrationDatabaseService.getWebsiteSettings();
         // console.log('Hero: Loaded settings from database:', loadedSettings);
 
         setSettings(loadedSettings);
