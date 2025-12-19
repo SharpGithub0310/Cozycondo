@@ -9,7 +9,7 @@ import {
 // PATCH /api/properties/[id]/status - Update property featured/active status (admin only)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Apply rate limiting for admin operations
@@ -32,7 +32,7 @@ export async function PATCH(
         return errorResponse('Database not configured', 503);
       }
 
-      const { id } = params;
+      const { id } = await params;
       const body = await req.json();
 
       // Validate status update data
@@ -109,7 +109,7 @@ export async function PATCH(
 // GET /api/properties/[id]/status - Get property status (public)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Apply rate limiting
@@ -135,7 +135,7 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Query property status
     const { data: property, error } = await adminClient
