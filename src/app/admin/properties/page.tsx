@@ -15,7 +15,8 @@ import {
   ExternalLink,
   GripVertical
 } from 'lucide-react';
-import { getStoredProperties, getDefaultPropertyData, updatePropertyStatus } from '@/utils/propertyStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import type { PropertyData } from '@/lib/enhanced-database-service';
 
 // Default properties list with IDs
 const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -24,35 +25,35 @@ export default function PropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadProperties = () => {
-    // Load properties from storage or use defaults
-    const storedProperties = getStoredProperties();
-    const loadedProperties = propertyIds.map(id => {
-      const stored = storedProperties[id];
-      const defaultData = getDefaultPropertyData(id);
-      if (stored) {
-        // Use stored data with admin-specific fields
-        return {
-          id: stored.id,
-          name: stored.name,
-          location: stored.location,
-          featured: stored.featured ?? false,
-          active: stored.active ?? true,
-          airbnbUrl: stored.airbnbUrl || ''
-        };
-      }
-      // Use default data
-      return {
-        id: defaultData.id,
-        name: defaultData.name,
-        location: defaultData.location,
-        featured: false,
-        active: true,
-        airbnbUrl: defaultData.airbnbUrl || ''
-      };
-    });
-    setProperties(loadedProperties);
+  const loadProperties = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Load properties from database
+      const dbProperties = await enhancedDatabaseService.getProperties();
+      console.log('Admin: Loaded properties from database:', dbProperties);
+
+      // Convert to admin format
+      const propertiesArray = Object.values(dbProperties).map((property: any) => ({
+        id: property.id,
+        name: property.name || property.title,
+        location: property.location || '',
+        featured: property.featured ?? false,
+        active: property.active ?? true,
+        airbnbUrl: property.airbnbUrl || ''
+      }));
+
+      setProperties(propertiesArray);
+    } catch (err) {
+      console.error('Admin: Error loading properties:', err);
+      setError('Failed to load properties. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -73,18 +74,9 @@ export default function PropertiesPage() {
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Also reload on storage change (for cross-tab updates)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'cozy_condo_properties') {
-        loadProperties();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
     return () => {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
@@ -93,33 +85,47 @@ export default function PropertiesPage() {
     p.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const toggleFeatured = (id: string) => {
-    const updatedProperties = properties.map(p =>
-      p.id === id ? { ...p, featured: !p.featured } : p
-    );
+  const toggleFeatured = async (id: string) => {
+    const property = properties.find(p => p.id === id);
+    if (!property) return;
 
-    // Update local state
-    setProperties(updatedProperties);
+    const newFeaturedStatus = !property.featured;
 
-    // Save to localStorage
-    const property = updatedProperties.find(p => p.id === id);
-    if (property) {
-      updatePropertyStatus(id, { featured: property.featured });
+    try {
+      // Update in database first
+      await enhancedDatabaseService.updatePropertyStatus(id, { featured: newFeaturedStatus });
+
+      // Update local state on success
+      setProperties(prev => prev.map(p =>
+        p.id === id ? { ...p, featured: newFeaturedStatus } : p
+      ));
+
+      console.log(`Admin: Updated property ${id} featured status to ${newFeaturedStatus}`);
+    } catch (err) {
+      console.error('Admin: Error updating featured status:', err);
+      setError('Failed to update property status. Please try again.');
     }
   };
 
-  const toggleActive = (id: string) => {
-    const updatedProperties = properties.map(p =>
-      p.id === id ? { ...p, active: !p.active } : p
-    );
+  const toggleActive = async (id: string) => {
+    const property = properties.find(p => p.id === id);
+    if (!property) return;
 
-    // Update local state
-    setProperties(updatedProperties);
+    const newActiveStatus = !property.active;
 
-    // Save to localStorage
-    const property = updatedProperties.find(p => p.id === id);
-    if (property) {
-      updatePropertyStatus(id, { active: property.active });
+    try {
+      // Update in database first
+      await enhancedDatabaseService.updatePropertyStatus(id, { active: newActiveStatus });
+
+      // Update local state on success
+      setProperties(prev => prev.map(p =>
+        p.id === id ? { ...p, active: newActiveStatus } : p
+      ));
+
+      console.log(`Admin: Updated property ${id} active status to ${newActiveStatus}`);
+    } catch (err) {
+      console.error('Admin: Error updating active status:', err);
+      setError('Failed to update property status. Please try again.');
     }
   };
 
@@ -137,28 +143,45 @@ export default function PropertiesPage() {
         </Link>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="admin-card bg-red-50 border-red-200">
+          <div className="flex items-center justify-between">
+            <p className="text-red-600">{error}</p>
+            <button
+              onClick={loadProperties}
+              className="btn-primary text-sm"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Total Properties</p>
-          <p className="font-display text-2xl font-semibold text-[#5f4a38]">{properties.length}</p>
+          <p className="font-display text-2xl font-semibold text-[#5f4a38]">
+            {loading ? '...' : properties.length}
+          </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Active</p>
           <p className="font-display text-2xl font-semibold text-[#14b8a6]">
-            {properties.filter(p => p.active).length}
+            {loading ? '...' : properties.filter(p => p.active).length}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Featured</p>
           <p className="font-display text-2xl font-semibold text-[#fb923c]">
-            {properties.filter(p => p.featured).length}
+            {loading ? '...' : properties.filter(p => p.featured).length}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">With Airbnb Link</p>
           <p className="font-display text-2xl font-semibold text-[#FF5A5F]">
-            {properties.filter(p => p.airbnbUrl).length}
+            {loading ? '...' : properties.filter(p => p.airbnbUrl).length}
           </p>
         </div>
       </div>
@@ -194,7 +217,42 @@ export default function PropertiesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#faf3e6]">
-              {filteredProperties.map((property) => (
+              {loading ? (
+                // Loading skeleton rows
+                Array.from({ length: 3 }, (_, i) => (
+                  <tr key={`loading-${i}`} className="animate-pulse">
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-gray-200"></div>
+                        <div>
+                          <div className="h-4 bg-gray-200 rounded w-32 mb-1"></div>
+                          <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="w-8 h-8 bg-gray-200 rounded-lg mx-auto"></div>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="h-6 bg-gray-200 rounded-full w-16 mx-auto"></div>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="h-6 bg-gray-200 rounded-full w-16 mx-auto"></div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                filteredProperties.map((property) => (
                 <tr key={property.id} className="hover:bg-[#fefdfb] transition-colors">
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
@@ -283,12 +341,13 @@ export default function PropertiesPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {filteredProperties.length === 0 && (
+        {!loading && filteredProperties.length === 0 && (
           <div className="text-center py-12">
             <p className="text-[#9a7d5e]">No properties found</p>
           </div>

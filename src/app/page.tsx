@@ -4,8 +4,8 @@ import Hero from '@/components/Hero';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getStoredSettings } from '@/utils/settingsStorage';
-import { getStoredProperties, getDefaultPropertyData } from '@/utils/propertyStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import type { PropertyData, WebsiteSettings } from '@/lib/enhanced-database-service';
 
 // Features section data
 const features = [
@@ -37,67 +37,66 @@ const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 export default function HomePage() {
   const [aboutImage, setAboutImage] = useState('');
   const [featuredProperties, setFeaturedProperties] = useState<any[]>([]);
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<WebsiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load settings
-    const loadedSettings = getStoredSettings();
-    setSettings(loadedSettings);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    if (loadedSettings.aboutImage) {
-      setAboutImage(loadedSettings.aboutImage);
-    }
+        // Load settings and properties from database
+        const [loadedSettings, propertiesData] = await Promise.all([
+          enhancedDatabaseService.getWebsiteSettings(),
+          enhancedDatabaseService.getProperties()
+        ]);
 
-    // Load properties
-    const storedProperties = getStoredProperties();
-    console.log('Stored properties from localStorage:', storedProperties);
+        console.log('Loaded settings from database:', loadedSettings);
+        console.log('Loaded properties from database:', propertiesData);
 
-    const loadedProperties = propertyIds.map(id => {
-      const stored = storedProperties[id];
-      const defaultData = getDefaultPropertyData(id);
+        setSettings(loadedSettings);
 
-      if (stored) {
-        console.log(`Property ${id} using stored data:`, { featured: stored.featured, active: stored.active });
-        return {
-          id: stored.id,
-          name: stored.name,
-          slug: stored.name.toLowerCase().replace(/\s+/g, '-'),
-          location: stored.location,
-          short_description: stored.description,
-          amenities: stored.amenities,
-          featured: stored.featured ?? false, // Default to false if undefined
-          active: stored.active ?? true,      // Default to true if undefined
-          photos: stored.photos || []
-        };
+        if (loadedSettings.aboutImage) {
+          setAboutImage(loadedSettings.aboutImage);
+        }
+
+        // Convert properties object to array format for processing
+        const propertiesArray = Object.values(propertiesData).map((property: any) => ({
+          id: property.id,
+          name: property.name || property.title,
+          slug: property.slug || property.name?.toLowerCase().replace(/\s+/g, '-') || property.id,
+          location: property.location || '',
+          short_description: property.description || '',
+          amenities: property.amenities || [],
+          featured: property.featured ?? false,
+          active: property.active ?? true,
+          photos: property.photos || property.images || []
+        }));
+
+        console.log('Converted properties array:', propertiesArray);
+
+        // Filter to show only active and featured properties
+        let featured = propertiesArray.filter(p => p.active && p.featured);
+        console.log('Filtered featured properties:', featured);
+
+        // If no featured properties, show first 3 active properties
+        if (featured.length === 0) {
+          featured = propertiesArray.filter(p => p.active).slice(0, 3);
+          console.log('No featured properties, using first 3 active:', featured);
+        }
+
+        setFeaturedProperties(featured);
+      } catch (err) {
+        console.error('Error loading data:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      console.log(`Property ${id} using default data:`, { featured: defaultData.featured, active: defaultData.active });
-      return {
-        id: defaultData.id,
-        name: defaultData.name,
-        slug: defaultData.name.toLowerCase().replace(/\s+/g, '-'),
-        location: defaultData.location,
-        short_description: defaultData.description,
-        amenities: defaultData.amenities,
-        featured: defaultData.featured,
-        active: defaultData.active,
-        photos: defaultData.photos || []
-      };
-    });
-
-    console.log('All loaded properties:', loadedProperties);
-
-    // Filter to show only active and featured properties
-    let featured = loadedProperties.filter(p => p.active && p.featured);
-    console.log('Filtered featured properties:', featured);
-
-    // If no featured properties, show first 3 active properties
-    if (featured.length === 0) {
-      featured = loadedProperties.filter(p => p.active).slice(0, 3);
-      console.log('No featured properties, using first 3 active:', featured);
-    }
-
-    setFeaturedProperties(featured);
+    loadData();
   }, []);
 
   return (
@@ -113,13 +112,53 @@ export default function HomePage() {
             <p className="section-subtitle text-fluid-lg mx-auto">
               {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
             </p>
-            <div className="text-sm text-gray-600 mt-2">
-              DEBUG: Showing {featuredProperties.length} properties | Settings loaded: {settings ? 'Yes' : 'No'}
-            </div>
+            {loading && (
+              <div className="text-sm text-gray-600 mt-2">
+                Loading properties and settings...
+              </div>
+            )}
+            {error && (
+              <div className="text-sm text-red-600 mt-2">
+                {error}
+              </div>
+            )}
+            {!loading && !error && (
+              <div className="text-sm text-gray-600 mt-2">
+                Showing {featuredProperties.length} featured properties | Data source: Database
+              </div>
+            )}
           </div>
 
-          <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-3">
-            {featuredProperties.map((property, index) => (
+          {loading ? (
+            <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="card animate-pulse">
+                  <div className="card-image bg-gray-200"></div>
+                  <div className="card-content">
+                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-16 bg-gray-200 rounded mb-4"></div>
+                    <div className="flex gap-2">
+                      <div className="h-6 w-16 bg-gray-200 rounded"></div>
+                      <div className="h-6 w-20 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-600 py-8">
+              <p>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 btn-primary"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-3">
+              {featuredProperties.map((property, index) => (
               <div
                 key={property.id}
                 className="card group animate-fade-in"
@@ -192,8 +231,9 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-fluid-xl">
             <Link href="/properties" className="btn-primary inline-flex items-center gap-2 touch-target">

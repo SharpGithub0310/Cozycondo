@@ -24,7 +24,7 @@ import {
   X,
   ZoomIn
 } from 'lucide-react';
-import { getStoredProperty } from '@/utils/propertyStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 
 // Amenity icons mapping
 const amenityIcons: Record<string, React.ReactNode> = {
@@ -65,26 +65,27 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
   };
 
   useEffect(() => {
-    // Check if we have stored property data with photos
-    const propertyId = property.id;
-    const storedProperty = getStoredProperty(propertyId);
+    // Load property data from database
+    const loadProperty = async () => {
+      try {
+        const propertyId = property.id;
+        const dbProperty = await enhancedDatabaseService.getProperty(propertyId);
 
-    if (storedProperty) {
-      // Update property data with stored information
-      setProperty({
-        ...property,
-        ...storedProperty,
-        // Keep the original structure but update with stored data
-        name: storedProperty.name,
-        description: storedProperty.description,
-        location: storedProperty.location,
-        amenities: storedProperty.amenities,
-      });
+        if (dbProperty) {
+          // Update property data with database information
+          setProperty({
+            ...property,
+            ...dbProperty,
+            name: dbProperty.name,
+            description: dbProperty.description,
+            location: dbProperty.location,
+            amenities: dbProperty.amenities,
+          });
 
-      // Set photos from stored data, reordering to put featured photo first
-      if (storedProperty.photos && storedProperty.photos.length > 0) {
-        const photos = [...storedProperty.photos];
-        const featuredIndex = storedProperty.featuredPhotoIndex || 0;
+          // Set photos from database data, reordering to put featured photo first
+          if (dbProperty.photos && dbProperty.photos.length > 0) {
+            const photos = [...dbProperty.photos];
+            const featuredIndex = dbProperty.featuredPhotoIndex || 0;
 
         // Move featured photo to first position if it's not already there
         if (featuredIndex > 0 && featuredIndex < photos.length) {
@@ -94,20 +95,31 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
         }
 
         setDisplayPhotos(photos);
-      } else {
-        // Use default photos if no stored photos
+          } else {
+            // Use default photos if no database photos
+            setDisplayPhotos([
+              'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
+              'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
+            ]);
+          }
+        } else {
+          // Use default photos if no property data at all
+          setDisplayPhotos([
+            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
+          ]);
+        }
+      } catch (error) {
+        console.error('Error loading property from database:', error);
+        // Fallback to default photos
         setDisplayPhotos([
           'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
           'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
         ]);
       }
-    } else {
-      // Use default photos if no stored data at all
-      setDisplayPhotos([
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-      ]);
-    }
+    };
+
+    loadProperty();
   }, [property.id, slug]);
 
   return (

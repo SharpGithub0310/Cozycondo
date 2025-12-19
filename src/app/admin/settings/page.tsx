@@ -2,26 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2 } from 'lucide-react';
-import { getStoredSettings, saveSettings } from '@/utils/settingsStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import type { WebsiteSettings } from '@/lib/enhanced-database-service';
 
 export default function AdminSettings() {
-  const [settings, setSettings] = useState({
-    phone: '+63 977 887 0724',
-    email: 'admin@cozycondo.net',
-    address: 'Iloilo City, Philippines',
-    website: 'https://cozycondo.net',
-    timezone: 'Asia/Manila',
-    checkinTime: '15:00',
-    checkoutTime: '11:00',
-    currency: 'PHP',
+  const [settings, setSettings] = useState<WebsiteSettings>({
     logo: '',
+    footerLogo: '',
     heroBackground: '',
     aboutImage: '',
     contactImage: '',
-    footerLogo: '',
     favicon: '',
-
-    // Homepage Content
     heroBadgeText: '',
     heroTitle: 'Your Cozy Escape in Iloilo City',
     heroSubtitle: '',
@@ -37,12 +28,30 @@ export default function AdminSettings() {
     highlyRatedImage: '',
     featuredTitle: 'Featured Properties',
     featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
+    updatedAt: ''
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load stored settings on component mount
-    const storedSettings = getStoredSettings();
-    setSettings(prev => ({ ...prev, ...storedSettings }));
+    const loadSettings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const dbSettings = await enhancedDatabaseService.getWebsiteSettings();
+        console.log('Admin Settings: Loaded from database:', dbSettings);
+
+        setSettings(dbSettings);
+      } catch (err) {
+        console.error('Admin Settings: Error loading settings:', err);
+        setError('Failed to load settings. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSettings();
   }, []);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -54,36 +63,29 @@ export default function AdminSettings() {
     setSaveMessage('');
 
     try {
-      // Save to localStorage
-      saveSettings({
-        logo: settings.logo,
-        footerLogo: settings.footerLogo,
-        heroBackground: settings.heroBackground,
-        aboutImage: settings.aboutImage,
-        contactImage: settings.contactImage,
-        favicon: settings.favicon,
-        heroBadgeText: settings.heroBadgeText,
-        heroTitle: settings.heroTitle,
-        heroSubtitle: settings.heroSubtitle,
-        heroDescription: settings.heroDescription,
-        statsUnits: settings.statsUnits,
-        statsUnitsLabel: settings.statsUnitsLabel,
-        statsRating: settings.statsRating,
-        statsRatingLabel: settings.statsRatingLabel,
-        statsLocation: settings.statsLocation,
-        statsLocationLabel: settings.statsLocationLabel,
-        highlyRatedTitle: settings.highlyRatedTitle,
-        highlyRatedSubtitle: settings.highlyRatedSubtitle,
-        highlyRatedImage: settings.highlyRatedImage,
-        featuredTitle: settings.featuredTitle,
-        featuredSubtitle: settings.featuredSubtitle,
-      });
-      setSaveMessage('Settings saved successfully!');
+      // Save to database
+      await enhancedDatabaseService.saveWebsiteSettings(settings);
+      setSaveMessage('Settings saved successfully! Changes will appear on the website immediately.');
+      console.log('Admin Settings: Successfully saved to database');
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
+      console.error('Admin Settings: Error saving settings:', error);
       setSaveMessage('Failed to save settings. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Helper function to save individual settings immediately (for image uploads)
+  const saveIndividualSetting = async (key: keyof WebsiteSettings, value: string) => {
+    try {
+      const updatedSettings = { ...settings, [key]: value };
+      await enhancedDatabaseService.saveWebsiteSettings({ [key]: value });
+      setSettings(updatedSettings);
+      console.log(`Admin Settings: Saved ${key} immediately`);
+    } catch (error) {
+      console.error(`Admin Settings: Error saving ${key}:`, error);
+      setError('Failed to save setting. Please try again.');
     }
   };
 
@@ -95,9 +97,35 @@ export default function AdminSettings() {
         <p className="text-[#7d6349] mt-1">Manage your site settings and configuration.</p>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="admin-card bg-red-50 border-red-200 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <p className="text-red-600">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-600"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Settings Form */}
       <div className="admin-card max-w-2xl">
-        <form onSubmit={handleSave} className="space-y-6">
+        {loading ? (
+          <div className="space-y-6 animate-pulse">
+            <div className="h-8 bg-gray-200 rounded"></div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+            <div className="h-32 bg-gray-200 rounded"></div>
+            <div className="h-12 bg-gray-200 rounded w-32"></div>
+          </div>
+        ) : (
+          <form onSubmit={handleSave} className="space-y-6">
           {/* Contact Information */}
           <div>
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
@@ -381,7 +409,7 @@ export default function AdminSettings() {
                           const imageUrl = event.target?.result as string;
                           const updatedSettings = {...settings, highlyRatedImage: imageUrl};
                           setSettings(updatedSettings);
-                          saveSettings({ highlyRatedImage: imageUrl });
+                          saveIndividualSetting('highlyRatedImage', imageUrl);
                         };
                         reader.readAsDataURL(file);
                       }
@@ -401,7 +429,7 @@ export default function AdminSettings() {
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setSettings({...settings, highlyRatedImage: newValue});
-                    saveSettings({ highlyRatedImage: newValue });
+                    saveIndividualSetting('highlyRatedImage', newValue);
                   }}
                   className="form-input text-sm"
                   placeholder="Or enter image URL"
@@ -481,7 +509,7 @@ export default function AdminSettings() {
                             const imageUrl = event.target?.result as string;
                             const updatedSettings = {...settings, logo: imageUrl};
                             setSettings(updatedSettings);
-                            saveSettings({ logo: imageUrl });
+                            saveIndividualSetting('logo', imageUrl);
                           };
                           reader.readAsDataURL(file);
                         }
@@ -501,7 +529,7 @@ export default function AdminSettings() {
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, logo: newValue});
-                      saveSettings({ logo: newValue });
+                      saveIndividualSetting('logo', newValue);
                     }}
                     className="form-input text-sm"
                     placeholder="Or enter logo URL"
@@ -542,7 +570,7 @@ export default function AdminSettings() {
                             const imageUrl = event.target?.result as string;
                             const updatedSettings = {...settings, footerLogo: imageUrl};
                             setSettings(updatedSettings);
-                            saveSettings({ footerLogo: imageUrl });
+                            saveIndividualSetting('footerLogo', imageUrl);
                           };
                           reader.readAsDataURL(file);
                         }
@@ -562,7 +590,7 @@ export default function AdminSettings() {
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, footerLogo: newValue});
-                      saveSettings({ footerLogo: newValue });
+                      saveIndividualSetting('footerLogo', newValue);
                     }}
                     className="form-input text-sm"
                     placeholder="Or enter footer logo URL"
@@ -609,7 +637,7 @@ export default function AdminSettings() {
                           const imageUrl = event.target?.result as string;
                           const updatedSettings = {...settings, heroBackground: imageUrl};
                           setSettings(updatedSettings);
-                          saveSettings({ heroBackground: imageUrl });
+                          saveIndividualSetting('heroBackground', imageUrl);
                         };
                         reader.readAsDataURL(file);
                       }
@@ -630,7 +658,7 @@ export default function AdminSettings() {
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setSettings({...settings, heroBackground: newValue});
-                    saveSettings({ heroBackground: newValue });
+                    saveIndividualSetting('heroBackground', newValue);
                   }}
                   className="form-input"
                   placeholder="Or enter hero background URL"
@@ -676,7 +704,7 @@ export default function AdminSettings() {
                             const imageUrl = event.target?.result as string;
                             const updatedSettings = {...settings, aboutImage: imageUrl};
                             setSettings(updatedSettings);
-                            saveSettings({ aboutImage: imageUrl });
+                            saveIndividualSetting('aboutImage', imageUrl);
                           };
                           reader.readAsDataURL(file);
                         }
@@ -696,7 +724,7 @@ export default function AdminSettings() {
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, aboutImage: newValue});
-                      saveSettings({ aboutImage: newValue });
+                      saveIndividualSetting('aboutImage', newValue);
                     }}
                     className="form-input text-sm"
                     placeholder="Or enter about image URL"
@@ -737,7 +765,7 @@ export default function AdminSettings() {
                             const imageUrl = event.target?.result as string;
                             const updatedSettings = {...settings, contactImage: imageUrl};
                             setSettings(updatedSettings);
-                            saveSettings({ contactImage: imageUrl });
+                            saveIndividualSetting('contactImage', imageUrl);
                           };
                           reader.readAsDataURL(file);
                         }
@@ -757,7 +785,7 @@ export default function AdminSettings() {
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, contactImage: newValue});
-                      saveSettings({ contactImage: newValue });
+                      saveIndividualSetting('contactImage', newValue);
                     }}
                     className="form-input text-sm"
                     placeholder="Or enter contact image URL"
@@ -802,7 +830,7 @@ export default function AdminSettings() {
                           const imageUrl = event.target?.result as string;
                           const updatedSettings = {...settings, favicon: imageUrl};
                           setSettings(updatedSettings);
-                          saveSettings({ favicon: imageUrl });
+                          saveIndividualSetting('favicon', imageUrl);
                         };
                         reader.readAsDataURL(file);
                       }
@@ -822,7 +850,7 @@ export default function AdminSettings() {
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setSettings({...settings, favicon: newValue});
-                    saveSettings({ favicon: newValue });
+                    saveIndividualSetting('favicon', newValue);
                   }}
                   className="form-input text-sm"
                   placeholder="Or enter favicon URL"
@@ -869,7 +897,8 @@ export default function AdminSettings() {
               {isSaving ? 'Saving...' : 'Save Settings'}
             </button>
           </div>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );

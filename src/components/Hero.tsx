@@ -3,26 +3,92 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, MapPin, Star, Home } from 'lucide-react';
 import Link from 'next/link';
-import { getStoredSettings } from '@/utils/settingsStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import type { WebsiteSettings } from '@/lib/enhanced-database-service';
 
 // Stats will be loaded from settings
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
   const [heroBackground, setHeroBackground] = useState('');
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<WebsiteSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
 
-    // Load settings
-    const loadedSettings = getStoredSettings();
-    setSettings(loadedSettings);
+    const loadSettings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    if (loadedSettings.heroBackground) {
-      setHeroBackground(loadedSettings.heroBackground);
-    }
+        const loadedSettings = await enhancedDatabaseService.getWebsiteSettings();
+        console.log('Hero: Loaded settings from database:', loadedSettings);
+
+        setSettings(loadedSettings);
+
+        if (loadedSettings.heroBackground) {
+          setHeroBackground(loadedSettings.heroBackground);
+        }
+      } catch (err) {
+        console.error('Hero: Error loading settings:', err);
+        setError('Failed to load settings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSettings();
   }, []);
+
+  if (loading) {
+    return (
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-32 lg:py-40">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded mb-4"></div>
+              <div className="h-12 bg-gray-200 rounded mb-4"></div>
+              <div className="h-6 bg-gray-200 rounded mb-8"></div>
+              <div className="flex gap-4 mb-12">
+                <div className="h-12 w-32 bg-gray-200 rounded"></div>
+                <div className="h-12 w-32 bg-gray-200 rounded"></div>
+              </div>
+              <div className="flex gap-8">
+                <div className="h-16 w-24 bg-gray-200 rounded"></div>
+                <div className="h-16 w-24 bg-gray-200 rounded"></div>
+                <div className="h-16 w-24 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+            <div className="animate-pulse">
+              <div className="aspect-[4/5] bg-gray-200 rounded-2xl"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <div className="text-red-600 mb-4">
+            <p>{error}</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   if (!settings) return null;
 

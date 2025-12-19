@@ -4,7 +4,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, ArrowRight, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getStoredProperty } from '@/utils/propertyStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import type { PropertyData } from '@/lib/enhanced-database-service';
 
 // export const metadata: Metadata = {
 //   title: 'Properties',
@@ -96,24 +97,47 @@ const properties = [
 ];
 
 export default function PropertiesPage() {
-  const [updatedProperties, setUpdatedProperties] = useState(properties);
+  const [updatedProperties, setUpdatedProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Update properties with stored data
-    const updated = properties.map(prop => {
-      const storedProperty = getStoredProperty(prop.id);
-      if (storedProperty) {
-        return {
-          ...prop,
-          name: storedProperty.name,
-          location: storedProperty.location,
-          short_description: prop.short_description, // Keep original short description
-          amenities: storedProperty.amenities || prop.amenities,
-        };
+    const loadProperties = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Load properties from database
+        const dbProperties = await enhancedDatabaseService.getProperties();
+        console.log('Properties Page: Loaded properties from database:', dbProperties);
+
+        // Convert database properties to display format
+        const propertiesArray = Object.values(dbProperties)
+          .filter((property: any) => property.active) // Only show active properties
+          .map((property: any) => ({
+            id: property.id,
+            name: property.name || property.title,
+            slug: property.slug || property.name?.toLowerCase().replace(/\s+/g, '-') || property.id,
+            location: property.location || '',
+            short_description: property.description || '',
+            amenities: property.amenities || [],
+            featured: property.featured ?? false,
+            active: property.active ?? true,
+            photos: property.photos || property.images || []
+          }));
+
+        setUpdatedProperties(propertiesArray);
+      } catch (err) {
+        console.error('Properties Page: Error loading properties:', err);
+        setError('Failed to load properties. Please try again later.');
+        // Fallback to default properties on error
+        setUpdatedProperties(properties.filter(p => p.active));
+      } finally {
+        setLoading(false);
       }
-      return prop;
-    });
-    setUpdatedProperties(updated);
+    };
+
+    loadProperties();
   }, []);
 
   const featuredProperties = updatedProperties.filter(p => p.featured && p.active);
@@ -139,6 +163,47 @@ export default function PropertiesPage() {
       {/* Properties Grid */}
       <section className="section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+              <div className="flex items-center justify-between">
+                <p className="text-red-600">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="btn-primary text-sm"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading ? (
+            <div className="space-y-16">
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-48 mb-8 animate-pulse"></div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="card animate-pulse">
+                      <div className="aspect-[4/3] bg-gray-200 rounded-t-lg"></div>
+                      <div className="p-5 space-y-3">
+                        <div className="h-6 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-16 bg-gray-200 rounded"></div>
+                        <div className="flex gap-2">
+                          <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                          <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+                          <div className="h-6 w-14 bg-gray-200 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
           {/* Featured Properties */}
           {featuredProperties.length > 0 && (
             <div className="mb-16">
@@ -175,6 +240,8 @@ export default function PropertiesPage() {
               ))}
             </div>
           </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -203,28 +270,20 @@ export default function PropertiesPage() {
 }
 
 // Property Card Component
-function PropertyCard({ property }: { property: typeof properties[0] }) {
+function PropertyCard({ property }: { property: any }) {
   const [displayPhoto, setDisplayPhoto] = useState<string>('');
   const [propertyData, setPropertyData] = useState(property);
 
   useEffect(() => {
-    const storedProperty = getStoredProperty(property.id);
-    if (storedProperty) {
-      // Update property data with stored values
-      setPropertyData({
-        ...property,
-        name: storedProperty.name,
-        location: storedProperty.location,
-        amenities: storedProperty.amenities || property.amenities,
-      });
+    // Property data already comes from database, just set up the display photo
+    setPropertyData(property);
 
-      if (storedProperty.photos && storedProperty.photos.length > 0) {
-        // Use featured photo if available, otherwise first photo
-        const featuredIndex = storedProperty.featuredPhotoIndex || 0;
-        setDisplayPhoto(storedProperty.photos[featuredIndex] || storedProperty.photos[0]);
-      }
+    if (property.photos && property.photos.length > 0) {
+      // Use featured photo if available, otherwise first photo
+      const featuredIndex = property.featuredPhotoIndex || 0;
+      setDisplayPhoto(property.photos[featuredIndex] || property.photos[0]);
     }
-  }, [property.id]);
+  }, [property]);
 
   return (
     <div className="card group">

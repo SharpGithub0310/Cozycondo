@@ -1,0 +1,8 @@
+npm warn exec The following package was not found and will be installed: next@16.1.0
+npm error code ENOTEMPTY
+npm error syscall rename
+npm error path /home/mckoy0310/.npm/_npx/8b377f6eec906bc4/node_modules/next
+npm error dest /home/mckoy0310/.npm/_npx/8b377f6eec906bc4/node_modules/.next-n6drf1F2
+npm error errno -39
+npm error ENOTEMPTY: directory not empty, rename '/home/mckoy0310/.npm/_npx/8b377f6eec906bc4/node_modules/next' -> '/home/mckoy0310/.npm/_npx/8b377f6eec906bc4/node_modules/.next-n6drf1F2'
+npm error A complete log of this run can be found in: /home/mckoy0310/.npm/_logs/2025-12-19T13_11_53_076Z-debug-0.log
