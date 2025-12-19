@@ -10,6 +10,7 @@ export interface APIResponse<T = any> {
     total?: number;
     page?: number;
     limit?: number;
+    totalPages?: number;
     timestamp?: string;
     migrationId?: string;
   };
