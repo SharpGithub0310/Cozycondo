@@ -331,7 +331,7 @@ function PropertyCard({ property }: { property: any }) {
         </p>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {propertyData.amenities.slice(0, 3).map((amenity, i) => (
+          {propertyData.amenities.slice(0, 3).map((amenity: string, i: number) => (
             <span
               key={i}
               className="px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full"
