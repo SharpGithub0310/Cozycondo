@@ -12,7 +12,7 @@ import {
 // GET /api/properties/[id] - Get specific property
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Apply rate limiting
@@ -38,7 +38,7 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Query property with photos
     const { data: property, error } = await adminClient
@@ -107,7 +107,7 @@ export async function GET(
 // PUT /api/properties/[id] - Update specific property (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Apply rate limiting for admin operations
@@ -130,7 +130,7 @@ export async function PUT(
         return errorResponse('Database not configured', 503);
       }
 
-      const { id } = params;
+      const { id } = await params;
       const body = await req.json();
 
       // Validate property data for updates
@@ -248,7 +248,7 @@ export async function PUT(
 // DELETE /api/properties/[id] - Delete specific property (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Apply rate limiting for admin operations
@@ -271,7 +271,7 @@ export async function DELETE(
         return errorResponse('Database not configured', 503);
       }
 
-      const { id } = params;
+      const { id } = await params;
 
       // First check if property exists
       const { data: existing, error: fetchError } = await adminClient
