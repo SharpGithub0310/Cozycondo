@@ -32,8 +32,8 @@ export default function Footer() {
         </svg>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+      <div className="container-responsive py-fluid-4xl">
+        <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-4">
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
@@ -57,14 +57,14 @@ export default function Footer() {
                 <span className="block text-xs text-[#d4b896]">Iloilo City</span>
               </div>
             </div>
-            <p className="text-[#d4b896] text-sm leading-relaxed">
+            <p className="text-[#d4b896] text-fluid-sm leading-relaxed">
               Your home away from home in the heart of Iloilo City. Experience comfort and convenience in our premium short-term rental condominiums.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-display text-lg font-semibold mb-6">Quick Links</h3>
+            <h3 className="font-display text-fluid-lg font-semibold mb-fluid-lg">Quick Links</h3>
             <ul className="space-y-3">
               {[
                 { name: 'Home', href: '/' },
@@ -86,7 +86,7 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-display text-lg font-semibold mb-6">Contact Us</h3>
+            <h3 className="font-display text-fluid-lg font-semibold mb-fluid-lg">Contact Us</h3>
             <ul className="space-y-4">
               <li>
                 <a
@@ -117,13 +117,13 @@ export default function Footer() {
 
           {/* Social & CTA */}
           <div>
-            <h3 className="font-display text-lg font-semibold mb-6">Connect With Us</h3>
-            <div className="flex gap-3 mb-6">
+            <h3 className="font-display text-fluid-lg font-semibold mb-fluid-lg">Connect With Us</h3>
+            <div className="flex gap-3 mb-fluid-lg">
               <a
                 href="https://www.facebook.com/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-[#7d6349] hover:bg-[#14b8a6] flex items-center justify-center transition-colors duration-200"
+                className="touch-target w-10 h-10 rounded-lg bg-[#7d6349] hover:bg-[#14b8a6] flex items-center justify-center transition-colors duration-200"
               >
                 <Facebook className="w-5 h-5" />
               </a>
@@ -131,7 +131,7 @@ export default function Footer() {
                 href="https://m.me/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-[#7d6349] hover:bg-[#14b8a6] flex items-center justify-center transition-colors duration-200"
+                className="touch-target w-10 h-10 rounded-lg bg-[#7d6349] hover:bg-[#14b8a6] flex items-center justify-center transition-colors duration-200"
               >
                 <MessageCircle className="w-5 h-5" />
               </a>
@@ -140,7 +140,7 @@ export default function Footer() {
               href="https://m.me/cozycondoiloilocity"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#14b8a6] hover:bg-[#0d9488] text-white font-medium rounded-lg transition-colors duration-200"
+              className="inline-flex items-center gap-2 px-fluid-lg py-fluid-md bg-[#14b8a6] hover:bg-[#0d9488] text-white font-medium rounded-lg transition-colors duration-200 touch-target"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Message Us</span>
@@ -149,7 +149,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 pt-8 border-t border-[#7d6349]">
+        <div className="mt-fluid-4xl pt-fluid-xl border-t border-[#7d6349]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[#b89b7a]">
               © {currentYear} Cozy Condo Iloilo City. All rights reserved.

@@ -59,8 +59,8 @@ export default function Hero() {
       <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-[#fb923c] rounded-full animate-float opacity-60" style={{ animationDelay: '1s' }} />
       <div className="absolute bottom-1/3 left-1/4 w-5 h-5 bg-[#d4b896] rounded-full animate-float opacity-40" style={{ animationDelay: '2s' }} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-32 lg:py-40">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
           {/* Text content */}
           <div
             className={`transition-all duration-1000 ${
@@ -75,30 +75,30 @@ export default function Hero() {
               </div>
             )}
 
-            <h1 className={`font-display text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight mb-6 ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
+            <h1 className={`font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6 ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
               {settings.heroTitle}
             </h1>
 
-            <p className={`text-lg mb-8 max-w-xl ${heroBackground ? 'text-white/90' : 'text-[#7d6349]'}`}>
+            <p className={`text-base sm:text-lg mb-6 sm:mb-8 max-w-xl ${heroBackground ? 'text-white/90' : 'text-[#7d6349]'}`}>
               {settings.heroDescription}
             </p>
 
-            <div className="flex flex-wrap gap-4 mb-12">
-              <Link href="/properties" className="btn-primary text-lg px-8 py-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
+              <Link href="/properties" className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 min-h-[44px] justify-center">
                 Explore Properties
               </Link>
               <a
                 href="https://m.me/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary text-lg px-8 py-4"
+                className="btn-secondary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 min-h-[44px] justify-center"
               >
                 Message Us
               </a>
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
@@ -109,12 +109,12 @@ export default function Hero() {
                     }`}
                     style={{ transitionDelay: `${(index + 2) * 150}ms` }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-[#14b8a6]" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white shadow-sm flex items-center justify-center">
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#14b8a6]" />
                       </div>
                       <div>
-                        <div className={`font-display text-2xl font-semibold ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
+                        <div className={`font-display text-xl sm:text-2xl font-semibold ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
                           {stat.value}
                         </div>
                         <div className={`text-sm ${heroBackground ? 'text-white/80' : 'text-[#9a7d5e]'}`}>{stat.label}</div>
@@ -128,13 +128,13 @@ export default function Hero() {
 
           {/* Image composition */}
           <div
-            className={`relative transition-all duration-1000 delay-300 ${
+            className={`relative transition-all duration-1000 delay-300 order-first lg:order-last ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
             }`}
           >
             <div className="relative">
               {/* Main image */}
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
+              <div className="relative aspect-[4/5] sm:aspect-[4/5] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
                 {settings.highlyRatedImage ? (
                   <img
                     src={settings.highlyRatedImage}
@@ -149,42 +149,42 @@ export default function Hero() {
                 ) : null}
                 <div className={`absolute inset-0 flex items-center justify-center ${settings.highlyRatedImage ? 'hidden' : ''}`}>
                   <div className="text-center text-white/80">
-                    <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="font-display text-4xl font-bold">CC</span>
+                    <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 sm:mb-4 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <span className="font-display text-2xl sm:text-4xl font-bold">CC</span>
                     </div>
-                    <p className="text-lg font-medium">Cozy Condo</p>
+                    <p className="text-base sm:text-lg font-medium">Cozy Condo</p>
                     <p className="text-sm opacity-80">Premium Living</p>
                   </div>
                 </div>
               </div>
 
               {/* Floating card */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4 border border-[#faf3e6]">
+              <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-3 sm:p-4 border border-[#faf3e6]">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-[#14b8a6] flex items-center justify-center">
-                    <Star className="w-6 h-6 text-white fill-white" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#14b8a6] flex items-center justify-center">
+                    <Star className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
                   </div>
                   <div>
-                    <div className="font-display text-xl font-semibold text-[#5f4a38]">
+                    <div className="font-display text-lg sm:text-xl font-semibold text-[#5f4a38]">
                       {settings.highlyRatedTitle}
                     </div>
-                    <div className="text-sm text-[#9a7d5e]">{settings.highlyRatedSubtitle}</div>
+                    <div className="text-xs sm:text-sm text-[#9a7d5e]">{settings.highlyRatedSubtitle}</div>
                   </div>
                 </div>
               </div>
 
               {/* Decorative blob */}
-              <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#14b8a6]/20 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -right-4 sm:-top-8 sm:-right-8 w-16 h-16 sm:w-32 sm:h-32 bg-[#14b8a6]/20 rounded-full blur-xl sm:blur-2xl" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <a href="#properties" className={`flex flex-col items-center transition-colors ${heroBackground ? 'text-white/80 hover:text-white' : 'text-[#9a7d5e] hover:text-[#0d9488]'}`}>
-          <span className="text-sm mb-2">Scroll to explore</span>
-          <ChevronDown className="w-5 h-5" />
+          <span className="text-xs sm:text-sm mb-1 sm:mb-2 hidden sm:block">Scroll to explore</span>
+          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
         </a>
       </div>
     </section>

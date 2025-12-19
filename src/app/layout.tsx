@@ -12,6 +12,12 @@ export const metadata: Metadata = {
   description: "Discover comfortable and convenient short-term rental condominiums in Iloilo City, Philippines. Modern amenities, prime locations, and exceptional hospitality.",
   keywords: ["Iloilo City", "condo rental", "short-term rental", "Airbnb", "Philippines", "accommodation", "vacation rental"],
   authors: [{ name: "Cozy Condo" }],
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
   openGraph: {
     type: "website",
     locale: "en_PH",

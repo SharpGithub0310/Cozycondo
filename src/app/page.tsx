@@ -107,10 +107,10 @@ export default function HomePage() {
 
       {/* Properties Section */}
       <section id="properties" className="section bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-title">{settings?.featuredTitle || 'Featured Properties'}</h2>
-            <p className="section-subtitle mx-auto">
+        <div className="container-responsive">
+          <div className="text-center mb-fluid-xl">
+            <h2 className="section-title text-fluid-3xl">{settings?.featuredTitle || 'Featured Properties'}</h2>
+            <p className="section-subtitle text-fluid-lg mx-auto">
               {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
             </p>
             <div className="text-sm text-gray-600 mt-2">
@@ -118,7 +118,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-3">
             {featuredProperties.map((property, index) => (
               <div
                 key={property.id}
@@ -126,12 +126,12 @@ export default function HomePage() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Image */}
-                <div className="relative aspect-[4/3] bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden">
+                <div className="relative card-image bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden">
                   {property.photos && property.photos.length > 0 ? (
                     <img
                       src={property.photos[property.featuredPhotoIndex || 0]}
                       alt={property.name}
-                      className="w-full h-full object-cover"
+                      className="card-image"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         const fallback = e.currentTarget.nextElementSibling as HTMLElement;
@@ -155,37 +155,37 @@ export default function HomePage() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5">
-                  <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-2 group-hover:text-[#0d9488] transition-colors">
+                <div className="card-content">
+                  <h3 className="card-title group-hover:text-[#0d9488] transition-colors">
                     {property.name}
                   </h3>
                   
-                  <div className="flex items-center gap-2 text-[#9a7d5e] text-sm mb-3">
+                  <div className="flex items-center gap-2 text-[#9a7d5e] text-fluid-sm mb-fluid-sm">
                     <MapPin className="w-4 h-4" />
                     <span>{property.location}</span>
                   </div>
 
-                  <p className="text-[#7d6349] text-sm mb-4">
+                  <p className="card-description">
                     {property.short_description}
                   </p>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap mb-fluid-md">
                     {property.amenities.map((amenity: string, i: number) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full"
+                        className="amenity-tag"
                       >
                         {amenity}
                       </span>
                     ))}
                   </div>
 
-                  <div className="text-xs text-gray-500 mb-2">
+                  <div className="text-xs text-gray-500 mb-fluid-sm">
                     ID: {property.id} | Featured: {property.featured ? 'Yes' : 'No'} | Active: {property.active ? 'Yes' : 'No'}
                   </div>
                   <Link
                     href={`/properties/${property.slug}`}
-                    className="inline-flex items-center gap-1 text-[#0d9488] font-medium text-sm hover:gap-2 transition-all"
+                    className="inline-flex items-center gap-1 text-[#0d9488] font-medium text-fluid-sm hover:gap-2 transition-all touch-target"
                   >
                     <span>View Details</span>
                     <ArrowRight className="w-4 h-4" />
@@ -195,8 +195,8 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <Link href="/properties" className="btn-primary inline-flex items-center gap-2">
+          <div className="text-center mt-fluid-xl">
+            <Link href="/properties" className="btn-primary inline-flex items-center gap-2 touch-target">
               <span>View All Properties</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -206,29 +206,29 @@ export default function HomePage() {
 
       {/* Features Section */}
       <section className="section gradient-warm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-title">Why Choose Cozy Condo?</h2>
-            <p className="section-subtitle mx-auto">
+        <div className="container-responsive">
+          <div className="text-center mb-fluid-xl">
+            <h2 className="section-title text-fluid-3xl">Why Choose Cozy Condo?</h2>
+            <p className="section-subtitle text-fluid-lg mx-auto">
               We go beyond just providing a place to stay. We create memorable experiences.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid-responsive grid-responsive-sm-2 grid-responsive-lg-4">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div
                   key={index}
-                  className="text-center p-6 rounded-2xl bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-lg transition-all duration-300"
+                  className="text-center p-fluid-lg rounded-2xl bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center shadow-lg">
-                    <Icon className="w-7 h-7 text-white" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-fluid-md rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center shadow-lg">
+                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-2">
+                  <h3 className="font-display text-fluid-lg font-semibold text-[#5f4a38] mb-fluid-sm">
                     {feature.title}
                   </h3>
-                  <p className="text-[#7d6349] text-sm">
+                  <p className="text-[#7d6349] text-fluid-sm">
                     {feature.description}
                   </p>
                 </div>
@@ -240,11 +240,11 @@ export default function HomePage() {
 
       {/* About Section */}
       <section className="section bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container-responsive">
+          <div className="grid-responsive grid-responsive-md-2 items-center">
             {/* Image side */}
             <div className="relative">
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+              <div className="aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl">
                 {aboutImage ? (
                   <img
                     src={aboutImage}
@@ -259,32 +259,32 @@ export default function HomePage() {
                 ) : null}
                 <div className={`aspect-[4/3] bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center ${aboutImage ? 'hidden' : ''}`}>
                   <div className="text-center text-white">
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="font-display text-3xl font-bold">CC</span>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-fluid-md rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <span className="font-display text-2xl sm:text-3xl font-bold">CC</span>
                     </div>
-                    <p className="text-xl font-display font-semibold">Cozy Condo</p>
+                    <p className="text-fluid-xl font-display font-semibold">Cozy Condo</p>
                     <p className="text-sm opacity-80">Iloilo City</p>
                   </div>
                 </div>
               </div>
               {/* Decorative element */}
-              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#fb923c]/20 rounded-full blur-2xl" />
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-16 h-16 sm:w-32 sm:h-32 bg-[#fb923c]/20 rounded-full blur-xl sm:blur-2xl" />
             </div>
 
             {/* Content side */}
             <div>
-              <h2 className="section-title">Welcome to Cozy Condo</h2>
-              <p className="text-[#7d6349] text-lg mb-6">
+              <h2 className="section-title text-fluid-3xl">Welcome to Cozy Condo</h2>
+              <p className="text-[#7d6349] text-fluid-lg mb-fluid-lg">
                 Founded with a passion for hospitality, Cozy Condo has been providing exceptional short-term rental experiences in Iloilo City. Our carefully curated collection of condominiums combines modern comfort with warm Filipino hospitality.
               </p>
-              <p className="text-[#7d6349] mb-8">
+              <p className="text-[#7d6349] text-fluid-base mb-fluid-xl">
                 Whether you&apos;re a business traveler, a vacationing family, or someone relocating to the city, we have the perfect space for you. Each of our 9+ properties is thoughtfully designed and maintained to ensure your stay is nothing short of cozy.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/contact" className="btn-primary">
+              <div className="flex flex-col sm:flex-row gap-fluid-md">
+                <Link href="/contact" className="btn-primary touch-target">
                   Get in Touch
                 </Link>
-                <Link href="/properties" className="btn-secondary">
+                <Link href="/properties" className="btn-secondary touch-target">
                   Browse Properties
                 </Link>
               </div>
@@ -296,30 +296,30 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="section bg-[#5f4a38] text-white relative overflow-hidden">
         {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-[#14b8a6]/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#fb923c]/20 rounded-full blur-3xl" />
-        
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-6">
+        <div className="absolute top-0 left-0 w-32 h-32 sm:w-64 sm:h-64 bg-[#14b8a6]/20 rounded-full blur-2xl sm:blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-40 h-40 sm:w-80 sm:h-80 bg-[#fb923c]/20 rounded-full blur-2xl sm:blur-3xl" />
+
+        <div className="relative container-responsive text-center max-w-4xl mx-auto">
+          <h2 className="font-display text-fluid-3xl font-semibold mb-fluid-lg">
             Ready to Book Your Stay?
           </h2>
-          <p className="text-[#d4b896] text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-[#d4b896] text-fluid-lg mb-fluid-xl max-w-2xl mx-auto">
             Contact us today and let us help you find the perfect condo for your needs. We&apos;re here to make your stay in Iloilo City unforgettable.
           </p>
           
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row justify-center gap-fluid-md mb-fluid-2xl">
             <a
               href="https://m.me/cozycondoiloilocity"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#14b8a6] hover:bg-[#0d9488] text-white font-medium rounded-lg transition-all duration-300 hover:shadow-lg"
+              className="btn-primary bg-[#14b8a6] hover:bg-[#0d9488] rounded-lg transition-all duration-300 hover:shadow-lg touch-target"
             >
               <MessageCircle className="w-5 h-5" />
               <span>Message Us on Facebook</span>
             </a>
             <a
               href="tel:+639778870724"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-all duration-300"
+              className="btn-secondary bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg transition-all duration-300 touch-target"
             >
               <Phone className="w-5 h-5" />
               <span>Call +63 977 887 0724</span>
@@ -327,12 +327,12 @@ export default function HomePage() {
           </div>
 
           {/* Contact info */}
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-[#d4b896]">
-            <a href="mailto:admin@cozycondo.net" className="flex items-center gap-2 hover:text-white transition-colors">
+          <div className="flex flex-col sm:flex-row justify-center gap-fluid-md text-fluid-sm text-[#d4b896]">
+            <a href="mailto:admin@cozycondo.net" className="flex items-center justify-center sm:justify-start gap-2 hover:text-white transition-colors touch-target">
               <Mail className="w-4 h-4" />
               <span>admin@cozycondo.net</span>
             </a>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
               <MapPin className="w-4 h-4" />
               <span>Iloilo City, Philippines</span>
             </div>

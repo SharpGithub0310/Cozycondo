@@ -240,7 +240,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary py-3 disabled:opacity-50"
+              className="w-full btn-primary py-fluid-sm disabled:opacity-50"
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </button>

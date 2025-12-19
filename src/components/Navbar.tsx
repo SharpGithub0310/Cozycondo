@@ -14,6 +14,37 @@ const navigation = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Close mobile menu when clicking outside or on escape key
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isOpen && !target.closest('nav')) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when menu is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
   const [scrolled, setScrolled] = useState(false);
   const [logo, setLogo] = useState('');
 
@@ -35,18 +66,18 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 safe-area-top ${
         scrolled
           ? 'bg-white/95 backdrop-blur-md shadow-sm'
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div className="container-responsive">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group touch-target">
             {logo ? (
-              <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow">
                 <img
                   src={logo}
                   alt="Cozy Condo Logo"
@@ -57,12 +88,12 @@ export default function Navbar() {
                 />
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-                <span className="text-white font-display text-xl font-bold">CC</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                <span className="text-white font-display text-lg sm:text-xl font-bold">CC</span>
               </div>
             )}
             <div>
-              <span className="font-display text-xl font-semibold text-[#5f4a38]">
+              <span className="font-display text-lg sm:text-xl font-semibold text-[#5f4a38]">
                 Cozy Condo
               </span>
               <span className="hidden sm:block text-xs text-[#9a7d5e]">Iloilo City</span>
@@ -75,7 +106,7 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-4 py-2 rounded-lg text-[#7d6349] hover:text-[#5f4a38] hover:bg-[#faf3e6] transition-all duration-200 font-medium"
+                className="px-3 lg:px-4 py-2 rounded-lg text-[#7d6349] hover:text-[#5f4a38] hover:bg-[#faf3e6] transition-all duration-200 font-medium touch-target"
               >
                 {item.name}
               </Link>
@@ -84,19 +115,21 @@ export default function Navbar() {
               href="https://m.me/cozycondoiloilocity"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-4 btn-primary flex items-center gap-2"
+              className="ml-2 lg:ml-4 btn-primary flex items-center gap-2 touch-target"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Book Now</span>
+              <span className="hidden lg:inline">Book Now</span>
+              <span className="lg:hidden">Book</span>
             </a>
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg text-[#7d6349] hover:bg-[#faf3e6] transition-colors"
+            className="md:hidden p-2 rounded-lg text-[#7d6349] hover:bg-[#faf3e6] transition-colors touch-target"
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
         </div>
       </div>
@@ -107,7 +140,7 @@ export default function Navbar() {
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="bg-white/95 backdrop-blur-md border-t border-[#faf3e6] px-4 py-4 space-y-1">
+        <div className="bg-white/98 backdrop-blur-md border-t border-[#faf3e6] px-4 py-4 space-y-1 safe-area-bottom">
           {navigation.map((item) => {
             const Icon = item.icon;
             return (
@@ -115,10 +148,10 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#7d6349] hover:text-[#5f4a38] hover:bg-[#faf3e6] transition-all duration-200"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#7d6349] hover:text-[#5f4a38] hover:bg-[#faf3e6] transition-all duration-200 touch-target"
               >
                 <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium text-fluid-base">{item.name}</span>
               </Link>
             );
           })}
@@ -126,7 +159,8 @@ export default function Navbar() {
             href="https://m.me/cozycondoiloilocity"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 mt-4 btn-primary w-full"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center justify-center gap-2 mt-4 btn-primary w-full touch-target"
           >
             <MessageCircle className="w-4 h-4" />
             <span>Book Now</span>
