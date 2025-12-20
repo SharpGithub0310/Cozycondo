@@ -104,8 +104,12 @@ export default function Hero() {
       {heroBackground ? (
         <>
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${heroBackground})` }}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-gray-200"
+            style={{
+              backgroundImage: `url(${heroBackground})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
           />
           <div className="absolute inset-0 bg-[#5f4a38]/40" />
         </>
@@ -114,9 +118,9 @@ export default function Hero() {
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
 
-          {/* Decorative elements */}
-          <div className="absolute top-20 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+          {/* Decorative elements - hidden on mobile for performance */}
+          <div className="hidden sm:block absolute top-20 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
+          <div className="hidden sm:block absolute bottom-20 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
         </>
       )}
       
@@ -202,26 +206,40 @@ export default function Hero() {
               {/* Main image */}
               <div className="relative aspect-[4/5] sm:aspect-[4/5] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
                 {settings.highlyRatedImage ? (
-                  <img
-                    src={settings.highlyRatedImage}
-                    alt="Highly rated property"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                      if (fallback) fallback.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div className={`absolute inset-0 flex items-center justify-center ${settings.highlyRatedImage ? 'hidden' : ''}`}>
-                  <div className="text-center text-white/80">
-                    <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 sm:mb-4 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="font-display text-2xl sm:text-4xl font-bold">CC</span>
+                  <>
+                    <img
+                      src={settings.highlyRatedImage}
+                      alt="Highly rated property"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        console.log('Hero image failed to load, showing fallback');
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center hidden">
+                      <div className="text-center text-white/80">
+                        <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 sm:mb-4 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <span className="font-display text-2xl sm:text-4xl font-bold">CC</span>
+                        </div>
+                        <p className="text-base sm:text-lg font-medium">Cozy Condo</p>
+                        <p className="text-sm opacity-80">Premium Living</p>
+                      </div>
                     </div>
-                    <p className="text-base sm:text-lg font-medium">Cozy Condo</p>
-                    <p className="text-sm opacity-80">Premium Living</p>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white/80">
+                      <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 sm:mb-4 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <span className="font-display text-2xl sm:text-4xl font-bold">CC</span>
+                      </div>
+                      <p className="text-base sm:text-lg font-medium">Cozy Condo</p>
+                      <p className="text-sm opacity-80">Premium Living</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Floating card */}
