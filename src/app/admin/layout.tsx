@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 import {
   LayoutDashboard,
   Building2,
@@ -33,16 +34,38 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [logoUrl, setLogoUrl] = useState('');
+  const [settings, setSettings] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    // Check for admin session
-    const adminSession = localStorage.getItem('cozy_admin_session');
-    if (adminSession) {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
+    const initializeAdmin = async () => {
+      try {
+        // Check for admin session
+        const adminSession = localStorage.getItem('cozy_admin_session');
+        if (adminSession) {
+          setIsAuthenticated(true);
+
+          // Load website settings including logo
+          try {
+            const websiteSettings = await enhancedDatabaseService.getWebsiteSettings();
+            setSettings(websiteSettings);
+            if (websiteSettings.logo) {
+              setLogoUrl(websiteSettings.logo);
+            }
+          } catch (settingsError) {
+            console.warn('Failed to load admin settings:', settingsError);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to initialize admin:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAdmin();
   }, []);
 
   const handleLogout = () => {
@@ -88,12 +111,28 @@ export default function AdminLayout({
           {/* Logo */}
           <div className="flex items-center justify-between h-20 px-6 border-b border-[#7d6349]">
             <Link href="/admin" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
-                <span className="text-white font-display font-bold">CC</span>
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt="Logo"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to default if logo fails to load
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<span class="text-white font-display font-bold">CC</span>';
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="text-white font-display font-bold">CC</span>
+                )}
               </div>
               <div>
                 <span className="font-display text-lg font-semibold text-white">Admin</span>
-                <span className="block text-xs text-[#d4b896]">Cozy Condo</span>
+                <span className="block text-xs text-[#d4b896]">{settings?.companyName || 'Cozy Condo'}</span>
               </div>
             </Link>
             <button
@@ -205,7 +244,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
               <span className="text-white font-display text-2xl font-bold">CC</span>
             </div>
             <h1 className="font-display text-2xl font-semibold text-[#5f4a38]">

@@ -14,7 +14,7 @@ import {
   Star,
   Eye
 } from 'lucide-react';
-import { getStoredProperty, getDefaultPropertyData } from '@/utils/propertyStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 
 export default function PropertyDetail() {
   const params = useParams();
@@ -25,36 +25,48 @@ export default function PropertyDetail() {
   const loadProperty = async () => {
     try {
       setLoading(true);
-      // Get stored property data or fall back to defaults
-      const storedProperty = getStoredProperty(params.id as string);
-      const defaultProperty = getDefaultPropertyData(params.id as string);
-      const propertyData = storedProperty || defaultProperty;
+      console.log('Loading property from database:', params.id);
+
+      // Fetch property from database using enhanced database service
+      const propertyData = await enhancedDatabaseService.getProperty(params.id as string);
+
+      if (!propertyData) {
+        console.error('Property not found:', params.id);
+        setProperty(null);
+        return;
+      }
+
+      console.log('Loaded property data:', propertyData);
 
       // Transform to the format expected by the component
-      const mockProperty = {
-        id: params.id,
-        name: propertyData.name,
-        type: propertyData.type.charAt(0).toUpperCase() + propertyData.type.slice(1),
-        bedrooms: propertyData.bedrooms,
-        bathrooms: propertyData.bathrooms,
-        maxGuests: propertyData.maxGuests,
-        size: propertyData.size + ' sq m',
-        pricePerNight: parseInt(propertyData.pricePerNight),
-        location: propertyData.location,
-        description: propertyData.description,
-        amenities: propertyData.amenities,
-        photos: propertyData.photos,
-        airbnbUrl: propertyData.airbnbUrl,
-        createdAt: '2024-01-15',
-        lastBooking: '2024-12-01',
-        totalBookings: params.id === '1' ? 18 : 24,
-        rating: params.id === '1' ? 4.9 : 4.8,
-        status: 'active',
+      const transformedProperty = {
+        id: propertyData.id || params.id,
+        uuid: (propertyData as any).uuid || propertyData.id,
+        name: propertyData.name || (propertyData as any).title || 'Unnamed Property',
+        type: propertyData.type ? propertyData.type.charAt(0).toUpperCase() + propertyData.type.slice(1) : 'Apartment',
+        bedrooms: propertyData.bedrooms || 2,
+        bathrooms: propertyData.bathrooms || 1,
+        maxGuests: propertyData.maxGuests || (propertyData as any).max_guests || 4,
+        size: (propertyData.size || (propertyData as any).size_sqm || '45') + ' sq m',
+        pricePerNight: parseInt(propertyData.pricePerNight || (propertyData as any).price_per_night || (propertyData as any).price || '2500'),
+        location: propertyData.location || '',
+        description: propertyData.description || propertyData.short_description || '',
+        amenities: propertyData.amenities || [],
+        photos: propertyData.photos || (propertyData as any).images || [],
+        airbnbUrl: propertyData.airbnbUrl || (propertyData as any).airbnb_url || '',
+        createdAt: (propertyData as any).createdAt || (propertyData as any).created_at || '2024-01-15',
+        lastBooking: '2024-12-01', // This would come from booking system
+        totalBookings: Math.floor(Math.random() * 30) + 10, // Mock data
+        rating: (Math.random() * 0.5 + 4.5).toFixed(1), // Mock rating
+        status: propertyData.active !== false ? 'active' : 'inactive',
+        featured: propertyData.featured || false,
+        featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
       };
 
-      setProperty(mockProperty);
+      setProperty(transformedProperty);
     } catch (error) {
-      console.error('Failed to load property:', error);
+      console.error('Failed to load property from database:', error);
+      setProperty(null);
     } finally {
       setLoading(false);
     }
