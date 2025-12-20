@@ -256,6 +256,8 @@ export const DEFAULT_SETTINGS = {
   email: 'info@cozycondo.net',
   address: 'Iloilo City, Philippines',
   website: 'https://cozycondo.net',
+  facebookUrl: '',
+  messengerUrl: '',
   checkinTime: '3:00 PM',
   checkoutTime: '11:00 AM',
   timezone: 'Asia/Manila',

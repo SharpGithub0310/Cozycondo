@@ -187,6 +187,32 @@ export default function AdminSettings() {
                   placeholder="https://your-website.com"
                 />
               </div>
+
+              <div>
+                <label className="form-label">
+                  Facebook Page URL
+                </label>
+                <input
+                  type="url"
+                  value={settings.facebookUrl}
+                  onChange={(e) => setSettings({...settings, facebookUrl: e.target.value})}
+                  className="form-input"
+                  placeholder="https://facebook.com/yourpage"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">
+                  Messenger URL
+                </label>
+                <input
+                  type="url"
+                  value={settings.messengerUrl}
+                  onChange={(e) => setSettings({...settings, messengerUrl: e.target.value})}
+                  className="form-input"
+                  placeholder="https://m.me/yourpage"
+                />
+              </div>
             </div>
           </div>
 

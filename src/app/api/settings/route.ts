@@ -98,6 +98,16 @@ export async function GET(request: NextRequest) {
       highlyRatedImage: settingsObj.highlyRatedImage || '',
       featuredTitle: settingsObj.featuredTitle || 'Featured Properties',
       featuredSubtitle: settingsObj.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
+      phone: settingsObj.phone || '',
+      email: settingsObj.email || '',
+      address: settingsObj.address || '',
+      website: settingsObj.website || '',
+      facebookUrl: settingsObj.facebookUrl || '',
+      messengerUrl: settingsObj.messengerUrl || '',
+      checkinTime: settingsObj.checkinTime || '',
+      checkoutTime: settingsObj.checkoutTime || '',
+      timezone: settingsObj.timezone || '',
+      currency: settingsObj.currency || '',
       updatedAt: new Date().toISOString()
     };
 

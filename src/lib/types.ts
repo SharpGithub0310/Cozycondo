@@ -125,6 +125,8 @@ export interface WebsiteSettings {
   email?: string;
   address?: string;
   website?: string;
+  facebookUrl?: string;
+  messengerUrl?: string;
   checkinTime?: string;
   checkoutTime?: string;
   timezone?: string;
