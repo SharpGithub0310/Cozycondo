@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2 } from 'lucide-react';
+import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2, Plus, HelpCircle } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import type { WebsiteSettings } from '@/lib/types';
+import type { WebsiteSettings, FAQ } from '@/lib/types';
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<WebsiteSettings>({
@@ -28,7 +28,9 @@ export default function AdminSettings() {
     highlyRatedImage: '',
     featuredTitle: 'Featured Properties',
     featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
-    updatedAt: ''
+    updatedAt: '',
+    faqs: [],
+    companyName: 'Cozy Condo'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +102,31 @@ export default function AdminSettings() {
       console.error(`Admin Settings: Error saving ${key}:`, error);
       setError('Failed to save setting. Please try again.');
     }
+  };
+
+  // FAQ Management functions
+  const addFAQ = () => {
+    const newFaq: FAQ = {
+      id: Date.now().toString(),
+      question: '',
+      answer: '',
+      order: settings.faqs?.length || 0
+    };
+    setSettings({
+      ...settings,
+      faqs: [...(settings.faqs || []), newFaq]
+    });
+  };
+
+  const updateFAQ = (index: number, field: 'question' | 'answer', value: string) => {
+    const updatedFaqs = [...(settings.faqs || [])];
+    updatedFaqs[index] = { ...updatedFaqs[index], [field]: value };
+    setSettings({ ...settings, faqs: updatedFaqs });
+  };
+
+  const deleteFAQ = (index: number) => {
+    const updatedFaqs = (settings.faqs || []).filter((_, i) => i !== index);
+    setSettings({ ...settings, faqs: updatedFaqs });
   };
 
   return (
@@ -914,6 +941,94 @@ export default function AdminSettings() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* FAQ Management */}
+          <div className="pt-6 border-t border-[#faf3e6]">
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4 flex items-center gap-2">
+              <HelpCircle className="w-5 h-5" />
+              FAQ Management
+            </h3>
+            <p className="text-[#7d6349] mb-6 text-sm">
+              Manage frequently asked questions that appear on the contact page.
+            </p>
+
+            <div className="space-y-4 mb-6">
+              {(settings.faqs || []).map((faq, index) => (
+                <div key={faq.id || index} className="p-4 border border-[#faf3e6] rounded-lg bg-[#fefdfb]">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-sm font-medium text-[#5f4a38]">FAQ #{index + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => deleteFAQ(index)}
+                      className="text-red-500 hover:text-red-700 transition-colors p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="form-label">Question</label>
+                      <input
+                        type="text"
+                        value={faq.question}
+                        onChange={(e) => updateFAQ(index, 'question', e.target.value)}
+                        className="form-input"
+                        placeholder="Enter your question..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="form-label">Answer</label>
+                      <textarea
+                        value={faq.answer}
+                        onChange={(e) => updateFAQ(index, 'answer', e.target.value)}
+                        className="form-input min-h-[80px]"
+                        placeholder="Enter the answer..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {(settings.faqs || []).length === 0 && (
+                <div className="text-center py-8 text-[#9a7d5e]">
+                  <HelpCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>No FAQs added yet. Click the button below to add your first FAQ.</p>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={addFAQ}
+              className="flex items-center gap-2 px-4 py-2 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add FAQ
+            </button>
+          </div>
+
+          {/* Company Information */}
+          <div className="pt-6 border-t border-[#faf3e6]">
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Company Information
+            </h3>
+            <div className="max-w-md">
+              <label className="form-label">Company Name</label>
+              <input
+                type="text"
+                value={settings.companyName}
+                onChange={(e) => setSettings({...settings, companyName: e.target.value})}
+                className="form-input"
+                placeholder="Your company name"
+              />
+              <p className="text-xs text-[#9a7d5e] mt-1">
+                This appears in the admin navbar and other places throughout the site.
+              </p>
             </div>
           </div>
 

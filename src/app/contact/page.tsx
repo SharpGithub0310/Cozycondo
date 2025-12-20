@@ -2,7 +2,7 @@
 
 import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getStoredSettings } from '@/utils/settingsStorage';
+import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 
 const contactMethods = [
   {
@@ -68,12 +68,36 @@ const faqs = [
 
 export default function ContactPage() {
   const [contactImage, setContactImage] = useState('');
+  const [settings, setSettings] = useState<any>(null);
+  const [dynamicFaqs, setDynamicFaqs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const settings = getStoredSettings();
-    if (settings.contactImage) {
-      setContactImage(settings.contactImage);
-    }
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        // Load settings from database
+        const dbSettings = await enhancedDatabaseService.getWebsiteSettings();
+        setSettings(dbSettings);
+
+        if (dbSettings.contactImage) {
+          setContactImage(dbSettings.contactImage);
+        }
+
+        // Load FAQs from database if available
+        if (dbSettings.faqs) {
+          setDynamicFaqs(dbSettings.faqs);
+        }
+      } catch (error) {
+        console.error('Contact: Error loading settings:', error);
+        // Fallback to using default faqs
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (
@@ -215,19 +239,30 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className="p-6 rounded-2xl bg-[#faf3e6] hover:bg-[#f5e6cc] transition-colors"
-              >
-                <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-2">
-                  {faq.question}
-                </h3>
-                <p className="text-[#7d6349]">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-6 rounded-2xl bg-gray-200 animate-pulse">
+                  <div className="h-5 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-16 bg-gray-300 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {(dynamicFaqs.length > 0 ? dynamicFaqs : faqs).map((faq, index) => (
+                <div
+                  key={index}
+                  className="p-6 rounded-2xl bg-[#faf3e6] hover:bg-[#f5e6cc] transition-colors"
+                >
+                  <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-2">
+                    {faq.question}
+                  </h3>
+                  <p className="text-[#7d6349]">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="mt-12 text-center">
             <p className="text-[#7d6349] mb-4">

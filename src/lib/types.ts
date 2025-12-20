@@ -134,6 +134,16 @@ export interface WebsiteSettings {
   timezone?: string;
   currency?: string;
   updatedAt?: string;
+  faqs?: FAQ[];
+  companyName?: string;
+}
+
+// FAQ Types
+export interface FAQ {
+  id?: string;
+  question: string;
+  answer: string;
+  order?: number;
 }
 
 // Amenity icon mapping
