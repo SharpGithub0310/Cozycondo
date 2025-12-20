@@ -9,7 +9,7 @@ export interface Property {
   address: string;
   map_url?: string;
   airbnb_url?: string;
-  airbnb_ical_url?: string;
+  ical_url?: string;
   amenities: string[];
   featured: boolean;
   active: boolean;

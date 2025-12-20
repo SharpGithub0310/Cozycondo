@@ -32,8 +32,8 @@ const features = [
   },
 ];
 
-// Property IDs to load
-const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+// Legacy property IDs - no longer used
+// Properties are now loaded dynamically from database
 
 export default function HomePage() {
   const [aboutImage, setAboutImage] = useState('');
@@ -48,10 +48,10 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
 
-        // Load settings and properties from database
+        // Load settings and only active properties from database
         const [loadedSettings, propertiesData] = await Promise.all([
           postMigrationDatabaseService.getWebsiteSettings(),
-          postMigrationDatabaseService.getProperties()
+          postMigrationDatabaseService.getProperties({ active: true })
         ]);
 
         // console.log('Loaded settings from database:', loadedSettings);
@@ -64,12 +64,13 @@ export default function HomePage() {
         }
 
         // Convert properties object to array format for processing
+        // Properties are already filtered to active only
         const propertiesArray = Object.values(propertiesData).map((property: any) => ({
           id: property.id,
           name: property.name || property.title,
           slug: property.slug || property.name?.toLowerCase().replace(/\s+/g, '-') || property.id,
           location: property.location || '',
-          short_description: property.description || '',
+          short_description: property.description || property.short_description || '',
           amenities: property.amenities || [],
           featured: property.featured ?? false,
           active: property.active ?? true,
@@ -78,14 +79,14 @@ export default function HomePage() {
 
         // console.log('Converted properties array:', propertiesArray);
 
-        // Filter to show only active and featured properties
-        let featured = propertiesArray.filter(p => p.active && p.featured);
+        // Filter to show featured properties (all are already active)
+        let featured = propertiesArray.filter(p => p.featured);
         // console.log('Filtered featured properties:', featured);
 
-        // If no featured properties, show first 3 active properties
+        // If no featured properties, show first 3 properties
         if (featured.length === 0) {
-          featured = propertiesArray.filter(p => p.active).slice(0, 3);
-          // console.log('No featured properties, using first 3 active:', featured);
+          featured = propertiesArray.slice(0, 3);
+          // console.log('No featured properties, using first 3:', featured);
         }
 
         setFeaturedProperties(featured);

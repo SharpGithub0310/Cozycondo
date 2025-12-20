@@ -132,21 +132,66 @@ class EnhancedDatabaseService {
   // PROPERTY MANAGEMENT
   // =============================================
 
-  async getProperties(): Promise<Record<string, PropertyData>> {
-    return this.apiCall(
-      '/api/properties',
-      { method: 'GET' },
-      () => {
-        // Try localStorage first
-        const stored = getStoredProperties();
-        if (Object.keys(stored).length > 0) {
-          return stored;
-        }
-        // Fall back to production defaults if localStorage is empty
-        console.log('Using production fallback properties');
-        return getProductionFallbackProperties() as Record<string, PropertyData>;
+  async getProperties(options: { active?: boolean } = {}): Promise<Record<string, PropertyData>> {
+    console.log('Enhanced Database Service: Fetching properties via API...');
+
+    try {
+      // Build query parameters for filtering
+      const queryParams = new URLSearchParams();
+      if (options.active !== undefined) {
+        queryParams.set('active', options.active.toString());
       }
-    );
+
+      const endpoint = `/api/properties${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+
+      const result = await this.apiCall(
+        endpoint,
+        { method: 'GET' },
+        () => {
+          console.log('API call failed, trying localStorage fallback...');
+          // Try localStorage first
+          const stored = getStoredProperties();
+          if (Object.keys(stored).length > 0) {
+            console.log(`Found ${Object.keys(stored).length} properties in localStorage`);
+
+            // Filter by active status if requested
+            if (options.active !== undefined) {
+              const filtered: Record<string, PropertyData> = {};
+              Object.entries(stored).forEach(([key, property]) => {
+                if (property.active === options.active) {
+                  filtered[key] = property;
+                }
+              });
+              return filtered;
+            }
+
+            return stored;
+          }
+          // Fall back to production defaults if localStorage is empty
+          console.log('Using production fallback properties');
+          const fallback = getProductionFallbackProperties() as Record<string, PropertyData>;
+
+          // Filter by active status if requested
+          if (options.active !== undefined) {
+            const filtered: Record<string, PropertyData> = {};
+            Object.entries(fallback).forEach(([key, property]) => {
+              if (property.active === options.active) {
+                filtered[key] = property;
+              }
+            });
+            return filtered;
+          }
+
+          return fallback;
+        }
+      );
+
+      console.log(`Successfully fetched ${Object.keys(result).length} properties from API`);
+      return result;
+    } catch (error) {
+      console.error('Enhanced Database Service: Error fetching properties:', error);
+      throw error;
+    }
   }
 
   async getProperty(id: string): Promise<PropertyData | null> {

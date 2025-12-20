@@ -65,11 +65,11 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
   };
 
   useEffect(() => {
-    // Load property data from database
+    // Load property data from database using slug
     const loadProperty = async () => {
       try {
-        const propertyId = property.id;
-        const dbProperty = await enhancedDatabaseService.getProperty(propertyId);
+        // Use the slug from props, not the property.id which might be outdated
+        const dbProperty = await enhancedDatabaseService.getProperty(slug);
 
         if (dbProperty) {
           // Update property data with database information
@@ -120,7 +120,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
     };
 
     loadProperty();
-  }, [property.id, slug]);
+  }, [slug]);
 
   return (
     <div className="pt-20">

@@ -107,13 +107,13 @@ export default function PropertiesPage() {
         setLoading(true);
         setError(null);
 
-        // Load properties from database
-        const dbProperties = await enhancedDatabaseService.getProperties();
+        // Load only active properties from database for public view
+        const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
         console.log('Properties Page: Loaded properties from database:', dbProperties);
 
         // Convert database properties to display format
+        // Properties are already filtered to active only, no need to filter again
         const propertiesArray = Object.values(dbProperties)
-          .filter((property: any) => property.active) // Only show active properties
           .map((property: any) => ({
             id: property.id,
             name: property.name || property.title,
@@ -140,8 +140,9 @@ export default function PropertiesPage() {
     loadProperties();
   }, []);
 
-  const featuredProperties = updatedProperties.filter(p => p.featured && p.active);
-  const otherProperties = updatedProperties.filter(p => !p.featured && p.active);
+  // Properties are already active, no need to filter by active again
+  const featuredProperties = updatedProperties.filter(p => p.featured);
+  const otherProperties = updatedProperties.filter(p => !p.featured);
 
   return (
     <div className="pt-20">
@@ -230,7 +231,7 @@ export default function PropertiesPage() {
                 All Properties
               </h2>
               <span className="text-sm text-[#9a7d5e] bg-[#faf3e6] px-3 py-1 rounded-full">
-                {updatedProperties.filter(p => p.active).length} units
+                {updatedProperties.length} units
               </span>
             </div>
             

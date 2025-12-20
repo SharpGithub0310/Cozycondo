@@ -41,10 +41,34 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const { page, limit, active, featured, search, sort, order } = parseQueryParams(searchParams);
 
-    // Build query with joins for photos
+    // Build query with joins for photos, ensuring we get all necessary fields
     let query = adminClient
       .from('properties')
-      .select('*, property_photos(*)');
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        short_description,
+        location,
+        address,
+        map_url,
+        airbnb_url,
+        ical_url,
+        amenities,
+        featured,
+        active,
+        display_order,
+        created_at,
+        updated_at,
+        property_photos (
+          id,
+          url,
+          alt_text,
+          is_primary,
+          display_order
+        )
+      `);
 
     // Apply filters
     if (active !== undefined) {
@@ -59,10 +83,10 @@ export async function GET(request: NextRequest) {
       query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%,location.ilike.%${search}%`);
     }
 
-    // Apply sorting
-    const validSortFields = ['created_at', 'updated_at', 'name', 'price_per_night', 'bedrooms', 'bathrooms', 'display_order'];
+    // Apply sorting with null handling
+    const validSortFields = ['created_at', 'updated_at', 'name', 'display_order'];
     const sortField = validSortFields.includes(sort) ? sort : 'display_order';
-    query = query.order(sortField, { ascending: order === 'asc' });
+    query = query.order(sortField, { ascending: order === 'asc', nullsFirst: false });
 
     // Apply pagination
     const offset = (page - 1) * limit;
@@ -85,11 +109,26 @@ export async function GET(request: NextRequest) {
     const result: Record<string, any> = {};
 
     (data || []).forEach((prop) => {
-      result[prop.slug] = {
-        id: prop.slug,
-        title: prop.name,
+      // Ensure slug exists, fallback to UUID if needed
+      const slug = prop.slug || prop.id || prop.name?.toLowerCase().replace(/\s+/g, '-') || 'property-' + Date.now();
+
+      // Sort photos properly
+      const sortedPhotos = (prop.property_photos || [])
+        .filter((photo: any) => photo.url) // Only include photos with URLs
+        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+        .map((photo: any) => photo.url);
+
+      // Find featured photo index
+      const featuredPhotoIndex = (prop.property_photos || [])
+        .findIndex((photo: any) => photo.is_primary) || 0;
+
+      result[slug] = {
+        id: slug, // Use slug as ID for frontend compatibility
+        uuid: prop.id, // Store actual UUID for database operations
+        title: prop.name || '',
         name: prop.name || '',
-        description: prop.description || '',
+        description: prop.description || prop.short_description || '',
+        short_description: prop.short_description || prop.description || '',
         type: prop.type || 'apartment',
         bedrooms: prop.bedrooms || 2,
         bathrooms: prop.bathrooms || 1,
@@ -98,22 +137,22 @@ export async function GET(request: NextRequest) {
         area: parseFloat(prop.size_sqm || '45'),
         areaUnit: 'sqm',
         location: prop.location || '',
+        address: prop.address || '',
         price: parseFloat(prop.price_per_night || '2500'),
         priceUnit: 'PHP/night',
         pricePerNight: prop.price_per_night || '2500',
         airbnbUrl: prop.airbnb_url || '',
-        icalUrl: prop.ical_url || '',
-        featured: prop.featured || false,
-        active: prop.active !== false,
-        amenities: prop.amenities || [],
-        images: (prop.property_photos || [])
-          .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-          .map((photo: any) => photo.url),
-        photos: (prop.property_photos || [])
-          .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-          .map((photo: any) => photo.url),
-        featuredPhotoIndex: prop.featured_photo_index || 0,
-        slug: prop.slug,
+        airbnbIcalUrl: prop.ical_url || '',
+        icalUrl: prop.ical_url || '', // Legacy compatibility
+        mapUrl: prop.map_url || '',
+        featured: prop.featured === true,
+        active: prop.active === true,
+        amenities: Array.isArray(prop.amenities) ? prop.amenities : [],
+        images: sortedPhotos, // Legacy compatibility
+        photos: sortedPhotos,
+        featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
+        slug: slug,
+        displayOrder: prop.display_order || 0,
         createdAt: prop.created_at,
         updatedAt: prop.updated_at
       };

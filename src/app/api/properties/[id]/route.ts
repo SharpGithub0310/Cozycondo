@@ -40,12 +40,72 @@ export async function GET(
 
     const { id } = await params;
 
-    // Query property with photos
-    const { data: property, error } = await adminClient
+    // Query property with photos - try by slug first, then by UUID if not found
+    let { data: property, error } = await adminClient
       .from('properties')
-      .select('*, property_photos(*)')
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        short_description,
+        location,
+        address,
+        map_url,
+        airbnb_url,
+        ical_url,
+        amenities,
+        featured,
+        active,
+        display_order,
+        created_at,
+        updated_at,
+        property_photos (
+          id,
+          url,
+          alt_text,
+          is_primary,
+          display_order
+        )
+      `)
       .eq('slug', id)
       .single();
+
+    // If not found by slug and id looks like a UUID, try by UUID
+    if (error && error.code === 'PGRST116' && id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      const uuidQuery = await adminClient
+        .from('properties')
+        .select(`
+          id,
+          name,
+          slug,
+          description,
+          short_description,
+          location,
+          address,
+          map_url,
+          airbnb_url,
+          ical_url,
+          amenities,
+          featured,
+          active,
+          display_order,
+          created_at,
+          updated_at,
+          property_photos (
+            id,
+            url,
+            alt_text,
+            is_primary,
+            display_order
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      property = uuidQuery.data;
+      error = uuidQuery.error;
+    }
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -54,12 +114,27 @@ export async function GET(
       return handleDatabaseError(error);
     }
 
+    // Ensure slug exists, fallback to UUID if needed
+    const slug = property.slug || property.id || property.name?.toLowerCase().replace(/\s+/g, '-') || 'property-' + Date.now();
+
+    // Sort photos properly
+    const sortedPhotos = (property.property_photos || [])
+      .filter((photo: any) => photo.url) // Only include photos with URLs
+      .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+      .map((photo: any) => photo.url);
+
+    // Find featured photo index
+    const featuredPhotoIndex = (property.property_photos || [])
+      .findIndex((photo: any) => photo.is_primary) || 0;
+
     // Convert to the format expected by the frontend (keeping backward compatibility)
     const result = {
-      id: property.slug,
-      title: property.name,
+      id: slug, // Use slug as ID for frontend compatibility
+      uuid: property.id, // Store actual UUID for database operations
+      title: property.name || '',
       name: property.name || '',
-      description: property.description || '',
+      description: property.description || property.short_description || '',
+      short_description: property.short_description || property.description || '',
       type: property.type || 'apartment',
       bedrooms: property.bedrooms || 2,
       bathrooms: property.bathrooms || 1,
@@ -68,22 +143,22 @@ export async function GET(
       area: parseFloat(property.size_sqm || '45'),
       areaUnit: 'sqm',
       location: property.location || '',
+      address: property.address || '',
       price: parseFloat(property.price_per_night || '2500'),
       priceUnit: 'PHP/night',
       pricePerNight: property.price_per_night || '2500',
       airbnbUrl: property.airbnb_url || '',
-      icalUrl: property.ical_url || '',
-      featured: property.featured || false,
-      active: property.active !== false,
-      amenities: property.amenities || [],
-      images: (property.property_photos || [])
-        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-        .map((photo: any) => photo.url),
-      photos: (property.property_photos || [])
-        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-        .map((photo: any) => photo.url),
-      featuredPhotoIndex: property.featured_photo_index || 0,
-      slug: property.slug,
+      airbnbIcalUrl: property.ical_url || '',
+      icalUrl: property.ical_url || '', // Legacy compatibility
+      mapUrl: property.map_url || '',
+      featured: property.featured === true,
+      active: property.active === true,
+      amenities: Array.isArray(property.amenities) ? property.amenities : [],
+      images: sortedPhotos, // Legacy compatibility
+      photos: sortedPhotos,
+      featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
+      slug: slug,
+      displayOrder: property.display_order || 0,
       createdAt: property.created_at,
       updatedAt: property.updated_at
     };
