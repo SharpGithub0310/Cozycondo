@@ -180,10 +180,13 @@ class DatabaseService {
       },
       () => {
         const storedProperty = getStoredProperty(id);
-        if (storedProperty && !storedProperty.updatedAt) {
-          storedProperty.updatedAt = new Date().toISOString();
-        }
-        return storedProperty;
+        if (!storedProperty) return null;
+
+        // Ensure all required properties are present
+        return {
+          ...storedProperty,
+          updatedAt: storedProperty.updatedAt || new Date().toISOString()
+        };
       },
       'Get property'
     );
