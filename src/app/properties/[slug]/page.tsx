@@ -81,31 +81,52 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
+  console.log('PropertyPage: Looking for property with slug:', slug);
+
   try {
     // Try to fetch property from database with fallback
     const property = await postMigrationDatabaseService.getProperty(slug);
 
     if (property) {
+      console.log('PropertyPage: Found property in database:', property.name || property.title);
       return <PropertyDetail slug={slug} defaultProperty={property} />;
     }
   } catch (error) {
-    console.error('Error fetching property from database:', error);
+    console.error('PropertyPage: Error fetching property from database:', error);
   }
 
   // Try fallback properties if database fails
   try {
     const fallbackProperties = getProductionFallbackProperties();
-    const property = Object.values(fallbackProperties).find((p: any) =>
+    console.log('PropertyPage: Available fallback property slugs:', Object.values(fallbackProperties).map((p: any) => p.slug || p.id));
+
+    // Try different matching strategies
+    let property = Object.values(fallbackProperties).find((p: any) =>
       (p.slug || p.id) === slug
     ) as any;
 
+    // If not found by slug, try by name-to-slug conversion
+    if (!property) {
+      property = Object.values(fallbackProperties).find((p: any) => {
+        const generatedSlug = p.name?.toLowerCase().replace(/\s+/g, '-') || p.id;
+        return generatedSlug === slug;
+      }) as any;
+    }
+
+    // If not found by name conversion, try by id
+    if (!property) {
+      property = Object.values(fallbackProperties).find((p: any) => p.id === slug) as any;
+    }
+
     if (property) {
+      console.log('PropertyPage: Found property in fallback:', property.name);
       return <PropertyDetail slug={slug} defaultProperty={property} />;
     }
   } catch (fallbackError) {
-    console.error('Error with fallback properties:', fallbackError);
+    console.error('PropertyPage: Error with fallback properties:', fallbackError);
   }
 
+  console.log('PropertyPage: No property found for slug:', slug);
   // If no property found in database or fallback, show not found
   notFound();
 }

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/types';
 import type { WebsiteSettings } from '@/lib/types';
+import { normalizePropertyData } from '@/utils/slugify';
 
 // Features section data
 const features = [
@@ -65,23 +66,16 @@ export default function HomePage() {
 
         // Convert properties object to array format for processing
         // Properties are already filtered to active only
-        const propertiesArray = Object.values(propertiesData).map((property: any) => ({
-          id: property.id,
-          name: property.name || property.title,
-          slug: property.slug || property.name?.toLowerCase().replace(/\s+/g, '-') || property.id,
-          location: property.location || '',
-          short_description: property.description || property.short_description || '',
-          amenities: property.amenities || [],
-          featured: property.featured ?? false,
-          active: property.active ?? true,
-          photos: property.photos || property.images || []
-        }));
+        const propertiesArray = Object.values(propertiesData).map((property: any) =>
+          normalizePropertyData(property)
+        );
 
-        // console.log('Converted properties array:', propertiesArray);
+        console.log('Converted properties array:', propertiesArray);
+        console.log('Property slugs:', propertiesArray.map(p => ({ name: p.name, slug: p.slug })));
 
         // Filter to show featured properties (all are already active)
         let featured = propertiesArray.filter(p => p.featured);
-        // console.log('Filtered featured properties:', featured);
+        console.log('Filtered featured properties:', featured);
 
         // If no featured properties, show first 3 properties
         if (featured.length === 0) {

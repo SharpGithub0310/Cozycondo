@@ -6,6 +6,7 @@ import { MapPin, ArrowRight, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 import type { PropertyData } from '@/lib/types';
+import { normalizePropertyData } from '@/utils/slugify';
 
 // export const metadata: Metadata = {
 //   title: 'Properties',
@@ -125,17 +126,7 @@ export default function PropertiesPage() {
         // Convert database properties to display format
         // Properties are already filtered to active only, no need to filter again
         const propertiesArray = Object.values(dbProperties)
-          .map((property: any) => ({
-            id: property.id,
-            name: property.name || property.title,
-            slug: property.slug || property.name?.toLowerCase().replace(/\s+/g, '-') || property.id,
-            location: property.location || '',
-            short_description: property.description || property.short_description || '',
-            amenities: property.amenities || [],
-            featured: property.featured ?? false,
-            active: property.active ?? true,
-            photos: property.photos || property.images || []
-          }));
+          .map((property: any) => normalizePropertyData(property));
 
         console.log('Properties Page: Converted properties array:', {
           totalCount: propertiesArray.length,
