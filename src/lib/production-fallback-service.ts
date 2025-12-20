@@ -28,6 +28,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80',
       'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '2': {
     id: '2',
@@ -50,6 +52,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5f6?w=800&q=80',
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '3': {
     id: '3',
@@ -72,6 +76,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
       'https://images.unsplash.com/photo-1565182999561-18d7dc61c393?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '4': {
     id: '4',
@@ -94,6 +100,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=800&q=80',
       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '5': {
     id: '5',
@@ -116,6 +124,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80',
       'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '6': {
     id: '6',
@@ -138,6 +148,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
       'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '7': {
     id: '7',
@@ -160,6 +172,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '8': {
     id: '8',
@@ -182,6 +196,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=80',
       'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
   '9': {
     id: '9',
@@ -204,6 +220,8 @@ export const DEFAULT_PROPERTIES = {
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
     ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
   },
 };
 
