@@ -284,7 +284,14 @@ class DatabaseService {
           updatedAt: new Date().toISOString()
         };
       },
-      () => getStoredSettings(),
+      () => {
+        const storedSettings = getStoredSettings();
+        // Ensure updatedAt is always present
+        return {
+          ...storedSettings,
+          updatedAt: storedSettings.updatedAt || new Date().toISOString()
+        };
+      },
       'Get website settings'
     );
   }
