@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2 } from 'lucide-react';
-import { getStoredProperty, saveProperty, getDefaultPropertyData } from '@/utils/propertyStorage';
+import { getStoredProperty, getDefaultPropertyData } from '@/utils/propertyStorage';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
 export default function EditProperty() {
   const params = useParams();
@@ -40,9 +41,19 @@ export default function EditProperty() {
   useEffect(() => {
     const loadProperty = async () => {
       try {
-        // Load property from localStorage or get default data
-        const storedProperty = getStoredProperty(params.id as string);
-        const propertyData = storedProperty || getDefaultPropertyData(params.id as string);
+        // Load property from database first, fallback to localStorage/defaults
+        let propertyData;
+        try {
+          propertyData = await postMigrationDatabaseService.getProperty(params.id as string);
+        } catch (error) {
+          console.warn('Failed to load from database, trying localStorage:', error);
+          propertyData = getStoredProperty(params.id as string);
+        }
+
+        // If no data found, use default data
+        if (!propertyData) {
+          propertyData = getDefaultPropertyData(params.id as string);
+        }
 
         setProperty({
           name: propertyData.name,
@@ -77,35 +88,43 @@ export default function EditProperty() {
     setIsSaving(true);
 
     try {
-      // Save to localStorage (in production, this would be an API call)
-      saveProperty(params.id as string, {
+      // Save to database via API
+      const propertyData = {
         id: params.id as string,
         name: property.name,
+        title: property.name, // API expects 'title' field
         type: property.type,
         bedrooms: property.bedrooms,
         bathrooms: property.bathrooms,
         maxGuests: property.maxGuests,
         size: property.size,
+        area: parseFloat(property.size) || 45, // API expects 'area' as number
+        areaUnit: 'sqm',
         description: property.description,
         location: property.location,
+        price: parseFloat(property.pricePerNight) || 0, // API expects 'price' as number
         pricePerNight: property.pricePerNight,
+        priceUnit: 'PHP/night',
         airbnbUrl: property.airbnbUrl,
         amenities: property.amenities,
         photos: property.photos,
+        images: property.photos, // API expects 'images' field
         featuredPhotoIndex: property.featuredPhotoIndex,
         icalUrl: property.icalUrl || '',
         featured: property.featured || false,
         active: property.active !== false,
         updatedAt: new Date().toISOString(),
-      });
+      };
 
-      // Simulate save delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await postMigrationDatabaseService.saveProperty(params.id as string, propertyData);
+
+      console.log('Property saved successfully to database');
 
       // Redirect back to property view
       router.push(`/admin/properties/${params.id}`);
     } catch (error) {
       console.error('Failed to save property:', error);
+      alert('Failed to save property. Please try again.');
       setIsSaving(false);
     }
   };
