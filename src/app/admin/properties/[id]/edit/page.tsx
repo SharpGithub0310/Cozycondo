@@ -24,6 +24,9 @@ export default function EditProperty() {
     amenities: [] as string[],
     photos: [] as string[],
     featuredPhotoIndex: 0,
+    icalUrl: '',
+    featured: false,
+    active: true,
   });
 
   const [newAmenity, setNewAmenity] = useState('');
@@ -55,6 +58,9 @@ export default function EditProperty() {
           amenities: propertyData.amenities,
           photos: propertyData.photos,
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
+          icalUrl: propertyData.icalUrl || '',
+          featured: propertyData.featured || false,
+          active: propertyData.active !== false,
         });
       } catch (error) {
         console.error('Failed to load property:', error);
