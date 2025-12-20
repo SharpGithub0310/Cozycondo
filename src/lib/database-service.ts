@@ -178,7 +178,13 @@ class DatabaseService {
           updatedAt: property.updated_at
         };
       },
-      () => getStoredProperty(id),
+      () => {
+        const storedProperty = getStoredProperty(id);
+        if (storedProperty && !storedProperty.updatedAt) {
+          storedProperty.updatedAt = new Date().toISOString();
+        }
+        return storedProperty;
+      },
       'Get property'
     );
   }
