@@ -87,9 +87,19 @@ class EnhancedDatabaseService {
         throw new Error('API not available and no fallback provided');
       }
 
+      // Get authentication headers if we're in the browser
+      const authHeaders: Record<string, string> = {};
+      if (typeof window !== 'undefined') {
+        const adminSession = localStorage.getItem('cozy_admin_session');
+        if (adminSession) {
+          authHeaders['x-admin-session'] = 'authenticated';
+        }
+      }
+
       const response = await fetch(endpoint, {
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders,
           ...options.headers,
         },
         ...options,
