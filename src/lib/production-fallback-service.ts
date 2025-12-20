@@ -223,6 +223,30 @@ export const DEFAULT_PROPERTIES = {
     icalUrl: '',
     featuredPhotoIndex: 0,
   },
+  '10': {
+    id: '10',
+    name: 'Cityscape Studio',
+    slug: 'cityscape-studio',
+    type: 'studio',
+    bedrooms: 1,
+    bathrooms: 1,
+    maxGuests: 2,
+    size: '45',
+    description: 'Experience modern city living at its finest in this beautifully designed studio unit located in the heart of Iloilo Business Park.',
+    short_description: 'Modern studio with stunning city views. Perfect for business travelers and couples.',
+    location: 'Iloilo Business Park',
+    pricePerNight: '3500',
+    airbnbUrl: 'https://airbnb.com/rooms/cityscape-studio',
+    featured: true,
+    active: true,
+    amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'Smart TV', 'Workspace', 'City View', '24/7 Security', 'Gym Access'],
+    photos: [
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80',
+      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&q=80',
+    ],
+    icalUrl: '',
+    featuredPhotoIndex: 0,
+  },
 };
 
 export const DEFAULT_SETTINGS = {
