@@ -47,6 +47,7 @@ export default function Navbar() {
   }, [isOpen]);
   const [scrolled, setScrolled] = useState(false);
   const [logo, setLogo] = useState('');
+  const [logoLoading, setLogoLoading] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,11 +58,38 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // Load logo from settings
-    const settings = getStoredSettings();
-    if (settings.logo) {
-      setLogo(settings.logo);
-    }
+    // Load logo from settings with better handling
+    const loadLogo = async () => {
+      try {
+        setLogoLoading(true);
+        // First check localStorage
+        const settings = getStoredSettings();
+        if (settings.logo) {
+          setLogo(settings.logo);
+        }
+
+        // Also try to fetch from API/database
+        if (typeof window !== 'undefined') {
+          try {
+            const response = await fetch('/api/settings');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.data?.logo) {
+                setLogo(data.data.logo);
+              }
+            }
+          } catch (apiError) {
+            console.log('Using localStorage logo fallback');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading logo:', error);
+      } finally {
+        setLogoLoading(false);
+      }
+    };
+
+    loadLogo();
   }, []);
 
   return (
@@ -76,27 +104,32 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group touch-target">
-            {logo ? (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-shadow">
-                <img
-                  src={logo}
-                  alt="Cozy Condo Logo"
-                  className="w-full h-full object-contain bg-white"
-                  onError={() => {
-                    setLogo(''); // Reset logo state to show fallback
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-                <span className="text-white font-display text-lg sm:text-xl font-bold">CC</span>
-              </div>
-            )}
-            <div>
-              <span className="font-display text-lg sm:text-xl font-semibold text-[#5f4a38]">
+            {/* Logo Image/Fallback - Always Show */}
+            <div className="flex-shrink-0">
+              {!logoLoading && logo ? (
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden shadow-md sm:shadow-lg group-hover:shadow-xl transition-shadow bg-white">
+                  <img
+                    src={logo}
+                    alt="Cozy Condo Logo"
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      console.log('Logo failed to load, showing fallback');
+                      setLogo(''); // Reset logo state to show fallback
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-md sm:shadow-lg group-hover:shadow-xl transition-all">
+                  <span className="text-white font-display text-base sm:text-xl font-bold">CC</span>
+                </div>
+              )}
+            </div>
+            {/* Text - Responsive */}
+            <div className="flex flex-col">
+              <span className="font-display text-base sm:text-xl font-semibold text-[#5f4a38] leading-tight">
                 Cozy Condo
               </span>
-              <span className="hidden sm:block text-xs text-[#9a7d5e]">Iloilo City</span>
+              <span className="text-xs text-[#9a7d5e] leading-tight">Iloilo City</span>
             </div>
           </Link>
 
