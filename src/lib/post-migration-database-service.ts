@@ -68,7 +68,34 @@ class PostMigrationService {
   }
 
   async getProperty(id: string) {
-    return enhancedDatabaseService.getProperty(id);
+    try {
+      // First, try to get from database API
+      const dbProperty = await enhancedDatabaseService.getProperty(id);
+
+      if (dbProperty) {
+        console.log('✅ Loading property from database');
+        return dbProperty;
+      }
+    } catch (error) {
+      console.error('Database property error, trying fallback:', error);
+    }
+
+    // If database is unavailable, check fallback
+    try {
+      const fallbackProperties = getProductionFallbackProperties();
+      const property = Object.values(fallbackProperties).find((p: any) =>
+        (p.slug || p.id) === id
+      );
+
+      if (property) {
+        console.log('⚠️ Loading property from fallback');
+        return property;
+      }
+    } catch (error) {
+      console.error('Fallback property error:', error);
+    }
+
+    return null;
   }
 
   async getCalendarBlocks() {
