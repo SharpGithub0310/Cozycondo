@@ -42,6 +42,19 @@ export default function AdminSettings() {
         const dbSettings = await postMigrationDatabaseService.getWebsiteSettings();
         console.log('Admin Settings: Loaded from database:', dbSettings);
 
+        // Enhanced logging for debugging
+        console.log('Admin Settings: Data validation:', {
+          hasContactFields: !!(dbSettings.phone && dbSettings.email),
+          hasBookingFields: !!(dbSettings.checkinTime && dbSettings.timezone),
+          hasHeroFields: !!(dbSettings.heroTitle && dbSettings.heroDescription),
+          totalFields: Object.keys(dbSettings).length,
+          sampleFields: {
+            phone: dbSettings.phone,
+            email: dbSettings.email,
+            heroTitle: dbSettings.heroTitle
+          }
+        });
+
         setSettings(dbSettings);
       } catch (err) {
         console.error('Admin Settings: Error loading settings:', err);

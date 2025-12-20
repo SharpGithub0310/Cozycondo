@@ -99,7 +99,15 @@ class EnhancedDatabaseService {
         throw new Error(`API call failed: ${response.status} ${response.statusText}`);
       }
 
-      return await response.json();
+      const responseData = await response.json();
+
+      // Handle wrapped API responses (e.g., {success: true, data: {...}})
+      if (responseData && typeof responseData === 'object' && 'success' in responseData && 'data' in responseData) {
+        return responseData.data;
+      }
+
+      // Return direct response if not wrapped
+      return responseData;
     } catch (error) {
       console.error(`API call to ${endpoint} failed:`, error);
       if (fallbackOperation && this.options.fallbackToLocalStorage) {
