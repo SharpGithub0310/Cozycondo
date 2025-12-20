@@ -186,30 +186,114 @@ export async function POST(request: NextRequest) {
         return errorResponse('Property ID (slug) is required', 400);
       }
 
-      // Use the existing RPC function for compatibility
-      const { error } = await adminClient.rpc('upsert_property_with_string_id', {
-        property_id: id,
-        property_name: propertyData.name || propertyData.title,
-        property_type: propertyData.type || 'apartment',
-        bedrooms_count: propertyData.bedrooms || 2,
-        bathrooms_count: propertyData.bathrooms || 1,
-        max_guests_count: propertyData.maxGuests || 4,
-        size_sqm_value: propertyData.size || propertyData.area?.toString() || '45',
-        description_text: propertyData.description || '',
-        location_text: propertyData.location || '',
-        price_per_night_value: propertyData.pricePerNight || propertyData.price?.toString() || '2500',
-        airbnb_url_value: propertyData.airbnbUrl || '',
-        ical_url_value: propertyData.icalUrl || '',
-        featured_flag: propertyData.featured || false,
-        active_flag: propertyData.active !== false,
-        amenities_array: propertyData.amenities || [],
-        photos_array: propertyData.photos || propertyData.images || [],
-        featured_photo_index_value: propertyData.featuredPhotoIndex || 0
-      });
+      // Direct table operations to avoid RPC function ambiguity issue
 
-      if (error) {
-        console.error('Error saving property:', error);
-        return handleDatabaseError(error);
+      // First, check if property exists
+      const { data: existingProperty, error: fetchError } = await adminClient
+        .from('properties')
+        .select('id')
+        .eq('slug', id)
+        .single();
+
+      let propertyId;
+
+      if (existingProperty) {
+        // Update existing property
+        const { data: updateData, error: updateError } = await adminClient
+          .from('properties')
+          .update({
+            name: propertyData.name || propertyData.title,
+            type: propertyData.type || 'apartment',
+            bedrooms: propertyData.bedrooms || 2,
+            bathrooms: propertyData.bathrooms || 1,
+            max_guests: propertyData.maxGuests || 4,
+            size_sqm: propertyData.size || propertyData.area?.toString() || '45',
+            description: propertyData.description || '',
+            location: propertyData.location || '',
+            price_per_night: propertyData.pricePerNight || propertyData.price?.toString() || '2500',
+            airbnb_url: propertyData.airbnbUrl || '',
+            ical_url: propertyData.icalUrl || '',
+            featured: propertyData.featured || false,
+            active: propertyData.active !== false,
+            amenities: propertyData.amenities || [],
+            featured_photo_index: propertyData.featuredPhotoIndex || 0,
+            updated_at: new Date().toISOString()
+          })
+          .eq('slug', id)
+          .select('id')
+          .single();
+
+        if (updateError) {
+          console.error('Error updating property:', updateError);
+          return handleDatabaseError(updateError);
+        }
+
+        propertyId = updateData.id;
+      } else {
+        // Insert new property
+        const { data: insertData, error: insertError } = await adminClient
+          .from('properties')
+          .insert({
+            name: propertyData.name || propertyData.title,
+            slug: id,
+            type: propertyData.type || 'apartment',
+            bedrooms: propertyData.bedrooms || 2,
+            bathrooms: propertyData.bathrooms || 1,
+            max_guests: propertyData.maxGuests || 4,
+            size_sqm: propertyData.size || propertyData.area?.toString() || '45',
+            description: propertyData.description || '',
+            location: propertyData.location || '',
+            price_per_night: propertyData.pricePerNight || propertyData.price?.toString() || '2500',
+            airbnb_url: propertyData.airbnbUrl || '',
+            ical_url: propertyData.icalUrl || '',
+            featured: propertyData.featured || false,
+            active: propertyData.active !== false,
+            amenities: propertyData.amenities || [],
+            featured_photo_index: propertyData.featuredPhotoIndex || 0
+          })
+          .select('id')
+          .single();
+
+        if (insertError) {
+          console.error('Error inserting property:', insertError);
+          return handleDatabaseError(insertError);
+        }
+
+        propertyId = insertData.id;
+      }
+
+      // Handle photos separately
+      const photos = propertyData.photos || propertyData.images || [];
+      if (photos.length > 0) {
+        // Delete existing photos
+        const { error: deletePhotosError } = await adminClient
+          .from('property_photos')
+          .delete()
+          .eq('property_id', propertyId);
+
+        if (deletePhotosError) {
+          console.error('Error deleting existing photos:', deletePhotosError);
+          // Don't return error, continue with the operation
+        }
+
+        // Insert new photos
+        const photoInserts = photos.map((photoUrl: string, index: number) => ({
+          property_id: propertyId,
+          url: photoUrl,
+          is_primary: index === (propertyData.featuredPhotoIndex || 0),
+          display_order: index
+        }));
+
+        if (photoInserts.length > 0) {
+          const { error: insertPhotosError } = await adminClient
+            .from('property_photos')
+            .insert(photoInserts);
+
+          if (insertPhotosError) {
+            console.error('Error inserting photos:', insertPhotosError);
+            // Don't return error, property was saved successfully
+          }
+        }
       }
 
       console.log(`Property upserted: ${propertyData.name || propertyData.title} (Slug: ${id})`);
