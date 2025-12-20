@@ -107,9 +107,20 @@ export default function PropertiesPage() {
         setLoading(true);
         setError(null);
 
+        // Mobile debugging: Log user agent and viewport
+        console.log('Properties Page: Loading properties on', {
+          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+          viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'server',
+          isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false
+        });
+
         // Load only active properties from database for public view
         const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
-        console.log('Properties Page: Loaded properties from database:', dbProperties);
+        console.log('Properties Page: Loaded properties from database:', {
+          totalCount: Object.keys(dbProperties).length,
+          propertyIds: Object.keys(dbProperties),
+          firstProperty: Object.values(dbProperties)[0]
+        });
 
         // Convert database properties to display format
         // Properties are already filtered to active only, no need to filter again
@@ -119,18 +130,25 @@ export default function PropertiesPage() {
             name: property.name || property.title,
             slug: property.slug || property.name?.toLowerCase().replace(/\s+/g, '-') || property.id,
             location: property.location || '',
-            short_description: property.description || '',
+            short_description: property.description || property.short_description || '',
             amenities: property.amenities || [],
             featured: property.featured ?? false,
             active: property.active ?? true,
             photos: property.photos || property.images || []
           }));
 
+        console.log('Properties Page: Converted properties array:', {
+          totalCount: propertiesArray.length,
+          featuredCount: propertiesArray.filter(p => p.featured).length,
+          sampleProperties: propertiesArray.slice(0, 2)
+        });
+
         setUpdatedProperties(propertiesArray);
       } catch (err) {
         console.error('Properties Page: Error loading properties:', err);
         setError('Failed to load properties. Please try again later.');
         // Fallback to default properties on error
+        console.log('Properties Page: Using fallback properties');
         setUpdatedProperties(properties.filter(p => p.active));
       } finally {
         setLoading(false);
@@ -184,18 +202,18 @@ export default function PropertiesPage() {
             <div className="space-y-16">
               <div>
                 <div className="h-8 bg-gray-200 rounded w-48 mb-8 animate-pulse"></div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {[1, 2, 3].map((i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div key={i} className="card animate-pulse">
                       <div className="aspect-[4/3] bg-gray-200 rounded-t-lg"></div>
-                      <div className="p-5 space-y-3">
-                        <div className="h-6 bg-gray-200 rounded"></div>
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-16 bg-gray-200 rounded"></div>
+                      <div className="p-4 sm:p-5 space-y-3">
+                        <div className="h-5 sm:h-6 bg-gray-200 rounded"></div>
+                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-12 sm:h-16 bg-gray-200 rounded"></div>
                         <div className="flex gap-2">
-                          <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
-                          <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
-                          <div className="h-6 w-14 bg-gray-200 rounded-full"></div>
+                          <div className="h-5 sm:h-6 w-12 sm:w-16 bg-gray-200 rounded-full"></div>
+                          <div className="h-5 sm:h-6 w-16 sm:w-20 bg-gray-200 rounded-full"></div>
+                          <div className="h-5 sm:h-6 w-10 sm:w-14 bg-gray-200 rounded-full"></div>
                         </div>
                       </div>
                     </div>
@@ -205,42 +223,72 @@ export default function PropertiesPage() {
             </div>
           ) : (
             <div>
-          {/* Featured Properties */}
-          {featuredProperties.length > 0 && (
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-1 h-8 bg-[#14b8a6] rounded-full" />
-                <h2 className="font-display text-2xl font-semibold text-[#5f4a38]">
-                  Featured Properties
-                </h2>
-              </div>
-              
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
+          {/* No Properties Available */}
+          {updatedProperties.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#faf3e6] flex items-center justify-center">
+                  <span className="font-display text-4xl text-[#d4b896]">CC</span>
+                </div>
+                <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-3">
+                  No Properties Available
+                </h3>
+                <p className="text-[#7d6349] mb-6">
+                  We're currently updating our property listings. Please check back soon or contact us directly.
+                </p>
+                <a
+                  href="https://m.me/cozycondoiloilocity"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary inline-flex items-center gap-2"
+                >
+                  <span>Contact Us</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
-          )}
+          ) : (
+            <>
+              {/* Featured Properties */}
+              {featuredProperties.length > 0 && (
+                <div className="mb-16">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-1 h-8 bg-[#14b8a6] rounded-full" />
+                    <h2 className="font-display text-xl sm:text-2xl font-semibold text-[#5f4a38]">
+                      Featured Properties
+                    </h2>
+                  </div>
 
-          {/* All Properties */}
-          <div>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-1 h-8 bg-[#d4b896] rounded-full" />
-              <h2 className="font-display text-2xl font-semibold text-[#5f4a38]">
-                All Properties
-              </h2>
-              <span className="text-sm text-[#9a7d5e] bg-[#faf3e6] px-3 py-1 rounded-full">
-                {updatedProperties.length} units
-              </span>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {otherProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                    {featuredProperties.map((property) => (
+                      <PropertyCard key={property.id} property={property} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* All Properties */}
+              {otherProperties.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-1 h-8 bg-[#d4b896] rounded-full" />
+                    <h2 className="font-display text-xl sm:text-2xl font-semibold text-[#5f4a38]">
+                      All Properties
+                    </h2>
+                    <span className="text-xs sm:text-sm text-[#9a7d5e] bg-[#faf3e6] px-2 sm:px-3 py-1 rounded-full">
+                      {updatedProperties.length} units
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                    {otherProperties.map((property) => (
+                      <PropertyCard key={property.id} property={property} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
             </div>
           )}
         </div>
@@ -317,31 +365,31 @@ function PropertyCard({ property }: { property: any }) {
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-2 group-hover:text-[#0d9488] transition-colors">
+      <div className="p-4 sm:p-5">
+        <h3 className="font-display text-lg sm:text-xl font-semibold text-[#5f4a38] mb-2 group-hover:text-[#0d9488] transition-colors">
           {propertyData.name}
         </h3>
 
         <div className="flex items-center gap-2 text-[#9a7d5e] text-sm mb-3">
-          <MapPin className="w-4 h-4" />
-          <span>{propertyData.location}</span>
+          <MapPin className="w-4 h-4 flex-shrink-0" />
+          <span className="truncate">{propertyData.location}</span>
         </div>
 
-        <p className="text-[#7d6349] text-sm mb-4 line-clamp-2">
+        <p className="text-[#7d6349] text-sm mb-4 line-clamp-2 leading-relaxed">
           {property.short_description}
         </p>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
           {propertyData.amenities.slice(0, 3).map((amenity: string, i: number) => (
             <span
               key={i}
-              className="px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full"
+              className="px-2 sm:px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full whitespace-nowrap"
             >
               {amenity}
             </span>
           ))}
           {propertyData.amenities.length > 3 && (
-            <span className="px-3 py-1 bg-[#faf3e6] text-[#9a7d5e] text-xs rounded-full">
+            <span className="px-2 sm:px-3 py-1 bg-[#faf3e6] text-[#9a7d5e] text-xs rounded-full whitespace-nowrap">
               +{propertyData.amenities.length - 3} more
             </span>
           )}
