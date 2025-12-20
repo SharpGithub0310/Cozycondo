@@ -49,9 +49,9 @@ export default function AdminSettingsDebug() {
 
         fieldsToCheck.forEach(field => {
           console.log(`  ${field}:`, {
-            api: apiData?.data?.[field] || 'NOT FOUND',
-            enhanced: enhancedData?.[field] || 'NOT FOUND',
-            postMigration: postMigrationData?.[field] || 'NOT FOUND',
+            api: apiData?.data?.[field as keyof typeof apiData.data] || 'NOT FOUND',
+            enhanced: enhancedData?.[field as keyof typeof enhancedData] || 'NOT FOUND',
+            postMigration: postMigrationData?.[field as keyof typeof postMigrationData] || 'NOT FOUND',
           });
         });
 
