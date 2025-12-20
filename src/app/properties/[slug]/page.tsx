@@ -88,7 +88,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     const property = await postMigrationDatabaseService.getProperty(slug);
 
     if (property) {
-      console.log('PropertyPage: Found property in database:', property.name || property.title);
+      console.log('PropertyPage: Found property in database:', property.name || (property as any).title);
       return <PropertyDetail slug={slug} defaultProperty={property} />;
     }
   } catch (error) {
