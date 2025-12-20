@@ -49,8 +49,14 @@ export async function GET(
         slug,
         description,
         short_description,
+        type,
+        bedrooms,
+        bathrooms,
+        max_guests,
+        size_sqm,
         location,
         address,
+        price_per_night,
         map_url,
         airbnb_url,
         ical_url,
@@ -58,6 +64,7 @@ export async function GET(
         featured,
         active,
         display_order,
+        featured_photo_index,
         created_at,
         updated_at,
         property_photos (
@@ -81,8 +88,14 @@ export async function GET(
           slug,
           description,
           short_description,
+          type,
+          bedrooms,
+          bathrooms,
+          max_guests,
+          size_sqm,
           location,
           address,
+          price_per_night,
           map_url,
           airbnb_url,
           ical_url,
@@ -90,6 +103,7 @@ export async function GET(
           featured,
           active,
           display_order,
+          featured_photo_index,
           created_at,
           updated_at,
           property_photos (
@@ -115,52 +129,52 @@ export async function GET(
     }
 
     // Ensure slug exists, fallback to UUID if needed
-    const slug = property.slug || property.id || property.name?.toLowerCase().replace(/\s+/g, '-') || 'property-' + Date.now();
+    const slug = property?.slug || property?.id || property?.name?.toLowerCase().replace(/\s+/g, '-') || 'property-' + Date.now();
 
     // Sort photos properly
-    const sortedPhotos = (property.property_photos || [])
+    const sortedPhotos = (property?.property_photos || [])
       .filter((photo: any) => photo.url) // Only include photos with URLs
       .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
       .map((photo: any) => photo.url);
 
     // Find featured photo index
-    const featuredPhotoIndex = (property.property_photos || [])
+    const featuredPhotoIndex = (property?.property_photos || [])
       .findIndex((photo: any) => photo.is_primary) || 0;
 
     // Convert to the format expected by the frontend (keeping backward compatibility)
     const result = {
       id: slug, // Use slug as ID for frontend compatibility
-      uuid: property.id, // Store actual UUID for database operations
-      title: property.name || '',
-      name: property.name || '',
-      description: property.description || property.short_description || '',
-      short_description: property.short_description || property.description || '',
-      type: property.type || 'apartment',
-      bedrooms: property.bedrooms || 2,
-      bathrooms: property.bathrooms || 1,
-      maxGuests: property.max_guests || 4,
-      size: property.size_sqm || '45',
-      area: parseFloat(property.size_sqm || '45'),
+      uuid: property?.id, // Store actual UUID for database operations
+      title: property?.name || '',
+      name: property?.name || '',
+      description: property?.description || property?.short_description || '',
+      short_description: property?.short_description || property?.description || '',
+      type: property?.type || 'apartment',
+      bedrooms: property?.bedrooms || 2,
+      bathrooms: property?.bathrooms || 1,
+      maxGuests: property?.max_guests || 4,
+      size: property?.size_sqm || '45',
+      area: parseFloat(property?.size_sqm || '45'),
       areaUnit: 'sqm',
-      location: property.location || '',
-      address: property.address || '',
-      price: parseFloat(property.price_per_night || '2500'),
+      location: property?.location || '',
+      address: property?.address || '',
+      price: parseFloat(property?.price_per_night || '2500'),
       priceUnit: 'PHP/night',
-      pricePerNight: property.price_per_night || '2500',
-      airbnbUrl: property.airbnb_url || '',
-      airbnbIcalUrl: property.ical_url || '',
-      icalUrl: property.ical_url || '', // Legacy compatibility
-      mapUrl: property.map_url || '',
-      featured: property.featured === true,
-      active: property.active === true,
-      amenities: Array.isArray(property.amenities) ? property.amenities : [],
+      pricePerNight: property?.price_per_night || '2500',
+      airbnbUrl: property?.airbnb_url || '',
+      airbnbIcalUrl: property?.ical_url || '',
+      icalUrl: property?.ical_url || '', // Legacy compatibility
+      mapUrl: property?.map_url || '',
+      featured: property?.featured === true,
+      active: property?.active === true,
+      amenities: Array.isArray(property?.amenities) ? property?.amenities : [],
       images: sortedPhotos, // Legacy compatibility
       photos: sortedPhotos,
       featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
       slug: slug,
-      displayOrder: property.display_order || 0,
-      createdAt: property.created_at,
-      updatedAt: property.updated_at
+      displayOrder: property?.display_order || 0,
+      createdAt: property?.created_at,
+      updatedAt: property?.updated_at
     };
 
     return successResponse(

@@ -22,12 +22,14 @@ export interface Property {
 export interface PropertyData {
   id: string;
   name: string;
+  title?: string;
   type: string;
   bedrooms: number;
   bathrooms: number;
   maxGuests: number;
   size: string;
   description: string;
+  short_description?: string;
   location: string;
   pricePerNight: string;
   airbnbUrl: string;

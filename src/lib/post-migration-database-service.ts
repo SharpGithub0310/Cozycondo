@@ -10,10 +10,10 @@ import { getProductionFallbackProperties, getProductionFallbackSettings } from '
 
 class PostMigrationService {
 
-  async getProperties() {
+  async getProperties(options?: { active?: boolean }) {
     try {
       // First, try to get from database API
-      const dbProperties = await enhancedDatabaseService.getProperties();
+      const dbProperties = await enhancedDatabaseService.getProperties(options);
 
       // Check if we have real database data (not empty fallback)
       if (dbProperties && Object.keys(dbProperties).length > 0) {
