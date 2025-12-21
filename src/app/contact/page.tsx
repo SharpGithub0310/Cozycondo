@@ -1,7 +1,7 @@
 'use client';
 
 import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 
 const contactMethods = [
@@ -72,33 +72,33 @@ export default function ContactPage() {
   const [dynamicFaqs, setDynamicFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
 
-        // Load settings from database
-        const dbSettings = await enhancedDatabaseService.getWebsiteSettings();
-        setSettings(dbSettings);
+      // Load settings from database
+      const dbSettings = await enhancedDatabaseService.getWebsiteSettings();
+      setSettings(dbSettings);
 
-        if (dbSettings.contactImage) {
-          setContactImage(dbSettings.contactImage);
-        }
-
-        // Load FAQs from database if available
-        if (dbSettings.faqs) {
-          setDynamicFaqs(dbSettings.faqs);
-        }
-      } catch (error) {
-        console.error('Contact: Error loading settings:', error);
-        // Fallback to using default faqs
-      } finally {
-        setLoading(false);
+      if (dbSettings.contactImage) {
+        setContactImage(dbSettings.contactImage);
       }
-    };
 
-    loadData();
+      // Load FAQs from database if available
+      if (dbSettings.faqs) {
+        setDynamicFaqs(dbSettings.faqs);
+      }
+    } catch (error) {
+      console.error('Contact: Error loading settings:', error);
+      // Fallback to using default faqs
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return (
     <div className="pt-20">

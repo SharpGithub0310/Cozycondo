@@ -3,7 +3,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, ArrowRight, Filter } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 import type { PropertyData } from '@/lib/types';
 import { normalizePropertyData } from '@/utils/slugify';
@@ -102,52 +102,52 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const loadProperties = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Mobile debugging: Log user agent and viewport
-        console.log('Properties Page: Loading properties on', {
-          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
-          viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'server',
-          isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false
-        });
+      // Mobile debugging: Log user agent and viewport
+      console.log('Properties Page: Loading properties on', {
+        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+        viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'server',
+        isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false
+      });
 
-        // Load only active properties from database for public view
-        const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
-        console.log('Properties Page: Loaded properties from database:', {
-          totalCount: Object.keys(dbProperties).length,
-          propertyIds: Object.keys(dbProperties),
-          firstProperty: Object.values(dbProperties)[0]
-        });
+      // Load only active properties from database for public view
+      const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
+      console.log('Properties Page: Loaded properties from database:', {
+        totalCount: Object.keys(dbProperties).length,
+        propertyIds: Object.keys(dbProperties),
+        firstProperty: Object.values(dbProperties)[0]
+      });
 
-        // Convert database properties to display format
-        // Properties are already filtered to active only, no need to filter again
-        const propertiesArray = Object.values(dbProperties)
-          .map((property: any) => normalizePropertyData(property));
+      // Convert database properties to display format
+      // Properties are already filtered to active only, no need to filter again
+      const propertiesArray = Object.values(dbProperties)
+        .map((property: any) => normalizePropertyData(property));
 
-        console.log('Properties Page: Converted properties array:', {
-          totalCount: propertiesArray.length,
-          featuredCount: propertiesArray.filter(p => p.featured).length,
-          sampleProperties: propertiesArray.slice(0, 2)
-        });
+      console.log('Properties Page: Converted properties array:', {
+        totalCount: propertiesArray.length,
+        featuredCount: propertiesArray.filter(p => p.featured).length,
+        sampleProperties: propertiesArray.slice(0, 2)
+      });
 
-        setUpdatedProperties(propertiesArray);
-      } catch (err) {
-        console.error('Properties Page: Error loading properties:', err);
-        setError('Failed to load properties. Please try again later.');
-        // Fallback to default properties on error
-        console.log('Properties Page: Using fallback properties');
-        setUpdatedProperties(properties.filter(p => p.active));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProperties();
+      setUpdatedProperties(propertiesArray);
+    } catch (err) {
+      console.error('Properties Page: Error loading properties:', err);
+      setError('Failed to load properties. Please try again later.');
+      // Fallback to default properties on error
+      console.log('Properties Page: Using fallback properties');
+      setUpdatedProperties(properties.filter(p => p.active));
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadProperties();
+  }, [loadProperties]);
 
   // Properties are already active, no need to filter by active again
   const featuredProperties = updatedProperties.filter(p => p.featured);
@@ -323,7 +323,7 @@ function PropertyCard({ property }: { property: any }) {
       const featuredIndex = property.featuredPhotoIndex || 0;
       setDisplayPhoto(property.photos[featuredIndex] || property.photos[0]);
     }
-  }, [property]);
+  }, [property.id, property.photos, property.featuredPhotoIndex]);
 
   return (
     <div className="card group">

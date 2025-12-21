@@ -56,6 +56,8 @@ export interface DatabaseServiceOptions {
 class EnhancedDatabaseService {
   private options: DatabaseServiceOptions;
   private migrationInProgress: boolean = false;
+  private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
+  private readonly DEFAULT_CACHE_TTL = 30000; // 30 seconds
 
   constructor(options: DatabaseServiceOptions = {}) {
     this.options = {
@@ -71,6 +73,43 @@ class EnhancedDatabaseService {
 
   private isOnline(): boolean {
     return typeof window !== 'undefined' && navigator.onLine;
+  }
+
+  private getCacheKey(endpoint: string, options: any = {}): string {
+    return `${endpoint}_${JSON.stringify(options)}`;
+  }
+
+  private isCacheValid(cacheEntry: { timestamp: number; ttl: number }): boolean {
+    return Date.now() - cacheEntry.timestamp < cacheEntry.ttl;
+  }
+
+  private getFromCache<T>(cacheKey: string): T | null {
+    const entry = this.cache.get(cacheKey);
+    if (entry && this.isCacheValid(entry)) {
+      console.log(`Cache hit for: ${cacheKey}`);
+      return entry.data;
+    }
+    if (entry) {
+      // Remove expired entry
+      this.cache.delete(cacheKey);
+    }
+    return null;
+  }
+
+  private setCache<T>(cacheKey: string, data: T, ttl: number = this.DEFAULT_CACHE_TTL): void {
+    this.cache.set(cacheKey, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+  }
+
+  private invalidateCache(pattern: string): void {
+    for (const key of this.cache.keys()) {
+      if (key.includes(pattern)) {
+        this.cache.delete(key);
+      }
+    }
   }
 
   private async apiCall<T>(
@@ -133,6 +172,14 @@ class EnhancedDatabaseService {
   // =============================================
 
   async getProperties(options: { active?: boolean } = {}): Promise<Record<string, PropertyData>> {
+    // Check cache first
+    const cacheKey = this.getCacheKey('/api/properties', options);
+    const cachedResult = this.getFromCache<Record<string, PropertyData>>(cacheKey);
+
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     console.log('Enhanced Database Service: Fetching properties via API...');
 
     try {
@@ -186,7 +233,10 @@ class EnhancedDatabaseService {
         }
       );
 
-      console.log(`Successfully fetched ${Object.keys(result).length} properties from API`);
+      // Cache the result for future use
+      this.setCache(cacheKey, result);
+
+      console.log(`Successfully fetched ${Object.keys(result).length} properties from API and cached result`);
       return result;
     } catch (error) {
       console.error('Enhanced Database Service: Error fetching properties:', error);
@@ -203,7 +253,7 @@ class EnhancedDatabaseService {
   }
 
   async saveProperty(id: string, propertyData: PropertyData): Promise<void> {
-    return this.apiCall(
+    const result = await this.apiCall(
       '/api/properties',
       {
         method: 'POST',
@@ -211,10 +261,15 @@ class EnhancedDatabaseService {
       },
       () => saveStoredProperty(id, propertyData)
     );
+
+    // Invalidate properties cache after modification
+    this.invalidateCache('/api/properties');
+
+    return result;
   }
 
   async updatePropertyStatus(id: string, updates: { featured?: boolean; active?: boolean }): Promise<void> {
-    return this.apiCall(
+    const result = await this.apiCall(
       '/api/properties',
       {
         method: 'PUT',
@@ -222,6 +277,11 @@ class EnhancedDatabaseService {
       },
       () => updateStoredPropertyStatus(id, updates)
     );
+
+    // Invalidate properties cache after modification
+    this.invalidateCache('/api/properties');
+
+    return result;
   }
 
   // =============================================
@@ -229,7 +289,15 @@ class EnhancedDatabaseService {
   // =============================================
 
   async getWebsiteSettings(): Promise<WebsiteSettings> {
-    return this.apiCall(
+    // Check cache first
+    const cacheKey = this.getCacheKey('/api/settings');
+    const cachedResult = this.getFromCache<WebsiteSettings>(cacheKey);
+
+    if (cachedResult) {
+      return cachedResult;
+    }
+
+    const result = await this.apiCall(
       '/api/settings',
       { method: 'GET' },
       () => {
@@ -244,10 +312,15 @@ class EnhancedDatabaseService {
         return getProductionFallbackSettings() as WebsiteSettings;
       }
     );
+
+    // Cache the result
+    this.setCache(cacheKey, result);
+
+    return result;
   }
 
   async saveWebsiteSettings(settings: Partial<WebsiteSettings>): Promise<void> {
-    return this.apiCall(
+    const result = await this.apiCall(
       '/api/settings',
       {
         method: 'POST',
@@ -255,6 +328,11 @@ class EnhancedDatabaseService {
       },
       () => saveSettings(settings)
     );
+
+    // Invalidate settings cache after modification
+    this.invalidateCache('/api/settings');
+
+    return result;
   }
 
   // =============================================

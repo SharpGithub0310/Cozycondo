@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Edit,
@@ -22,7 +22,7 @@ export default function PropertyDetail() {
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProperty = async () => {
+  const loadProperty = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Loading property from database:', params.id);
@@ -70,7 +70,7 @@ export default function PropertyDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
 
   useEffect(() => {
     loadProperty();
@@ -93,7 +93,7 @@ export default function PropertyDetail() {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [params.id]);
+  }, [loadProperty]);
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this property?')) {
