@@ -34,42 +34,10 @@ const nextConfig: NextConfig = {
   // Compression
   compress: true,
 
-  // Enable webpack bundle analyzer in development
-  webpack: (config, { dev, isServer }) => {
-    // Bundle analyzer in development
-    if (dev && !isServer && process.env.ANALYZE === 'true') {
-      const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-      config.plugins.push(
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'server',
-          openAnalyzer: true,
-        })
-      );
-    }
-
-    // Optimize bundle size
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-            common: {
-              minChunks: 2,
-              chunks: 'all',
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-
-    return config;
+  // Turbopack configuration (Next.js 16 uses Turbopack by default)
+  turbopack: {
+    // Empty config to silence the warning
+    // Turbopack handles optimizations automatically
   },
 
   // Headers for performance
