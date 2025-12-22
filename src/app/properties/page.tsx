@@ -1,395 +1,238 @@
-'use client';
-
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { MapPin, ArrowRight, Filter } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import Image from 'next/image';
+import { MapPin, ArrowRight, Bed, Bath, Square, Wifi, Car, Wind } from 'lucide-react';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import { getProductionFallbackProperties } from '@/lib/production-fallback-service';
 import type { PropertyData } from '@/lib/types';
-import { normalizePropertyData } from '@/utils/slugify';
-import OptimizedImage from '@/components/OptimizedImage';
-import { performanceMonitor } from '@/utils/performance';
 
-// export const metadata: Metadata = {
-//   title: 'Properties',
-//   description: 'Browse our collection of premium short-term rental condominiums in Iloilo City. Modern amenities, prime locations, and exceptional comfort.',
-// };
-
-// Sample properties (will be replaced with Supabase data)
-const properties = [
-  {
-    id: '1',
-    name: 'Artist Loft',
-    slug: 'artist-loft',
-    location: 'Arts District',
-    short_description: 'Unique artist loft with high ceilings and natural light. Perfect for creative professionals and art lovers.',
-    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Smart TV', 'High Ceilings', 'Natural Light', 'Workspace'],
-    featured: true,
-    active: true,
+export const metadata: Metadata = {
+  title: 'Properties | Cozy Condo',
+  description: 'Browse our collection of premium short-term rental condominiums in Iloilo City. Modern amenities, prime locations, and exceptional comfort.',
+  openGraph: {
+    title: 'Premium Properties in Iloilo City',
+    description: 'Discover comfortable and modern condominiums for short-term rental',
   },
-  {
-    id: '2',
-    name: 'Garden View Suite',
-    slug: 'garden-view-suite',
-    location: 'Smallville Complex',
-    short_description: 'Spacious 1-bedroom suite overlooking lush gardens. Ideal for extended stays with full kitchen and living area.',
-    amenities: ['WiFi', 'Air-conditioning', 'Parking', 'Kitchen', 'Balcony'],
-    featured: true,
-    active: true,
-  },
-  {
-    id: '3',
-    name: 'Downtown Retreat',
-    slug: 'downtown-retreat',
-    location: 'City Proper',
-    short_description: 'Cozy unit in the heart of downtown. Walking distance to SM City Iloilo and local attractions.',
-    amenities: ['WiFi', 'Air-conditioning', 'Smart TV', 'Kitchen'],
-    featured: true,
-    active: true,
-  },
-  {
-    id: '4',
-    name: 'Sunset Bay Unit',
-    slug: 'sunset-bay-unit',
-    location: 'Mandurriao',
-    short_description: 'Beautiful unit with western exposure for stunning sunset views. Modern finishes throughout.',
-    amenities: ['WiFi', 'Air-conditioning', 'City View', 'Kitchen', 'Gym Access'],
-    featured: false,
-    active: true,
-  },
-  {
-    id: '5',
-    name: 'Executive Suite',
-    slug: 'executive-suite',
-    location: 'Iloilo Business Park',
-    short_description: 'Premium 1-bedroom suite designed for business executives. Includes dedicated workspace and meeting area.',
-    amenities: ['WiFi', 'Air-conditioning', 'Workspace', 'Smart TV', 'Parking'],
-    featured: false,
-    active: true,
-  },
-  {
-    id: '6',
-    name: 'Family Haven',
-    slug: 'family-haven',
-    location: 'Molo District',
-    short_description: 'Spacious 2-bedroom unit perfect for families. Close to schools and family-friendly attractions.',
-    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'Washer', 'Parking'],
-    featured: false,
-    active: true,
-  },
-  {
-    id: '7',
-    name: 'Metro Central',
-    slug: 'metro-central',
-    location: 'City Proper',
-    short_description: 'Modern unit in the heart of City Proper. Walking distance to major attractions and business centers.',
-    amenities: ['WiFi', 'Air-conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
-    featured: false,
-    active: true,
-  },
-  {
-    id: '8',
-    name: 'Riverside Studio',
-    slug: 'riverside-studio',
-    location: 'Jaro District',
-    short_description: 'Peaceful riverside studio in historic Jaro district. Perfect for those seeking tranquility with cultural access.',
-    amenities: ['WiFi', 'Air-conditioning', 'Kitchen', 'River View', 'Peaceful Setting', 'Historic Area'],
-    featured: false,
-    active: true,
-  },
-];
+};
 
-export default function PropertiesPage() {
-  const [updatedProperties, setUpdatedProperties] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// Server Component - runs on the server, faster initial page load
+export default async function PropertiesPage() {
+  // Fetch properties on the server
+  let properties: PropertyData[] = [];
 
-  const loadProperties = useCallback(async () => {
-    return performanceMonitor.measureAsyncFunction('loadPropertiesPage', async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  try {
+    // Try database first
+    const dbProperties = await postMigrationDatabaseService.getProperties();
+    properties = Object.values(dbProperties);
+    console.log(`Loaded ${properties.length} properties from database`);
+  } catch (error) {
+    console.error('Error loading properties from database:', error);
+    // Use fallback if database fails
+    const fallbackProps = getProductionFallbackProperties();
+    properties = Object.values(fallbackProps);
+    console.log(`Using ${properties.length} fallback properties`);
+  }
 
-        // Mobile debugging: Log user agent and viewport
-        console.log('Properties Page: Loading properties on', {
-          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
-          viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'server',
-          isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false
-        });
-
-        // Load only active properties from database for public view
-        const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
-        console.log('Properties Page: Loaded properties from database:', {
-          totalCount: Object.keys(dbProperties).length,
-          propertyIds: Object.keys(dbProperties),
-          firstProperty: Object.values(dbProperties)[0]
-        });
-
-        // Convert database properties to display format
-        // Properties are already filtered to active only, no need to filter again
-        const propertiesArray = performanceMonitor.measureFunction('normalizeProperties', () => {
-          return Object.values(dbProperties)
-            .map((property: any) => normalizePropertyData(property));
-        });
-
-        console.log('Properties Page: Converted properties array:', {
-          totalCount: propertiesArray.length,
-          featuredCount: propertiesArray.filter(p => p.featured).length,
-          sampleProperties: propertiesArray.slice(0, 2)
-        });
-
-        performanceMonitor.recordMetric('Properties_LoadSuccess', propertiesArray.length);
-        setUpdatedProperties(propertiesArray);
-      } catch (err) {
-        console.error('Properties Page: Error loading properties:', err);
-        performanceMonitor.recordMetric('Properties_LoadError', 1);
-        setError('Failed to load properties. Please try again later.');
-        // Fallback to default properties on error
-        console.log('Properties Page: Using fallback properties');
-        setUpdatedProperties(properties.filter(p => p.active));
-      } finally {
-        setLoading(false);
-      }
+  // Filter active properties and sort featured first
+  const activeProperties = properties
+    .filter(p => p.active !== false)
+    .sort((a, b) => {
+      if (a.featured && !b.featured) return -1;
+      if (!a.featured && b.featured) return 1;
+      return 0;
     });
-  }, []);
 
-  useEffect(() => {
-    loadProperties();
-  }, [loadProperties]);
-
-  // Properties are already active, no need to filter by active again
-  const featuredProperties = updatedProperties.filter(p => p.featured);
-  const otherProperties = updatedProperties.filter(p => !p.featured);
+  const featuredProperties = activeProperties.filter(p => p.featured);
+  const regularProperties = activeProperties.filter(p => !p.featured);
 
   return (
-    <div className="pt-20">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h1 className="font-display text-4xl md:text-5xl font-semibold text-[#5f4a38] mb-4">
-              Our Properties
+      <section className="relative bg-gradient-to-r from-[#0d9488] to-[#0a7e74] text-white py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Find Your Perfect Stay in Iloilo
             </h1>
-            <p className="text-lg text-[#7d6349]">
-              Discover our curated collection of premium condominiums across Iloilo City. Each property is handpicked for comfort, convenience, and style.
+            <p className="text-lg md:text-xl opacity-90">
+              Discover our collection of premium condominiums, each offering modern comfort and prime locations.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Properties Grid */}
-      <section className="section bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Error Display */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
-              <div className="flex items-center justify-between">
-                <p className="text-red-600">{error}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="btn-primary text-sm"
-                >
-                  Retry
-                </button>
-              </div>
+      {/* Featured Properties */}
+      {featuredProperties.length > 0 && (
+        <section className="py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Properties</h2>
+              <p className="text-gray-600">Hand-picked selections for an exceptional stay</p>
             </div>
-          )}
 
-          {/* Loading State */}
-          {loading ? (
-            <div className="space-y-16">
-              <div>
-                <div className="h-8 bg-gray-200 rounded w-48 mb-8 animate-pulse"></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="card animate-pulse">
-                      <div className="aspect-[4/3] bg-gray-200 rounded-t-lg"></div>
-                      <div className="p-4 sm:p-5 space-y-3">
-                        <div className="h-5 sm:h-6 bg-gray-200 rounded"></div>
-                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-12 sm:h-16 bg-gray-200 rounded"></div>
-                        <div className="flex gap-2">
-                          <div className="h-5 sm:h-6 w-12 sm:w-16 bg-gray-200 rounded-full"></div>
-                          <div className="h-5 sm:h-6 w-16 sm:w-20 bg-gray-200 rounded-full"></div>
-                          <div className="h-5 sm:h-6 w-10 sm:w-14 bg-gray-200 rounded-full"></div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {featuredProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} priority={true} />
+              ))}
             </div>
-          ) : (
-            <div>
-          {/* No Properties Available */}
-          {updatedProperties.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="max-w-md mx-auto">
-                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#faf3e6] flex items-center justify-center">
-                  <span className="font-display text-4xl text-[#d4b896]">CC</span>
-                </div>
-                <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-3">
-                  No Properties Available
-                </h3>
-                <p className="text-[#7d6349] mb-6">
-                  We're currently updating our property listings. Please check back soon or contact us directly.
-                </p>
-                <a
-                  href="https://m.me/cozycondoiloilocity"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary inline-flex items-center gap-2"
-                >
-                  <span>Contact Us</span>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Featured Properties */}
-              {featuredProperties.length > 0 && (
-                <div className="mb-16">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-1 h-8 bg-[#14b8a6] rounded-full" />
-                    <h2 className="font-display text-xl sm:text-2xl font-semibold text-[#5f4a38]">
-                      Featured Properties
-                    </h2>
-                  </div>
+          </div>
+        </section>
+      )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    {featuredProperties.map((property) => (
-                      <PropertyCard key={property.id} property={property} />
-                    ))}
-                  </div>
-                </div>
-              )}
+      {/* All Properties */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">All Properties</h2>
+            <p className="text-gray-600">{activeProperties.length} properties available</p>
+          </div>
 
-              {/* All Properties */}
-              {otherProperties.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-1 h-8 bg-[#d4b896] rounded-full" />
-                    <h2 className="font-display text-xl sm:text-2xl font-semibold text-[#5f4a38]">
-                      All Properties
-                    </h2>
-                    <span className="text-xs sm:text-sm text-[#9a7d5e] bg-[#faf3e6] px-2 sm:px-3 py-1 rounded-full">
-                      {updatedProperties.length} units
-                    </span>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {regularProperties.map((property, index) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                priority={index < 3} // Prioritize first 3 images for LCP
+              />
+            ))}
+          </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    {otherProperties.map((property) => (
-                      <PropertyCard key={property.id} property={property} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+          {activeProperties.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No properties available at the moment.</p>
+              <p className="text-gray-500 mt-2">Please check back soon!</p>
             </div>
           )}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="section bg-[#faf3e6]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-[#5f4a38] mb-4">
-            Can&apos;t Find What You&apos;re Looking For?
-          </h2>
-          <p className="text-[#7d6349] mb-8">
-            Contact us directly and we&apos;ll help you find the perfect property for your needs.
+      <section className="py-16 bg-gradient-to-r from-[#0d9488] to-[#0a7e74] text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Can't Find What You're Looking For?</h2>
+          <p className="text-lg mb-8 opacity-90">
+            Contact us for personalized assistance with your accommodation needs
           </p>
-          <a
-            href="https://m.me/cozycondoiloilocity"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary inline-flex items-center gap-2"
+          <Link
+            href="/contact"
+            className="inline-flex items-center gap-2 bg-white text-[#0d9488] px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
           >
-            <span>Message Us</span>
-            <ArrowRight className="w-4 h-4" />
-          </a>
+            Get in Touch
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </section>
-    </div>
+    </main>
   );
 }
 
-// Property Card Component
-function PropertyCard({ property }: { property: any }) {
-  const [displayPhoto, setDisplayPhoto] = useState<string>('');
-  const [propertyData, setPropertyData] = useState(property);
-
-  useEffect(() => {
-    // Property data already comes from database, just set up the display photo
-    setPropertyData(property);
-
-    if (property.photos && property.photos.length > 0) {
-      // Use featured photo if available, otherwise first photo
-      const featuredIndex = property.featuredPhotoIndex || 0;
-      setDisplayPhoto(property.photos[featuredIndex] || property.photos[0]);
-    }
-  }, [property.id, property.photos, property.featuredPhotoIndex]);
+// Optimized Property Card Component
+function PropertyCard({ property, priority = false }: { property: PropertyData; priority?: boolean }) {
+  const imageUrl = property.image_url || property.images?.[0] || '/property-placeholder.jpg';
+  const amenityIcons: Record<string, any> = {
+    'WiFi': Wifi,
+    'Parking': Car,
+    'Air-conditioning': Wind,
+  };
 
   return (
-    <div className="card group">
-      {/* Image */}
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden rounded-t-lg">
-        <OptimizedImage
-          src={displayPhoto || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop'}
-          alt={property.name}
-          className="w-full h-full group-hover:scale-105 transition-transform duration-200"
-          lazy={true}
-          onError={() => setDisplayPhoto('')}
+    <Link
+      href={`/properties/${property.slug}`}
+      className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+    >
+      <div className="relative h-64 overflow-hidden">
+        <Image
+          src={imageUrl}
+          alt={property.name || 'Property'}
+          fill
+          className="object-cover group-hover:scale-110 transition-transform duration-500"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={priority}
+          quality={priority ? 90 : 75}
         />
         {property.featured && (
-          <div className="absolute top-4 left-4 px-3 py-1 bg-[#14b8a6] text-white text-xs font-medium rounded-full">
+          <div className="absolute top-4 left-4 bg-[#0d9488] text-white px-3 py-1 rounded-full text-sm font-semibold">
             Featured
           </div>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 sm:p-5">
-        <h3 className="font-display text-lg sm:text-xl font-semibold text-[#5f4a38] mb-2 group-hover:text-[#0d9488] transition-colors">
-          {propertyData.name}
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#0d9488] transition-colors">
+          {property.name}
         </h3>
 
-        <div className="flex items-center gap-2 text-[#9a7d5e] text-sm mb-3">
-          <MapPin className="w-4 h-4 flex-shrink-0" />
-          <span className="truncate">{propertyData.location}</span>
+        <div className="flex items-center text-gray-600 mb-3">
+          <MapPin className="w-4 h-4 mr-1" />
+          <span className="text-sm">{property.location}</span>
         </div>
 
-        <p className="text-[#7d6349] text-sm mb-4 line-clamp-2 leading-relaxed">
-          {property.short_description}
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          {property.short_description || property.description}
         </p>
 
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
-          {propertyData.amenities.slice(0, 3).map((amenity: string, i: number) => (
-            <span
-              key={i}
-              className="px-2 sm:px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full whitespace-nowrap"
-            >
-              {amenity}
-            </span>
-          ))}
-          {propertyData.amenities.length > 3 && (
-            <span className="px-2 sm:px-3 py-1 bg-[#faf3e6] text-[#9a7d5e] text-xs rounded-full whitespace-nowrap">
-              +{propertyData.amenities.length - 3} more
-            </span>
-          )}
-        </div>
+        {/* Property Details */}
+        {(property.bedrooms || property.bathrooms || property.area) && (
+          <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+            {property.bedrooms && (
+              <div className="flex items-center gap-1">
+                <Bed className="w-4 h-4" />
+                <span>{property.bedrooms}</span>
+              </div>
+            )}
+            {property.bathrooms && (
+              <div className="flex items-center gap-1">
+                <Bath className="w-4 h-4" />
+                <span>{property.bathrooms}</span>
+              </div>
+            )}
+            {property.area && (
+              <div className="flex items-center gap-1">
+                <Square className="w-4 h-4" />
+                <span>{property.area}</span>
+              </div>
+            )}
+          </div>
+        )}
 
-        <Link
-          href={`/properties/${property.slug}`}
-          className="inline-flex items-center gap-1 text-[#0d9488] font-medium text-sm hover:gap-2 transition-all"
-        >
-          <span>View Details</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        {/* Amenities */}
+        {property.amenities && property.amenities.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {property.amenities.slice(0, 3).map((amenity) => {
+              const Icon = amenityIcons[amenity];
+              return (
+                <span
+                  key={amenity}
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                >
+                  {Icon && <Icon className="w-3 h-3" />}
+                  {amenity}
+                </span>
+              );
+            })}
+            {property.amenities.length > 3 && (
+              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                +{property.amenities.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between pt-4 border-t">
+          <div>
+            {property.price && (
+              <div className="text-2xl font-bold text-[#0d9488]">
+                ₱{property.price.toLocaleString()}
+                <span className="text-sm text-gray-600 font-normal">/night</span>
+              </div>
+            )}
+          </div>
+          <span className="text-[#0d9488] font-semibold group-hover:gap-2 inline-flex items-center gap-1 transition-all">
+            View Details
+            <ArrowRight className="w-4 h-4" />
+          </span>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }

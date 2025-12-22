@@ -40,6 +40,44 @@ const nextConfig: NextConfig = {
     // Turbopack handles optimizations automatically
   },
 
+  // Redirects for old URLs and common mistakes
+  async redirects() {
+    return [
+      // Redirect common property type searches to properties page
+      {
+        source: '/properties/1-bedroom',
+        destination: '/properties',
+        permanent: false,
+      },
+      {
+        source: '/properties/2-bedroom',
+        destination: '/properties',
+        permanent: false,
+      },
+      {
+        source: '/properties/studio',
+        destination: '/properties',
+        permanent: false,
+      },
+      // Redirect old property URLs to new slugs (if needed)
+      {
+        source: '/property/:slug',
+        destination: '/properties/:slug',
+        permanent: true,
+      },
+      {
+        source: '/listings',
+        destination: '/properties',
+        permanent: true,
+      },
+      {
+        source: '/listings/:slug',
+        destination: '/properties/:slug',
+        permanent: true,
+      },
+    ];
+  },
+
   // Headers for performance
   async headers() {
     return [
