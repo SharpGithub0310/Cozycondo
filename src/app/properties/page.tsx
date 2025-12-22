@@ -7,6 +7,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 import type { PropertyData } from '@/lib/types';
 import { normalizePropertyData } from '@/utils/slugify';
+import OptimizedImage from '@/components/OptimizedImage';
+import { performanceMonitor } from '@/utils/performance';
 
 // export const metadata: Metadata = {
 //   title: 'Properties',
@@ -103,46 +105,52 @@ export default function PropertiesPage() {
   const [error, setError] = useState<string | null>(null);
 
   const loadProperties = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    return performanceMonitor.measureAsyncFunction('loadPropertiesPage', async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Mobile debugging: Log user agent and viewport
-      console.log('Properties Page: Loading properties on', {
-        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
-        viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'server',
-        isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false
-      });
+        // Mobile debugging: Log user agent and viewport
+        console.log('Properties Page: Loading properties on', {
+          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+          viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'server',
+          isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false
+        });
 
-      // Load only active properties from database for public view
-      const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
-      console.log('Properties Page: Loaded properties from database:', {
-        totalCount: Object.keys(dbProperties).length,
-        propertyIds: Object.keys(dbProperties),
-        firstProperty: Object.values(dbProperties)[0]
-      });
+        // Load only active properties from database for public view
+        const dbProperties = await enhancedDatabaseService.getProperties({ active: true });
+        console.log('Properties Page: Loaded properties from database:', {
+          totalCount: Object.keys(dbProperties).length,
+          propertyIds: Object.keys(dbProperties),
+          firstProperty: Object.values(dbProperties)[0]
+        });
 
-      // Convert database properties to display format
-      // Properties are already filtered to active only, no need to filter again
-      const propertiesArray = Object.values(dbProperties)
-        .map((property: any) => normalizePropertyData(property));
+        // Convert database properties to display format
+        // Properties are already filtered to active only, no need to filter again
+        const propertiesArray = performanceMonitor.measureFunction('normalizeProperties', () => {
+          return Object.values(dbProperties)
+            .map((property: any) => normalizePropertyData(property));
+        });
 
-      console.log('Properties Page: Converted properties array:', {
-        totalCount: propertiesArray.length,
-        featuredCount: propertiesArray.filter(p => p.featured).length,
-        sampleProperties: propertiesArray.slice(0, 2)
-      });
+        console.log('Properties Page: Converted properties array:', {
+          totalCount: propertiesArray.length,
+          featuredCount: propertiesArray.filter(p => p.featured).length,
+          sampleProperties: propertiesArray.slice(0, 2)
+        });
 
-      setUpdatedProperties(propertiesArray);
-    } catch (err) {
-      console.error('Properties Page: Error loading properties:', err);
-      setError('Failed to load properties. Please try again later.');
-      // Fallback to default properties on error
-      console.log('Properties Page: Using fallback properties');
-      setUpdatedProperties(properties.filter(p => p.active));
-    } finally {
-      setLoading(false);
-    }
+        performanceMonitor.recordMetric('Properties_LoadSuccess', propertiesArray.length);
+        setUpdatedProperties(propertiesArray);
+      } catch (err) {
+        console.error('Properties Page: Error loading properties:', err);
+        performanceMonitor.recordMetric('Properties_LoadError', 1);
+        setError('Failed to load properties. Please try again later.');
+        // Fallback to default properties on error
+        console.log('Properties Page: Using fallback properties');
+        setUpdatedProperties(properties.filter(p => p.active));
+      } finally {
+        setLoading(false);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -328,26 +336,14 @@ function PropertyCard({ property }: { property: any }) {
   return (
     <div className="card group">
       {/* Image */}
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden">
-        {displayPhoto ? (
-          <img
-            src={displayPhoto}
-            alt={property.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-            onError={(e) => {
-              setDisplayPhoto('');
-            }}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white/80">
-              <div className="w-16 h-16 mx-auto mb-2 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <span className="font-display text-2xl font-bold">CC</span>
-              </div>
-              <p className="text-sm">Photo coming soon</p>
-            </div>
-          </div>
-        )}
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden rounded-t-lg">
+        <OptimizedImage
+          src={displayPhoto || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop'}
+          alt={property.name}
+          className="w-full h-full group-hover:scale-105 transition-transform duration-200"
+          lazy={true}
+          onError={() => setDisplayPhoto('')}
+        />
         {property.featured && (
           <div className="absolute top-4 left-4 px-3 py-1 bg-[#14b8a6] text-white text-xs font-medium rounded-full">
             Featured

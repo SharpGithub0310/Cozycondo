@@ -18,7 +18,7 @@ export function getStoredProperties(): Record<string, PropertyData> {
   }
 }
 
-// Save property data
+// Save property data with quota handling
 export function saveProperty(id: string, propertyData: PropertyData): void {
   if (typeof window === 'undefined') return;
 
@@ -29,9 +29,45 @@ export function saveProperty(id: string, propertyData: PropertyData): void {
       id,
       updatedAt: new Date().toISOString(),
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+
+    const dataToStore = JSON.stringify(stored);
+
+    // Check if data size is reasonable (less than 5MB)
+    if (dataToStore.length > 5 * 1024 * 1024) {
+      console.warn('Property data is too large, clearing old data to make space');
+      clearStoredProperties();
+      // Store only the current property
+      const minimalStored = { [id]: stored[id] };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(minimalStored));
+      return;
+    }
+
+    localStorage.setItem(STORAGE_KEY, dataToStore);
   } catch (error) {
-    console.error('Error saving property:', error);
+    if (error instanceof Error && error.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded, attempting to clear old data');
+      try {
+        // Clear old property data and try again with just this property
+        clearStoredProperties();
+        const minimalStored = { [id]: {
+          ...propertyData,
+          id,
+          updatedAt: new Date().toISOString(),
+        } };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(minimalStored));
+        console.log('Successfully saved property after clearing storage');
+      } catch (retryError) {
+        console.error('Failed to save property even after clearing storage:', retryError);
+        // Notify user about storage issue
+        if (typeof window !== 'undefined' && window.dispatchEvent) {
+          window.dispatchEvent(new CustomEvent('cozy-storage-error', {
+            detail: { error: 'Storage quota exceeded. Some data may not be saved locally.' }
+          }));
+        }
+      }
+    } else {
+      console.error('Error saving property:', error);
+    }
   }
 }
 
@@ -66,9 +102,26 @@ export function updatePropertyStatus(id: string, updates: { featured?: boolean; 
       };
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    const dataToStore = JSON.stringify(stored);
+    localStorage.setItem(STORAGE_KEY, dataToStore);
   } catch (error) {
-    console.error('Error updating property status:', error);
+    if (error instanceof Error && error.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded during status update');
+      // For status updates, try to update just this property
+      try {
+        const minimalStored = { [id]: {
+          ...(stored[id] || getDefaultPropertyData(id)),
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        } };
+        clearStoredProperties();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(minimalStored));
+      } catch (retryError) {
+        console.error('Failed to update property status after clearing storage:', retryError);
+      }
+    } else {
+      console.error('Error updating property status:', error);
+    }
   }
 }
 
@@ -103,14 +156,31 @@ export function getStoredCalendarBlocks(): CalendarBlock[] {
   }
 }
 
-// Save calendar blocks
+// Save calendar blocks with quota handling
 export function saveCalendarBlocks(blocks: CalendarBlock[]): void {
   if (typeof window === 'undefined') return;
 
   try {
-    localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(blocks));
+    const dataToStore = JSON.stringify(blocks);
+    localStorage.setItem(CALENDAR_STORAGE_KEY, dataToStore);
   } catch (error) {
-    console.error('Error saving calendar blocks:', error);
+    if (error instanceof Error && error.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded for calendar blocks');
+      // Try to save only recent blocks (last 30 days)
+      try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const recentBlocks = blocks.filter(block =>
+          new Date(block.endDate) >= thirtyDaysAgo
+        );
+        localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(recentBlocks));
+        console.log(`Saved ${recentBlocks.length} recent calendar blocks (filtered from ${blocks.length})`);
+      } catch (retryError) {
+        console.error('Failed to save calendar blocks even after filtering:', retryError);
+      }
+    } else {
+      console.error('Error saving calendar blocks:', error);
+    }
   }
 }
 

@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MessengerWidget from "@/components/MessengerWidget";
+import PerformanceMonitor from "@/components/PerformanceMonitor";
 
 export const metadata: Metadata = {
   title: {
@@ -46,6 +47,7 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
         <MessengerWidget />
+        <PerformanceMonitor />
       </body>
     </html>
   );

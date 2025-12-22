@@ -50,6 +50,8 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
   const [displayPhotos, setDisplayPhotos] = useState<string[]>([]);
   const [showLightbox, setShowLightbox] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [loading, setLoading] = useState(!defaultProperty);
+  const [error, setError] = useState<string | null>(null);
 
   const openLightbox = (index: number) => {
     setCurrentPhotoIndex(index);
@@ -65,62 +67,147 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
   };
 
   useEffect(() => {
+    // If we already have the property from server-side, set up photos and we're done
+    if (defaultProperty && !loading) {
+      setupPhotos(defaultProperty);
+      return;
+    }
+
     // Load property data from database using slug
     const loadProperty = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
+        console.log('PropertyDetail: Loading property with slug:', slug);
+
         // Use the slug from props, not the property.id which might be outdated
         const dbProperty = await enhancedDatabaseService.getProperty(slug);
 
         if (dbProperty) {
+          console.log('PropertyDetail: Successfully loaded property from database');
           // Update property data with database information
-          setProperty({
-            ...property,
+          const updatedProperty = {
+            ...defaultProperty,
             ...dbProperty,
-            name: dbProperty.name,
-            description: dbProperty.description,
-            location: dbProperty.location,
-            amenities: dbProperty.amenities,
-          });
-
-          // Set photos from database data, reordering to put featured photo first
-          if (dbProperty.photos && dbProperty.photos.length > 0) {
-            const photos = [...dbProperty.photos];
-            const featuredIndex = dbProperty.featuredPhotoIndex || 0;
-
-        // Move featured photo to first position if it's not already there
-        if (featuredIndex > 0 && featuredIndex < photos.length) {
-          const featuredPhoto = photos[featuredIndex];
-          photos.splice(featuredIndex, 1);
-          photos.unshift(featuredPhoto);
-        }
-
-        setDisplayPhotos(photos);
-          } else {
-            // Use default photos if no database photos
-            setDisplayPhotos([
-              'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-              'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-            ]);
-          }
+            name: dbProperty.name || defaultProperty?.name || 'Property',
+            description: dbProperty.description || defaultProperty?.description || '',
+            location: dbProperty.location || defaultProperty?.location || '',
+            amenities: dbProperty.amenities || defaultProperty?.amenities || [],
+          };
+          setProperty(updatedProperty);
+          setupPhotos(updatedProperty);
+        } else if (defaultProperty) {
+          console.log('PropertyDetail: Using default property data');
+          setupPhotos(defaultProperty);
         } else {
-          // Use default photos if no property data at all
-          setDisplayPhotos([
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-          ]);
+          setError('Property not found');
+          setDisplayPhotos(getDefaultPhotos());
         }
       } catch (error) {
-        console.error('Error loading property from database:', error);
-        // Fallback to default photos
-        setDisplayPhotos([
-          'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-          'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-        ]);
+        console.error('PropertyDetail: Error loading property from database:', error);
+        setError('Failed to load property details');
+        // Use fallback data if available
+        if (defaultProperty) {
+          setupPhotos(defaultProperty);
+        } else {
+          setDisplayPhotos(getDefaultPhotos());
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
     loadProperty();
-  }, [slug]);
+  }, [slug, defaultProperty]);
+
+  const getDefaultPhotos = () => [
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
+    'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
+  ];
+
+  const setupPhotos = (propertyData: any) => {
+    if (propertyData.photos && propertyData.photos.length > 0) {
+      const photos = [...propertyData.photos];
+      const featuredIndex = propertyData.featuredPhotoIndex || 0;
+
+      // Move featured photo to first position if it's not already there
+      if (featuredIndex > 0 && featuredIndex < photos.length) {
+        const featuredPhoto = photos[featuredIndex];
+        photos.splice(featuredIndex, 1);
+        photos.unshift(featuredPhoto);
+      }
+
+      setDisplayPhotos(photos);
+    } else {
+      setDisplayPhotos(getDefaultPhotos());
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="pt-20">
+        <div className="bg-[#faf3e6] py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Link
+              href="/properties"
+              className="inline-flex items-center gap-2 text-[#7d6349] hover:text-[#0d9488] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Properties</span>
+            </Link>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4 mb-8"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="aspect-[4/3] bg-gray-200 rounded-lg"></div>
+              <div className="space-y-4">
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error && !property) {
+    return (
+      <div className="pt-20">
+        <div className="bg-[#faf3e6] py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Link
+              href="/properties"
+              className="inline-flex items-center gap-2 text-[#7d6349] hover:text-[#0d9488] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Properties</span>
+            </Link>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
+            <X className="w-12 h-12 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Not Found</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Link
+            href="/properties"
+            className="btn-primary"
+          >
+            Browse All Properties
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-20">

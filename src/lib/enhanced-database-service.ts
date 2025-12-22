@@ -28,6 +28,7 @@ import {
   getProductionFallbackProperties,
   getProductionFallbackSettings
 } from './production-fallback-service';
+import { performanceMonitor } from '../utils/performance';
 
 // =============================================
 // TYPESCRIPT INTERFACES
@@ -57,7 +58,8 @@ class EnhancedDatabaseService {
   private options: DatabaseServiceOptions;
   private migrationInProgress: boolean = false;
   private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
-  private readonly DEFAULT_CACHE_TTL = 30000; // 30 seconds
+  private readonly DEFAULT_CACHE_TTL = 60000; // 60 seconds for better performance
+  private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor(options: DatabaseServiceOptions = {}) {
     this.options = {
@@ -105,14 +107,47 @@ class EnhancedDatabaseService {
   }
 
   private invalidateCache(pattern: string): void {
+    const keysToDelete: string[] = [];
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
-        this.cache.delete(key);
+        keysToDelete.push(key);
       }
     }
+    keysToDelete.forEach(key => this.cache.delete(key));
+    console.log(`Invalidated ${keysToDelete.length} cache entries matching pattern: ${pattern}`);
   }
 
   private async apiCall<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    fallbackOperation?: () => T
+  ): Promise<T> {
+    // Create a unique key for this request to prevent duplicates
+    const requestKey = `${options.method || 'GET'}_${endpoint}_${JSON.stringify(options.body || {})}`;
+
+    // Check if there's already a pending request for the same data
+    const pendingRequest = this.pendingRequests.get(requestKey);
+    if (pendingRequest) {
+      console.log(`Duplicate API call prevented for: ${endpoint}`);
+      return await pendingRequest;
+    }
+
+    // Create the request promise
+    const requestPromise = this.executeApiCall(endpoint, options, fallbackOperation);
+
+    // Store the promise to prevent duplicate requests
+    this.pendingRequests.set(requestKey, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      return result;
+    } finally {
+      // Clean up the pending request
+      this.pendingRequests.delete(requestKey);
+    }
+  }
+
+  private async executeApiCall<T>(
     endpoint: string,
     options: RequestInit = {},
     fallbackOperation?: () => T
@@ -172,76 +207,89 @@ class EnhancedDatabaseService {
   // =============================================
 
   async getProperties(options: { active?: boolean } = {}): Promise<Record<string, PropertyData>> {
-    // Check cache first
-    const cacheKey = this.getCacheKey('/api/properties', options);
-    const cachedResult = this.getFromCache<Record<string, PropertyData>>(cacheKey);
+    return performanceMonitor.measureAsyncFunction('getProperties', async () => {
+      // Check cache first
+      const cacheKey = this.getCacheKey('/api/properties', options);
+      const cachedResult = this.getFromCache<Record<string, PropertyData>>(cacheKey);
 
-    if (cachedResult) {
-      return cachedResult;
-    }
-
-    console.log('Enhanced Database Service: Fetching properties via API...');
-
-    try {
-      // Build query parameters for filtering
-      const queryParams = new URLSearchParams();
-      if (options.active !== undefined) {
-        queryParams.set('active', options.active.toString());
+      if (cachedResult) {
+        performanceMonitor.recordMetric('Properties_CacheHit', 1);
+        return cachedResult;
       }
 
-      const endpoint = `/api/properties${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      console.log('Enhanced Database Service: Fetching properties via API...');
 
-      const result = await this.apiCall(
-        endpoint,
-        { method: 'GET' },
-        () => {
-          console.log('API call failed, trying localStorage fallback...');
-          // Try localStorage first
-          const stored = getStoredProperties();
-          if (Object.keys(stored).length > 0) {
-            console.log(`Found ${Object.keys(stored).length} properties in localStorage`);
-
-            // Filter by active status if requested
-            if (options.active !== undefined) {
-              const filtered: Record<string, PropertyData> = {};
-              Object.entries(stored).forEach(([key, property]) => {
-                if (property.active === options.active) {
-                  filtered[key] = property;
-                }
-              });
-              return filtered;
-            }
-
-            return stored;
-          }
-          // Fall back to production defaults if localStorage is empty
-          console.log('Using production fallback properties');
-          const fallback = getProductionFallbackProperties() as Record<string, PropertyData>;
-
-          // Filter by active status if requested
-          if (options.active !== undefined) {
-            const filtered: Record<string, PropertyData> = {};
-            Object.entries(fallback).forEach(([key, property]) => {
-              if (property.active === options.active) {
-                filtered[key] = property;
-              }
-            });
-            return filtered;
-          }
-
-          return fallback;
+      try {
+        // Build query parameters for filtering - ensure we get ALL properties by setting high limit
+        const queryParams = new URLSearchParams();
+        if (options.active !== undefined) {
+          queryParams.set('active', options.active.toString());
         }
-      );
+        // Set high limit to ensure we get all properties, not just 20
+        queryParams.set('limit', '100');
+        queryParams.set('page', '1');
 
-      // Cache the result for future use
-      this.setCache(cacheKey, result);
+        const endpoint = `/api/properties${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
 
-      console.log(`Successfully fetched ${Object.keys(result).length} properties from API and cached result`);
-      return result;
-    } catch (error) {
-      console.error('Enhanced Database Service: Error fetching properties:', error);
-      throw error;
-    }
+        const result = await performanceMonitor.trackApiCall(
+          'properties',
+          () => this.apiCall(
+            endpoint,
+            { method: 'GET' },
+            () => {
+              console.log('API call failed, trying localStorage fallback...');
+              performanceMonitor.recordMetric('Properties_FallbackUsed', 1);
+
+              // Try localStorage first
+              const stored = getStoredProperties();
+              if (Object.keys(stored).length > 0) {
+                console.log(`Found ${Object.keys(stored).length} properties in localStorage`);
+
+                // Filter by active status if requested
+                if (options.active !== undefined) {
+                  const filtered: Record<string, PropertyData> = {};
+                  Object.entries(stored).forEach(([key, property]) => {
+                    if (property.active === options.active) {
+                      filtered[key] = property;
+                    }
+                  });
+                  return filtered;
+                }
+
+                return stored;
+              }
+              // Fall back to production defaults if localStorage is empty
+              console.log('Using production fallback properties');
+              const fallback = getProductionFallbackProperties() as Record<string, PropertyData>;
+
+              // Filter by active status if requested
+              if (options.active !== undefined) {
+                const filtered: Record<string, PropertyData> = {};
+                Object.entries(fallback).forEach(([key, property]) => {
+                  if (property.active === options.active) {
+                    filtered[key] = property;
+                  }
+                });
+                return filtered;
+              }
+
+              return fallback;
+            }
+          )
+        );
+
+        // Cache the result for future use
+        this.setCache(cacheKey, result);
+        performanceMonitor.recordMetric('Properties_CacheSet', Object.keys(result).length);
+
+        console.log(`Successfully fetched ${Object.keys(result).length} properties from API and cached result`);
+        return result;
+      } catch (error) {
+        console.error('Enhanced Database Service: Error fetching properties:', error);
+        performanceMonitor.recordMetric('Properties_Error', 1);
+        throw error;
+      }
+    });
   }
 
   async getProperty(id: string): Promise<PropertyData | null> {
@@ -289,34 +337,42 @@ class EnhancedDatabaseService {
   // =============================================
 
   async getWebsiteSettings(): Promise<WebsiteSettings> {
-    // Check cache first
-    const cacheKey = this.getCacheKey('/api/settings');
-    const cachedResult = this.getFromCache<WebsiteSettings>(cacheKey);
+    return performanceMonitor.measureAsyncFunction('getWebsiteSettings', async () => {
+      // Check cache first
+      const cacheKey = this.getCacheKey('/api/settings');
+      const cachedResult = this.getFromCache<WebsiteSettings>(cacheKey);
 
-    if (cachedResult) {
-      return cachedResult;
-    }
-
-    const result = await this.apiCall(
-      '/api/settings',
-      { method: 'GET' },
-      () => {
-        // Try localStorage first
-        const stored = getStoredSettings();
-        // Check if we have actual settings (not just defaults)
-        if (stored.logo || stored.heroBackground) {
-          return stored;
-        }
-        // Fall back to production defaults if localStorage is empty
-        console.log('Using production fallback settings');
-        return getProductionFallbackSettings() as WebsiteSettings;
+      if (cachedResult) {
+        performanceMonitor.recordMetric('Settings_CacheHit', 1);
+        return cachedResult;
       }
-    );
 
-    // Cache the result
-    this.setCache(cacheKey, result);
+      const result = await performanceMonitor.trackApiCall(
+        'settings',
+        () => this.apiCall(
+          '/api/settings',
+          { method: 'GET' },
+          () => {
+            // Try localStorage first
+            const stored = getStoredSettings();
+            // Check if we have actual settings (not just defaults)
+            if (stored.logo || stored.heroBackground) {
+              return stored;
+            }
+            // Fall back to production defaults if localStorage is empty
+            console.log('Using production fallback settings');
+            performanceMonitor.recordMetric('Settings_FallbackUsed', 1);
+            return getProductionFallbackSettings() as WebsiteSettings;
+          }
+        )
+      );
 
-    return result;
+      // Cache the result
+      this.setCache(cacheKey, result);
+      performanceMonitor.recordMetric('Settings_CacheSet', 1);
+
+      return result;
+    });
   }
 
   async saveWebsiteSettings(settings: Partial<WebsiteSettings>): Promise<void> {
