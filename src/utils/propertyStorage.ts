@@ -81,8 +81,10 @@ export function getStoredProperty(id: string): PropertyData | null {
 export function updatePropertyStatus(id: string, updates: { featured?: boolean; active?: boolean }): void {
   if (typeof window === 'undefined') return;
 
+  let stored: Record<string, PropertyData> = {};
+
   try {
-    const stored = getStoredProperties();
+    stored = getStoredProperties();
     const existing = stored[id];
 
     if (existing) {
