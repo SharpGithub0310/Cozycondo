@@ -128,7 +128,7 @@ export default async function PropertiesPage() {
 
 // Optimized Property Card Component
 function PropertyCard({ property, priority = false }: { property: PropertyData; priority?: boolean }) {
-  const imageUrl = property.image_url || property.images?.[0] || '/property-placeholder.jpg';
+  const imageUrl = property.photos?.[0] || (property as any).images?.[0] || (property as any).image_url || '/property-placeholder.jpg';
   const amenityIcons: Record<string, any> = {
     'WiFi': Wifi,
     'Parking': Car,
@@ -137,7 +137,7 @@ function PropertyCard({ property, priority = false }: { property: PropertyData; 
 
   return (
     <Link
-      href={`/properties/${property.slug}`}
+      href={`/properties/${property.slug || property.id}`}
       className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
     >
       <div className="relative h-64 overflow-hidden">
@@ -172,7 +172,7 @@ function PropertyCard({ property, priority = false }: { property: PropertyData; 
         </p>
 
         {/* Property Details */}
-        {(property.bedrooms || property.bathrooms || property.area) && (
+        {(property.bedrooms || property.bathrooms || property.size) && (
           <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
             {property.bedrooms && (
               <div className="flex items-center gap-1">
@@ -186,10 +186,10 @@ function PropertyCard({ property, priority = false }: { property: PropertyData; 
                 <span>{property.bathrooms}</span>
               </div>
             )}
-            {property.area && (
+            {property.size && (
               <div className="flex items-center gap-1">
                 <Square className="w-4 h-4" />
-                <span>{property.area}</span>
+                <span>{property.size}</span>
               </div>
             )}
           </div>
@@ -220,9 +220,9 @@ function PropertyCard({ property, priority = false }: { property: PropertyData; 
 
         <div className="flex items-center justify-between pt-4 border-t">
           <div>
-            {property.price && (
+            {property.pricePerNight && (
               <div className="text-2xl font-bold text-[#0d9488]">
-                ₱{property.price.toLocaleString()}
+                {property.pricePerNight}
                 <span className="text-sm text-gray-600 font-normal">/night</span>
               </div>
             )}

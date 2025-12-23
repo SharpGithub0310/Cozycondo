@@ -22,6 +22,7 @@ export interface Property {
 export interface PropertyData {
   id: string;
   name: string;
+  slug?: string; // Added for compatibility
   title?: string;
   type: string;
   bedrooms: number;
@@ -38,6 +39,7 @@ export interface PropertyData {
   active: boolean;
   amenities: string[];
   photos: string[];
+  images?: string[]; // Alternative image field for compatibility
   featuredPhotoIndex: number;
   updatedAt?: string;
 }
