@@ -89,10 +89,10 @@ export default function PropertyCard({ property, photos = [] }: PropertyCardProp
           <h3 className="card-title group-hover:text-[var(--color-primary-600)]">
             {property.name}
           </h3>
-          {property.pricePerNight && (
+          {(property as any).pricePerNight && (
             <div className="text-right">
               <div className="font-bold text-[var(--color-primary-600)] text-lg">
-                {property.pricePerNight}
+                {(property as any).pricePerNight}
               </div>
               <div className="text-xs text-[var(--color-warm-600)]">per night</div>
             </div>
@@ -109,27 +109,27 @@ export default function PropertyCard({ property, photos = [] }: PropertyCardProp
         </p>
 
         {/* Property details */}
-        {(property.bedrooms || property.bathrooms || property.size) && (
+        {((property as any).bedrooms || (property as any).bathrooms || (property as any).size) && (
           <div className="flex items-center gap-4 mb-4 text-sm text-[var(--color-warm-700)]">
-            {property.bedrooms && (
+            {(property as any).bedrooms && (
               <div className="flex items-center gap-1.5">
                 <div className="w-4 h-4 rounded bg-[var(--color-warm-200)] flex items-center justify-center">
-                  <span className="text-xs font-bold">{property.bedrooms}</span>
+                  <span className="text-xs font-bold">{(property as any).bedrooms}</span>
                 </div>
                 <span>Beds</span>
               </div>
             )}
-            {property.bathrooms && (
+            {(property as any).bathrooms && (
               <div className="flex items-center gap-1.5">
                 <div className="w-4 h-4 rounded bg-[var(--color-warm-200)] flex items-center justify-center">
-                  <span className="text-xs font-bold">{property.bathrooms}</span>
+                  <span className="text-xs font-bold">{(property as any).bathrooms}</span>
                 </div>
                 <span>Baths</span>
               </div>
             )}
-            {property.size && (
+            {(property as any).size && (
               <div className="flex items-center gap-1.5">
-                <span className="font-medium">{property.size}</span>
+                <span className="font-medium">{(property as any).size}</span>
               </div>
             )}
           </div>
