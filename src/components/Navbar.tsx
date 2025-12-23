@@ -94,61 +94,79 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 safe-area-top ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 safe-area-top ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-sm'
+          ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-white/20'
           : 'bg-transparent'
       }`}
     >
       <div className="container-responsive">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group touch-target">
-            {/* Logo Image/Fallback - Always Show */}
-            <div className="flex-shrink-0">
+          {/* Enhanced Logo */}
+          <Link href="/" className="flex items-center gap-3 group touch-target">
+            <div className="flex-shrink-0 relative">
               {!logoLoading && logo ? (
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl overflow-hidden shadow-md sm:shadow-lg group-hover:shadow-xl transition-shadow bg-white">
+                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 bg-white ring-2 ring-white/20 group-hover:ring-[var(--color-primary-200)]">
                   <img
                     src={logo}
                     alt="Cozy Condo Logo"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       console.log('Logo failed to load, showing fallback');
-                      setLogo(''); // Reset logo state to show fallback
+                      setLogo('');
                     }}
                   />
                 </div>
               ) : (
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center shadow-md sm:shadow-lg group-hover:shadow-xl transition-all">
+                <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary-600)] to-[var(--color-primary-700)] flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
                   <span className="text-white font-display text-base sm:text-xl font-bold">CC</span>
                 </div>
               )}
+
+              {/* Status indicator */}
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm">
+                <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
+              </div>
             </div>
-            {/* Text - Responsive */}
+
+            {/* Enhanced Text */}
             <div className="flex flex-col">
-              <span className="font-display text-base sm:text-xl font-semibold text-[#5f4a38] leading-tight">
+              <span className={`font-display text-base sm:text-xl font-bold leading-tight transition-colors duration-300 ${
+                scrolled ? 'text-[var(--color-warm-900)]' : 'text-[var(--color-warm-900)]'
+              }`}>
                 Cozy Condo
               </span>
-              <span className="text-xs text-[#9a7d5e] leading-tight">Iloilo City</span>
+              <span className={`text-xs leading-tight font-medium transition-colors duration-300 ${
+                scrolled ? 'text-[var(--color-warm-600)]' : 'text-[var(--color-warm-600)]'
+              }`}>
+                Premium Stays • Iloilo City
+              </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Enhanced Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-2">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-3 lg:px-4 py-2 rounded-lg text-[#7d6349] hover:text-[#5f4a38] hover:bg-[#faf3e6] transition-all duration-200 font-medium touch-target"
+                className={`relative px-4 lg:px-5 py-2.5 rounded-xl font-medium transition-all duration-300 touch-target group ${
+                  scrolled
+                    ? 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-[var(--color-warm-50)]'
+                    : 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-white/10'
+                }`}
               >
-                {item.name}
+                <span className="relative z-10">{item.name}</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
               </Link>
             ))}
+
+            {/* Enhanced CTA Button */}
             <a
               href="https://m.me/cozycondoiloilocity"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-2 lg:ml-4 btn-primary flex items-center gap-2 touch-target"
+              className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
             >
               <MessageCircle className="w-4 h-4" />
               <span className="hidden lg:inline">Book Now</span>
@@ -156,48 +174,96 @@ export default function Navbar() {
             </a>
           </div>
 
-          {/* Mobile menu button */}
+          {/* Enhanced Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg text-[#7d6349] hover:bg-[#faf3e6] transition-colors touch-target"
+            className={`md:hidden relative p-2.5 rounded-xl transition-all duration-300 touch-target group ${
+              scrolled
+                ? 'text-[var(--color-warm-700)] hover:bg-[var(--color-warm-100)]'
+                : 'text-[var(--color-warm-700)] hover:bg-white/10'
+            }`}
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
           >
-            {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+            <div className={`transition-all duration-300 ${isOpen ? 'rotate-90 scale-90' : 'rotate-0 scale-100'}`}>
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </div>
+
+            {/* Notification dot */}
+            {!isOpen && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--color-primary-500)] rounded-full border border-white">
+                <div className="w-full h-full bg-[var(--color-primary-400)] rounded-full animate-pulse" />
+              </div>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Enhanced Mobile Navigation */}
       <div
-        className={`md:hidden transition-all duration-300 overflow-hidden ${
-          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`md:hidden transition-all duration-500 ease-in-out overflow-hidden ${
+          isOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="bg-white/98 backdrop-blur-md border-t border-[#faf3e6] px-4 py-4 space-y-1 safe-area-bottom">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#7d6349] hover:text-[#5f4a38] hover:bg-[#faf3e6] transition-all duration-200 touch-target"
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium text-fluid-base">{item.name}</span>
-              </Link>
-            );
-          })}
-          <a
-            href="https://m.me/cozycondoiloilocity"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-2 mt-4 btn-primary w-full touch-target"
-          >
-            <MessageCircle className="w-4 h-4" />
-            <span>Book Now</span>
-          </a>
+        <div className="bg-white/98 backdrop-blur-2xl border-t border-[var(--color-warm-200)] shadow-2xl safe-area-bottom">
+          <div className="px-6 py-6 space-y-2">
+            {navigation.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 touch-target group hover:scale-[1.02] ${
+                    index === 0 ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-700)]' : 'text-[var(--color-warm-700)] hover:bg-[var(--color-warm-50)]'
+                  }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    index === 0
+                      ? 'bg-[var(--color-primary-100)] text-[var(--color-primary-600)]'
+                      : 'bg-[var(--color-warm-100)] text-[var(--color-warm-600)] group-hover:bg-[var(--color-primary-100)] group-hover:text-[var(--color-primary-600)]'
+                  }`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">{item.name}</span>
+                    <span className="text-xs text-[var(--color-warm-500)]">
+                      {item.name === 'Home' && 'Welcome to Cozy Condo'}
+                      {item.name === 'Properties' && 'Browse our collection'}
+                      {item.name === 'Blog' && 'Travel tips & guides'}
+                      {item.name === 'Contact' && 'Get in touch with us'}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Enhanced mobile CTA */}
+          <div className="px-6 pb-6">
+            <a
+              href="https://m.me/cozycondoiloilocity"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-3 btn btn-primary w-full py-4 hover:scale-[1.02] transition-all duration-300 shadow-lg"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span className="font-semibold">Book Your Stay Now</span>
+            </a>
+
+            {/* Quick stats */}
+            <div className="flex items-center justify-center gap-6 mt-4 text-xs text-[var(--color-warm-600)]">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Available 24/7</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-[var(--color-primary-500)] rounded-full"></div>
+                <span>Fast Response</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </nav>

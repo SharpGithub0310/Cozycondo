@@ -211,46 +211,60 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
 
   return (
     <div className="pt-20">
-      {/* Back navigation */}
-      <div className="bg-[#faf3e6] py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Back navigation */}
+      <div className="bg-gradient-to-r from-[var(--color-warm-100)] to-[var(--color-warm-50)] py-6">
+        <div className="container-xl">
           <Link
             href="/properties"
-            className="inline-flex items-center gap-2 text-[#7d6349] hover:text-[#0d9488] transition-colors"
+            className="inline-flex items-center gap-3 px-4 py-2.5 bg-white/80 backdrop-blur-sm rounded-xl text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md group"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Properties</span>
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <span className="font-medium">Back to Properties</span>
           </Link>
         </div>
       </div>
 
-      {/* Property Header */}
-      <section className="bg-gradient-to-br from-[#fefdfb] to-[#fdf9f3] py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Property Header */}
+      <section className="relative bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)] py-12 lg:py-16">
+        {/* Background decorations */}
+        <div className="absolute inset-0 opacity-20">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `
+                radial-gradient(ellipse 200% 100% at 50% 0%, var(--color-primary-100) 0%, transparent 50%),
+                radial-gradient(ellipse 200% 100% at 80% 100%, var(--color-accent-orange-light) 0%, transparent 50%)
+              `
+            }}
+          />
+        </div>
+        <div className="relative container-xl">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               {property.featured && (
-                <span className="inline-block px-3 py-1 bg-[#14b8a6] text-white text-xs font-medium rounded-full mb-3">
+                <div className="featured-badge mb-4">
                   Featured
-                </span>
+                </div>
               )}
-              <h1 className="font-display text-3xl md:text-4xl font-semibold text-[#5f4a38] mb-2">
+              <h1 className="hero-title text-[var(--color-warm-900)] mb-4">
                 {property.name}
               </h1>
-              <div className="flex items-center gap-2 text-[#7d6349]">
-                <MapPin className="w-5 h-5 text-[#14b8a6]" />
-                <span>{property.location}</span>
+              <div className="flex items-center gap-3 text-[var(--color-warm-700)] mb-6">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-100)] flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-[var(--color-primary-600)]" />
+                </div>
+                <span className="text-lg font-medium">{property.location}</span>
               </div>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-4">
               {property.airbnb_url && (
                 <a
                   href={property.airbnb_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-secondary inline-flex items-center gap-2"
+                  className="btn btn-secondary btn-lg hover:scale-105"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-5 h-5" />
                   <span>View on Airbnb</span>
                 </a>
               )}
@@ -258,9 +272,9 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
                 href="https://m.me/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary inline-flex items-center gap-2"
+                className="btn btn-primary btn-lg hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-5 h-5" />
                 <span>Book Now</span>
               </a>
             </div>
@@ -268,9 +282,9 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
         </div>
       </section>
 
-      {/* Photo Gallery */}
-      <section className="bg-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Photo Gallery */}
+      <section className="section bg-white">
+        <div className="container-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Main photo */}
             <div
@@ -357,13 +371,13 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
         </div>
       </section>
 
-      {/* Property Details */}
-      <section className="section bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Property Details */}
+      <section className="section bg-gradient-to-br from-[var(--color-warm-50)] to-white">
+        <div className="container-xl">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Main content */}
             <div className="lg:col-span-2">
-              <h2 className="font-display text-2xl font-semibold text-[#5f4a38] mb-6">
+              <h2 className="section-title mb-8">
                 About This Property
               </h2>
               <div className="prose prose-lg text-[#7d6349] max-w-none">

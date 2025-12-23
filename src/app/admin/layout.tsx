@@ -76,12 +76,12 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#fefdfb] flex items-center justify-center">
+      <div className="min-h-screen bg-[color:var(--color-warm-50)] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[#14b8a6] flex items-center justify-center animate-pulse">
-            <span className="text-white font-display text-xl font-bold">CC</span>
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--color-primary-500)] flex items-center justify-center animate-pulse">
+            <span className="text-[color:var(--color-white)] font-display text-xl font-bold">CC</span>
           </div>
-          <p className="text-[#7d6349]">Loading...</p>
+          <p className="text-[color:var(--color-warm-700)]">Loading...</p>
         </div>
       </div>
     );
@@ -92,7 +92,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#fefdfb]">
+    <div className="min-h-screen bg-[color:var(--color-warm-50)]">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -103,15 +103,15 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#5f4a38] transform transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[color:var(--color-warm-900)] transform transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-20 px-6 border-b border-[#7d6349]">
+          <div className="flex items-center justify-between h-20 px-6 border-b border-[color:var(--color-warm-700)]">
             <Link href="/admin" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-[color:var(--color-primary-500)] to-[color:var(--color-primary-600)] flex items-center justify-center">
                 {logoUrl ? (
                   <img
                     src={logoUrl}
@@ -122,22 +122,22 @@ export default function AdminLayout({
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
                       if (parent) {
-                        parent.innerHTML = '<span class="text-white font-display font-bold">CC</span>';
+                        parent.innerHTML = '<span class="text-[color:var(--color-white)] font-display font-bold">CC</span>';
                       }
                     }}
                   />
                 ) : (
-                  <span className="text-white font-display font-bold">CC</span>
+                  <span className="text-[color:var(--color-white)] font-display font-bold">CC</span>
                 )}
               </div>
               <div>
-                <span className="font-display text-lg font-semibold text-white">Admin</span>
-                <span className="block text-xs text-[#d4b896]">{settings?.companyName || 'Cozy Condo'}</span>
+                <span className="font-display text-lg font-semibold text-[color:var(--color-white)]">Admin</span>
+                <span className="block text-xs text-[color:var(--color-warm-500)]">{settings?.companyName || 'Cozy Condo'}</span>
               </div>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 text-[#d4b896] hover:text-white"
+              className="lg:hidden p-2 text-[color:var(--color-warm-500)] hover:text-[color:var(--color-white)]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -156,8 +156,8 @@ export default function AdminLayout({
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-[#14b8a6] text-white'
-                      : 'text-[#d4b896] hover:bg-[#7d6349] hover:text-white'
+                      ? 'bg-[color:var(--color-primary-500)] text-[color:var(--color-white)]'
+                      : 'text-[color:var(--color-warm-500)] hover:bg-[color:var(--color-warm-700)] hover:text-[color:var(--color-white)]'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -169,10 +169,10 @@ export default function AdminLayout({
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[#7d6349]">
+          <div className="p-4 border-t border-[color:var(--color-warm-700)]">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-[#d4b896] hover:bg-[#7d6349] hover:text-white transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-[color:var(--color-warm-500)] hover:bg-[color:var(--color-warm-700)] hover:text-[color:var(--color-white)] transition-colors"
             >
               <LogOut className="w-5 h-5" />
               <span className="font-medium">Logout</span>
@@ -180,7 +180,7 @@ export default function AdminLayout({
             <Link
               href="/"
               target="_blank"
-              className="flex items-center gap-3 mt-2 px-4 py-3 rounded-lg text-[#d4b896] hover:bg-[#7d6349] hover:text-white transition-colors text-sm"
+              className="flex items-center gap-3 mt-2 px-4 py-3 rounded-lg text-[color:var(--color-warm-500)] hover:bg-[color:var(--color-warm-700)] hover:text-[color:var(--color-white)] transition-colors text-sm"
             >
               <span>View Website →</span>
             </Link>
@@ -191,16 +191,16 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="lg:ml-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-[#faf3e6]">
+        <header className="sticky top-0 z-30 bg-[color:var(--color-white)] border-b border-[color:var(--color-warm-200)]">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-[#7d6349] hover:text-[#5f4a38]"
+              className="lg:hidden p-2 text-[color:var(--color-warm-700)] hover:text-[color:var(--color-warm-900)]"
             >
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4 ml-auto">
-              <span className="text-sm text-[#7d6349]">Welcome, Admin</span>
+              <span className="text-sm text-[color:var(--color-warm-700)]">Welcome, Admin</span>
             </div>
           </div>
         </header>
@@ -239,18 +239,18 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[color:var(--color-warm-50)] via-[color:var(--color-warm-100)] to-[color:var(--color-warm-300)] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-[color:var(--color-white)] rounded-2xl shadow-[var(--shadow-xl)] p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center">
-              <span className="text-white font-display text-2xl font-bold">CC</span>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-[color:var(--color-primary-500)] to-[color:var(--color-primary-600)] flex items-center justify-center">
+              <span className="text-[color:var(--color-white)] font-display text-2xl font-bold">CC</span>
             </div>
-            <h1 className="font-display text-2xl font-semibold text-[#5f4a38]">
+            <h1 className="font-display text-2xl font-semibold text-[color:var(--color-warm-900)]">
               Admin Login
             </h1>
-            <p className="text-[#9a7d5e] mt-1">Cozy Condo Management</p>
+            <p className="text-[color:var(--color-warm-600)] mt-1">Cozy Condo Management</p>
           </div>
 
           {/* Form */}
@@ -271,7 +271,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+              <div className="p-3 rounded-lg bg-[color:var(--color-red-50)] text-[color:var(--color-red-600)] text-sm">
                 {error}
               </div>
             )}
@@ -285,8 +285,8 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             </button>
           </form>
 
-          <p className="text-center text-sm text-[#9a7d5e] mt-6">
-            <Link href="/" className="text-[#0d9488] hover:underline">
+          <p className="text-center text-sm text-[color:var(--color-warm-600)] mt-6">
+            <Link href="/" className="text-[color:var(--color-primary-600)] hover:underline">
               ← Back to Website
             </Link>
           </p>

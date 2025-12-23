@@ -20,102 +20,151 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property, photos = [] }: PropertyCardProps) {
   const [imageError, setImageError] = useState(false);
-  
+
   const primaryPhoto = photos.find(p => p.is_primary) || photos[0];
   const displayAmenities = property.amenities?.slice(0, 3) || [];
 
   return (
-    <div className="card group">
-      {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#faf3e6]">
+    <article className="card card-elevated group">
+      {/* Enhanced Image */}
+      <div className="card-image">
+        <div className="card-image-overlay" />
+
         {primaryPhoto && !imageError ? (
           <Image
             src={primaryPhoto.url}
             alt={primaryPhoto.alt_text || property.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
             onError={() => setImageError(true)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center text-[#b89b7a]">
-              <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-[#f5e6cc] flex items-center justify-center">
-                <span className="font-display text-2xl">CC</span>
+            <div className="text-center text-[var(--color-warm-600)]">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--color-warm-200)] to-[var(--color-warm-300)] flex items-center justify-center shadow-lg">
+                <span className="font-display text-2xl font-bold text-[var(--color-warm-800)]">CC</span>
               </div>
-              <span className="text-sm">Photo coming soon</span>
+              <span className="text-sm font-medium">Photo coming soon</span>
             </div>
           </div>
         )}
-        
-        {/* Featured badge */}
+
+        {/* Enhanced featured badge */}
         {property.featured && (
-          <div className="absolute top-4 left-4 px-3 py-1 bg-[#14b8a6] text-white text-xs font-medium rounded-full">
+          <div className="featured-badge">
             Featured
           </div>
         )}
 
-        {/* Quick actions overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2">
+        {/* Enhanced quick actions overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
+          <div className="flex gap-2 w-full">
             {property.airbnb_url && (
               <a
                 href={property.airbnb_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-white text-[#5f4a38] text-sm font-medium rounded-lg hover:bg-[#faf3e6] transition-colors"
+                className="flex-1 btn btn-secondary btn-sm bg-white/95 backdrop-blur-sm text-[var(--color-warm-800)] border-white/20 hover:bg-white hover:scale-105"
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>View on Airbnb</span>
               </a>
             )}
+            <Link
+              href={`/properties/${property.slug}`}
+              className="btn btn-primary btn-sm hover:scale-105"
+            >
+              <span>View Details</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-5">
-        <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-2 group-hover:text-[#0d9488] transition-colors">
-          {property.name}
-        </h3>
-        
-        <div className="flex items-center gap-2 text-[#9a7d5e] text-sm mb-3">
-          <MapPin className="w-4 h-4" />
-          <span>{property.location}</span>
+      {/* Enhanced Content */}
+      <div className="card-content">
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="card-title group-hover:text-[var(--color-primary-600)]">
+            {property.name}
+          </h3>
+          {property.pricePerNight && (
+            <div className="text-right">
+              <div className="font-bold text-[var(--color-primary-600)] text-lg">
+                {property.pricePerNight}
+              </div>
+              <div className="text-xs text-[var(--color-warm-600)]">per night</div>
+            </div>
+          )}
         </div>
 
-        <p className="text-[#7d6349] text-sm mb-4 line-clamp-2">
+        <div className="card-meta flex items-center gap-2 mb-4">
+          <MapPin className="w-4 h-4 text-[var(--color-primary-500)]" />
+          <span className="font-medium">{property.location}</span>
+        </div>
+
+        <p className="card-description line-clamp-2">
           {property.short_description}
         </p>
 
-        {/* Amenities */}
+        {/* Property details */}
+        {(property.bedrooms || property.bathrooms || property.size) && (
+          <div className="flex items-center gap-4 mb-4 text-sm text-[var(--color-warm-700)]">
+            {property.bedrooms && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded bg-[var(--color-warm-200)] flex items-center justify-center">
+                  <span className="text-xs font-bold">{property.bedrooms}</span>
+                </div>
+                <span>Beds</span>
+              </div>
+            )}
+            {property.bathrooms && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded bg-[var(--color-warm-200)] flex items-center justify-center">
+                  <span className="text-xs font-bold">{property.bathrooms}</span>
+                </div>
+                <span>Baths</span>
+              </div>
+            )}
+            {property.size && (
+              <div className="flex items-center gap-1.5">
+                <span className="font-medium">{property.size}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Enhanced Amenities */}
         {displayAmenities.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-6">
             {displayAmenities.map((amenity, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#faf3e6] text-[#7d6349] text-xs rounded-full"
-              >
-                {amenityIconMap[amenity.toLowerCase()] || null}
+              <span key={index} className="amenity-tag">
+                <span className="amenity-tag-icon">
+                  {amenityIconMap[amenity.toLowerCase()] || null}
+                </span>
                 <span className="capitalize">{amenity.replace('-', ' ')}</span>
               </span>
             ))}
             {property.amenities && property.amenities.length > 3 && (
-              <span className="inline-flex items-center px-3 py-1 bg-[#faf3e6] text-[#9a7d5e] text-xs rounded-full">
+              <span className="amenity-tag bg-[var(--color-primary-50)] border-[var(--color-primary-200)] text-[var(--color-primary-800)]">
                 +{property.amenities.length - 3} more
               </span>
             )}
           </div>
         )}
+      </div>
 
-        {/* View details link */}
+      {/* Card footer with enhanced CTA */}
+      <div className="card-footer">
         <Link
           href={`/properties/${property.slug}`}
-          className="inline-flex items-center gap-1 text-[#0d9488] font-medium text-sm hover:gap-2 transition-all"
+          className="btn btn-outline w-full group-hover:btn-primary transition-all duration-300"
         >
           <span>View Details</span>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-4 h-4 icon-arrow" />
         </Link>
       </div>
-    </div>
+    </article>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronDown, MapPin, Star, Home } from 'lucide-react';
+import { ChevronDown, MapPin, Star, Home, ArrowRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { WebsiteSettings } from '@/lib/types';
@@ -99,95 +99,120 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background image or gradient */}
+    <section className="hero">
+      {/* Enhanced Background */}
       {heroBackground ? (
         <>
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-gray-200"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: `url(${heroBackground})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
           />
-          <div className="absolute inset-0 bg-[#5f4a38]/40" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40" />
+          {/* Subtle pattern overlay */}
+          <div
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)',
+              backgroundSize: '40px 40px'
+            }}
+          />
         </>
       ) : (
         <>
-          {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
+          {/* Premium gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
 
-          {/* Decorative elements - hidden on mobile for performance */}
-          <div className="hidden sm:block absolute top-20 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
-          <div className="hidden sm:block absolute bottom-20 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+          {/* Mesh gradient overlay */}
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              background: `
+                radial-gradient(ellipse 200% 100% at 50% 0%, var(--color-primary-100) 0%, transparent 50%),
+                radial-gradient(ellipse 200% 100% at 80% 100%, var(--color-accent-orange-light) 0%, transparent 50%),
+                radial-gradient(ellipse 150% 100% at 20% 100%, var(--color-primary-200) 0%, transparent 50%)
+              `
+            }}
+          />
+
+          {/* Enhanced decorative elements */}
+          <div className="hidden lg:block absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-[var(--color-primary-300)]/20 to-[var(--color-primary-500)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
+          <div className="hidden lg:block absolute bottom-32 left-16 w-96 h-96 bg-gradient-to-tr from-[var(--color-accent-orange)]/15 to-[var(--color-warm-400)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+
+          {/* Floating geometric shapes */}
+          <div className="absolute top-1/4 right-1/5 w-3 h-3 bg-[var(--color-primary-500)] rounded-full animate-float opacity-60" />
+          <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-1/3 left-1/4 w-4 h-4 bg-[var(--color-warm-500)] rounded-full animate-float opacity-50" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-2/3 right-2/3 w-1.5 h-1.5 bg-[var(--color-primary-400)] rounded-full animate-float opacity-80" style={{ animationDelay: '0.5s' }} />
         </>
       )}
-      
-      {/* Floating shapes */}
-      <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-[#14b8a6] rounded-full animate-float opacity-60" />
-      <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-[#fb923c] rounded-full animate-float opacity-60" style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-1/3 left-1/4 w-5 h-5 bg-[#d4b896] rounded-full animate-float opacity-40" style={{ animationDelay: '2s' }} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-32 lg:py-40">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
-          {/* Text content */}
+      <div className="container-xl hero-content">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Enhanced Text content */}
           <div
             className={`transition-all duration-1000 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
-            {/* Badge */}
+            {/* Enhanced Badge */}
             {settings.heroBadgeText && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm border border-[#faf3e6] mb-6">
-                <span className="w-2 h-2 bg-[#14b8a6] rounded-full animate-pulse" />
-                <span className="text-sm font-medium text-[#7d6349]">{settings.heroBadgeText}</span>
+              <div className="hero-badge mb-8">
+                <div className="hero-badge-dot" />
+                <span>{settings.heroBadgeText}</span>
               </div>
             )}
 
-            <h1 className={`font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight mb-4 sm:mb-6 ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
+            <h1 className={`hero-title ${heroBackground ? 'text-white drop-shadow-lg' : 'text-[var(--color-warm-900)]'}`}>
               {settings.heroTitle}
             </h1>
 
-            <p className={`text-base sm:text-lg mb-6 sm:mb-8 max-w-xl ${heroBackground ? 'text-white/90' : 'text-[#7d6349]'}`}>
+            <p className={`hero-subtitle ${heroBackground ? 'text-white/90 drop-shadow-md' : 'text-[var(--color-warm-700)]'}`}>
               {settings.heroDescription}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
-              <Link href="/properties" className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 min-h-[44px] justify-center">
-                Explore Properties
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <Link href="/properties" className="btn btn-primary btn-lg">
+                <span>Explore Properties</span>
+                <ArrowRight className="w-5 h-5 icon-arrow" />
               </Link>
               <a
                 href="https://m.me/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 min-h-[44px] justify-center"
+                className="btn btn-secondary btn-lg"
               >
-                Message Us
+                <MessageCircle className="w-5 h-5" />
+                <span>Message Us</span>
               </a>
             </div>
 
-            {/* Stats */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+            {/* Enhanced Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
                   <div
                     key={index}
-                    className={`transition-all duration-700 ${
+                    className={`group transition-all duration-700 ${
                       isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
                     }`}
                     style={{ transitionDelay: `${(index + 2) * 150}ms` }}
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white shadow-sm flex items-center justify-center">
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#14b8a6]" />
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className={`font-display text-xl sm:text-2xl font-semibold ${heroBackground ? 'text-white' : 'text-[#5f4a38]'}`}>
+                        <div className={`font-display text-2xl font-bold ${heroBackground ? 'text-white drop-shadow-md' : 'text-[var(--color-warm-900)]'}`}>
                           {stat.value}
                         </div>
-                        <div className={`text-sm ${heroBackground ? 'text-white/80' : 'text-[#9a7d5e]'}`}>{stat.label}</div>
+                        <div className={`text-sm font-medium ${heroBackground ? 'text-white/90' : 'text-[var(--color-warm-600)]'}`}>
+                          {stat.label}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -196,21 +221,24 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Image composition */}
+          {/* Enhanced Image composition */}
           <div
             className={`relative transition-all duration-1000 delay-300 order-first lg:order-last ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
             }`}
           >
             <div className="relative">
-              {/* Main image */}
-              <div className="relative aspect-[4/5] sm:aspect-[4/5] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl bg-gradient-to-br from-[#d4b896] to-[#b89b7a]">
+              {/* Main image with enhanced styling */}
+              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[var(--color-warm-300)] to-[var(--color-warm-500)] ring-1 ring-white/20">
+                {/* Enhanced image overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
+
                 {settings.highlyRatedImage ? (
                   <>
                     <img
                       src={settings.highlyRatedImage}
                       alt="Highly rated property"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                       loading="lazy"
                       onError={(e) => {
                         console.log('Hero image failed to load, showing fallback');
@@ -221,10 +249,10 @@ export default function Hero() {
                     />
                     <div className="absolute inset-0 flex items-center justify-center hidden">
                       <div className="text-center text-white/80">
-                        <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 sm:mb-4 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <span className="font-display text-2xl sm:text-4xl font-bold">CC</span>
+                        <div className="w-20 h-20 lg:w-28 lg:h-28 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <span className="font-display text-3xl lg:text-5xl font-bold">CC</span>
                         </div>
-                        <p className="text-base sm:text-lg font-medium">Cozy Condo</p>
+                        <p className="text-xl font-medium">Cozy Condo</p>
                         <p className="text-sm opacity-80">Premium Living</p>
                       </div>
                     </div>
@@ -232,43 +260,65 @@ export default function Hero() {
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center text-white/80">
-                      <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-2 sm:mb-4 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <span className="font-display text-2xl sm:text-4xl font-bold">CC</span>
+                      <div className="w-20 h-20 lg:w-28 lg:h-28 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <span className="font-display text-3xl lg:text-5xl font-bold">CC</span>
                       </div>
-                      <p className="text-base sm:text-lg font-medium">Cozy Condo</p>
+                      <p className="text-xl font-medium">Cozy Condo</p>
                       <p className="text-sm opacity-80">Premium Living</p>
                     </div>
                   </div>
                 )}
+
+                {/* Subtle pattern overlay */}
+                <div
+                  className="absolute inset-0 opacity-10 z-20"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+                    backgroundSize: '20px 20px'
+                  }}
+                />
               </div>
 
-              {/* Floating card */}
-              <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-3 sm:p-4 border border-[#faf3e6]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#14b8a6] flex items-center justify-center">
-                    <Star className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
+              {/* Enhanced floating rating card */}
+              <div className="absolute -bottom-6 -left-6 lg:-bottom-8 lg:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30 ring-1 ring-black/5 hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg">
+                    <Star className="w-6 h-6 lg:w-7 lg:h-7 text-white fill-white" />
                   </div>
                   <div>
-                    <div className="font-display text-lg sm:text-xl font-semibold text-[#5f4a38]">
+                    <div className="font-display text-lg lg:text-xl font-bold text-[var(--color-warm-900)]">
                       {settings.highlyRatedTitle}
                     </div>
-                    <div className="text-xs sm:text-sm text-[#9a7d5e]">{settings.highlyRatedSubtitle}</div>
+                    <div className="text-sm lg:text-base text-[var(--color-warm-600)] font-medium">
+                      {settings.highlyRatedSubtitle}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Decorative blob */}
-              <div className="absolute -top-4 -right-4 sm:-top-8 sm:-right-8 w-16 h-16 sm:w-32 sm:h-32 bg-[#14b8a6]/20 rounded-full blur-xl sm:blur-2xl" />
+              {/* Enhanced decorative elements */}
+              <div className="absolute -top-8 -right-8 w-24 h-24 lg:w-40 lg:h-40 bg-gradient-to-br from-[var(--color-primary-400)]/30 to-[var(--color-primary-600)]/20 rounded-full blur-2xl animate-pulse" />
+              <div className="absolute top-1/4 -right-4 w-3 h-3 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
+              <div className="absolute bottom-1/4 -left-2 w-2 h-2 bg-[var(--color-primary-400)] rounded-full animate-float opacity-60" style={{ animationDelay: '2s' }} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <a href="#properties" className={`flex flex-col items-center transition-colors ${heroBackground ? 'text-white/80 hover:text-white' : 'text-[#9a7d5e] hover:text-[#0d9488]'}`}>
-          <span className="text-xs sm:text-sm mb-1 sm:mb-2 hidden sm:block">Scroll to explore</span>
-          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
+      {/* Enhanced scroll indicator */}
+      <div className="absolute bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2">
+        <a
+          href="#properties"
+          className={`group flex flex-col items-center transition-all duration-300 hover:scale-110 ${
+            heroBackground ? 'text-white/80 hover:text-white' : 'text-[var(--color-warm-600)] hover:text-[var(--color-primary-600)]'
+          }`}
+        >
+          <span className="text-sm font-medium mb-3 hidden sm:block group-hover:mb-4 transition-all duration-300">
+            Scroll to explore
+          </span>
+          <div className="w-8 h-12 border-2 border-current rounded-full flex items-start justify-center p-1">
+            <div className="w-1 h-3 bg-current rounded-full animate-bounce" />
+          </div>
         </a>
       </div>
     </section>

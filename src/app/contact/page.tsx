@@ -1,6 +1,7 @@
 'use client';
 
-import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send } from 'lucide-react';
+import Link from 'next/link';
+import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send, ArrowRight } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
 
@@ -102,38 +103,94 @@ export default function ContactPage() {
 
   return (
     <div className="pt-20">
-      {/* Hero Section */}
-      <section className="relative py-16 md:py-24 overflow-hidden">
-        {/* Background image or gradient */}
+      {/* Enhanced Hero Section */}
+      <section className="hero">
+        {/* Enhanced Background */}
         {contactImage ? (
           <>
             <div
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: `url(${contactImage})` }}
             />
-            <div className="absolute inset-0 bg-[#5f4a38]/70" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-900)]/60 via-[var(--color-warm-800)]/40 to-[var(--color-warm-950)]/80" />
+            {/* Pattern overlay */}
+            <div
+              className="absolute inset-0 opacity-5"
+              style={{
+                backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)',
+                backgroundSize: '40px 40px'
+              }}
+            />
           </>
         ) : (
           <>
-            <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#14b8a6]/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#fb923c]/10 rounded-full blur-3xl" />
+            {/* Premium gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
+
+            {/* Mesh gradient overlay */}
+            <div
+              className="absolute inset-0 opacity-30"
+              style={{
+                background: `
+                  radial-gradient(ellipse 200% 100% at 50% 0%, var(--color-primary-100) 0%, transparent 50%),
+                  radial-gradient(ellipse 200% 100% at 80% 100%, var(--color-accent-orange-light) 0%, transparent 50%),
+                  radial-gradient(ellipse 150% 100% at 20% 100%, var(--color-primary-200) 0%, transparent 50%)
+                `
+              }}
+            />
+
+            {/* Decorative elements */}
+            <div className="hidden lg:block absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-[var(--color-primary-300)]/20 to-[var(--color-primary-500)]/10 rounded-full blur-3xl animate-float" />
+            <div className="hidden lg:block absolute bottom-32 left-16 w-96 h-96 bg-gradient-to-tr from-[var(--color-accent-orange)]/15 to-[var(--color-warm-400)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
           </>
         )}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className={`font-display text-4xl md:text-5xl font-semibold mb-4 ${contactImage ? 'text-white' : 'text-[#5f4a38]'}`}>
+
+        <div className="relative container-xl hero-content text-center">
+          <div className="hero-badge mb-8">
+            <div className="hero-badge-dot" />
+            <span>24/7 Customer Support Available</span>
+          </div>
+
+          <h1 className={`hero-title mb-6 ${contactImage ? 'text-white drop-shadow-lg' : 'text-[var(--color-warm-900)]'}`}>
             Get in Touch
           </h1>
-          <p className={`text-lg max-w-2xl mx-auto ${contactImage ? 'text-white/90' : 'text-[#7d6349]'}`}>
-            Have questions about our properties or need help with a booking? We&apos;re here to assist you every step of the way.
+          <p className={`hero-subtitle mx-auto ${contactImage ? 'text-white/90 drop-shadow-md' : 'text-[var(--color-warm-700)]'}`}>
+            Have questions about our properties or need help with a booking? We're here to assist you every step of the way with personalized service.
           </p>
+
+          {/* Quick action buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-12">
+            <a
+              href="https://m.me/cozycondoiloilocity"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary btn-lg hover:scale-105"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>Message Us Now</span>
+            </a>
+            <a
+              href="tel:+639778870724"
+              className="btn btn-secondary btn-lg hover:scale-105"
+            >
+              <Phone className="w-5 h-5" />
+              <span>Call Us</span>
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Contact Methods */}
+      {/* Enhanced Contact Methods */}
       <section className="section bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="container-xl">
+          <div className="text-center mb-16">
+            <h2 className="section-title">Choose Your Preferred Way to Connect</h2>
+            <p className="section-subtitle mx-auto">
+              We offer multiple ways to get in touch. Pick the one that works best for you.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {contactMethods.map((method, index) => {
               const Icon = method.icon;
               return (
@@ -142,18 +199,32 @@ export default function ContactPage() {
                   href={method.href}
                   target={method.href.startsWith('http') ? '_blank' : undefined}
                   rel={method.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="group p-6 rounded-2xl bg-white border border-[#faf3e6] hover:border-[#14b8a6]/30 hover:shadow-lg transition-all duration-300"
+                  className="card card-flat group hover:card-elevated text-center p-8 transition-all duration-300 hover:scale-105"
                 >
-                  <div className={`w-12 h-12 ${method.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-6 h-6 text-white" />
+                  <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br ${method.color.replace('bg-', 'from-')} to-opacity-80 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all`}>
+                    <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-1">
+                  <h3 className="card-title text-center mb-2 group-hover:text-[var(--color-primary-600)]">
                     {method.title}
                   </h3>
-                  <p className="text-sm text-[#9a7d5e] mb-2">{method.description}</p>
-                  <p className="text-[#0d9488] font-medium group-hover:underline">
+                  <p className="card-meta text-center mb-4">{method.description}</p>
+                  <p className="text-[var(--color-primary-600)] font-semibold group-hover:underline">
                     {method.value}
                   </p>
+
+                  {/* Response time indicator */}
+                  {method.title === 'Facebook Messenger' && (
+                    <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      Usually responds instantly
+                    </div>
+                  )}
+                  {method.title === 'Phone' && (
+                    <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      Available 8AM - 10PM
+                    </div>
+                  )}
                 </a>
               );
             })}
@@ -161,67 +232,109 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Location & Hours */}
-      <section className="section bg-[#faf3e6]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Map placeholder */}
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-[#0d9488] to-[#14b8a6] shadow-xl">
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center text-white">
-                  <MapPin className="w-16 h-16 mx-auto mb-4 opacity-80" />
-                  <p className="text-xl font-display font-semibold">Iloilo City</p>
-                  <p className="text-sm opacity-80">Philippines</p>
-                  <a
-                    href="https://maps.google.com/?q=Iloilo+City+Philippines"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-sm"
-                  >
-                    <span>View on Google Maps</span>
-                  </a>
+      {/* Enhanced Location & Hours */}
+      <section className="section bg-gradient-to-br from-[var(--color-warm-100)] to-[var(--color-warm-50)]">
+        <div className="container-xl">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Enhanced Map */}
+            <div className="relative">
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-700)] shadow-2xl ring-1 ring-white/20">
+                <div className="w-full h-full flex items-center justify-center relative">
+                  {/* Background pattern */}
+                  <div
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+                      backgroundSize: '30px 30px'
+                    }}
+                  />
+
+                  <div className="text-center text-white relative z-10">
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <MapPin className="w-10 h-10" />
+                    </div>
+                    <h3 className="text-2xl font-display font-bold mb-2">Iloilo City</h3>
+                    <p className="text-white/80 mb-6">Philippines</p>
+                    <a
+                      href="https://maps.google.com/?q=Iloilo+City+Philippines"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary bg-white/20 backdrop-blur-sm border-white/20 text-white hover:bg-white/30"
+                    >
+                      <span>View on Google Maps</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating info cards */}
+              <div className="absolute -bottom-6 -right-6 lg:-bottom-8 lg:-right-8 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-[var(--color-warm-900)]">Quick Response</div>
+                    <div className="text-sm text-[var(--color-warm-600)]">Usually within minutes</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Info */}
+            {/* Enhanced Info */}
             <div>
-              <h2 className="font-display text-2xl md:text-3xl font-semibold text-[#5f4a38] mb-6">
-                Our Location
-              </h2>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#14b8a6] flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-[#5f4a38] mb-1">Address</h3>
-                    <p className="text-[#7d6349]">
-                      Various locations across Iloilo City, Philippines
-                    </p>
-                    <p className="text-sm text-[#9a7d5e] mt-1">
-                      Properties in Iloilo Business Park, Smallville, and City Proper
-                    </p>
+              <h2 className="section-title mb-8">Our Service Area</h2>
+
+              <div className="space-y-8">
+                <div className="card card-flat p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="card-title mb-2">Prime Locations</h3>
+                      <p className="card-description mb-3">
+                        Multiple premium properties across Iloilo City's best neighborhoods
+                      </p>
+                      <ul className="text-sm text-[var(--color-warm-600)] space-y-1">
+                        <li>• Iloilo Business Park</li>
+                        <li>• Smallville Complex</li>
+                        <li>• City Proper</li>
+                        <li>• Mandurriao District</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#fb923c] flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-[#5f4a38] mb-1">Response Hours</h3>
-                    <p className="text-[#7d6349]">We respond to inquiries daily</p>
-                    <p className="text-sm text-[#9a7d5e] mt-1">
-                      8:00 AM - 10:00 PM Philippine Time (GMT+8)
-                    </p>
+                <div className="card card-flat p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-accent-orange)] to-[var(--color-accent-orange-dark)] flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="card-title mb-2">Response Hours</h3>
+                      <p className="card-description mb-3">
+                        We're available to assist you daily with quick response times
+                      </p>
+                      <div className="text-sm text-[var(--color-warm-600)]">
+                        <strong>8:00 AM - 10:00 PM</strong> Philippine Time (GMT+8)
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white/50">
-                  <p className="text-sm text-[#7d6349]">
-                    <strong className="text-[#5f4a38]">Pro tip:</strong> For the fastest response, message us on Facebook Messenger. We typically reply within minutes during business hours!
-                  </p>
+                <div className="card bg-[var(--color-primary-50)] border-[var(--color-primary-200)] p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center flex-shrink-0">
+                      <MessageCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-[var(--color-primary-800)] mb-2">💡 Pro Tip</h3>
+                      <p className="text-[var(--color-primary-700)]">
+                        For the fastest response, message us on Facebook Messenger. We typically reply within minutes during business hours!
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -229,83 +342,123 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* Enhanced FAQ Section */}
       <section className="section bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+        <div className="container-md">
+          <div className="text-center mb-16">
             <h2 className="section-title">Frequently Asked Questions</h2>
             <p className="section-subtitle mx-auto">
-              Find quick answers to common questions about booking and staying with us.
+              Find quick answers to common questions about booking and staying with us. Can't find what you're looking for? Just ask us directly!
             </p>
           </div>
 
           {loading ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="p-6 rounded-2xl bg-gray-200 animate-pulse">
-                  <div className="h-5 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-16 bg-gray-300 rounded"></div>
+                <div key={i} className="card p-6 animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {(dynamicFaqs.length > 0 ? dynamicFaqs : faqs).map((faq, index) => (
                 <div
                   key={index}
-                  className="p-6 rounded-2xl bg-[#faf3e6] hover:bg-[#f5e6cc] transition-colors"
+                  className="card p-8 hover:card-elevated transition-all duration-300"
                 >
-                  <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-2">
+                  <h3 className="card-title text-[var(--color-primary-600)] mb-4">
                     {faq.question}
                   </h3>
-                  <p className="text-[#7d6349]">{faq.answer}</p>
+                  <p className="card-description text-[var(--color-warm-800)] leading-relaxed">
+                    {faq.answer}
+                  </p>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="mt-12 text-center">
-            <p className="text-[#7d6349] mb-4">
-              Still have questions? We&apos;re happy to help!
-            </p>
-            <a
-              href="https://m.me/cozycondoiloilocity"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center gap-2"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span>Chat with Us</span>
-            </a>
+          <div className="mt-16 text-center">
+            <div className="card bg-gradient-to-br from-[var(--color-primary-50)] to-[var(--color-primary-100)] border-[var(--color-primary-200)] p-8">
+              <h3 className="section-title text-[var(--color-primary-800)] mb-4">
+                Still Have Questions?
+              </h3>
+              <p className="text-[var(--color-primary-700)] text-lg mb-8">
+                We're happy to help! Our friendly team is standing by to answer any questions and help you find the perfect accommodation.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="https://m.me/cozycondoiloilocity"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary btn-lg hover:scale-105"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Chat with Us</span>
+                </a>
+                <a
+                  href="tel:+639778870724"
+                  className="btn btn-outline btn-lg border-[var(--color-primary-600)] text-[var(--color-primary-600)] hover:bg-[var(--color-primary-600)] hover:text-white hover:scale-105"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span>Call Now</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="section bg-[#5f4a38] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-6">
+      {/* Enhanced Final CTA Section */}
+      <section className="section bg-gradient-to-br from-[var(--color-warm-900)] via-[var(--color-warm-800)] to-[var(--color-warm-950)] text-white relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[var(--color-primary-400)]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-[var(--color-accent-orange)]/10 rounded-full blur-3xl" />
+
+        <div className="relative container-xl text-center">
+          <h2 className="section-title-lg text-white mb-6">
             Ready to Experience Cozy Condo?
           </h2>
-          <p className="text-[#d4b896] text-lg mb-8">
-            Book your stay today and discover why guests love our properties.
+          <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Book your stay today and discover why guests love our properties. Experience premium comfort with warm Filipino hospitality.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-16">
+            <Link
               href="/properties"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#14b8a6] hover:bg-[#0d9488] text-white font-medium rounded-lg transition-colors"
+              className="btn btn-lg bg-white text-[var(--color-warm-900)] hover:bg-[var(--color-warm-50)] hover:scale-105 transition-all duration-300 shadow-xl"
             >
               <span>Browse Properties</span>
-            </a>
+              <ArrowRight className="w-5 h-5 icon-arrow" />
+            </Link>
             <a
               href="https://m.me/cozycondoiloilocity"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-colors"
+              className="btn btn-lg btn-outline border-white/30 text-white hover:bg-white/10 hover:scale-105 transition-all duration-300"
             >
               <MessageCircle className="w-5 h-5" />
               <span>Message Us</span>
             </a>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-white/70 border-t border-white/20 pt-12">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">Fast Response</div>
+              <div className="text-sm">Within minutes</div>
+            </div>
+            <div className="w-px h-12 bg-white/20 hidden sm:block" />
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">Premium Service</div>
+              <div className="text-sm">5-star experience</div>
+            </div>
+            <div className="w-px h-12 bg-white/20 hidden sm:block" />
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">Local Expertise</div>
+              <div className="text-sm">Iloilo specialists</div>
+            </div>
           </div>
         </div>
       </section>

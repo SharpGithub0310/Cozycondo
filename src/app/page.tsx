@@ -100,59 +100,60 @@ export default function HomePage() {
       {/* Hero Section */}
       <Hero />
 
-      {/* Properties Section */}
+      {/* Enhanced Properties Section */}
       <section id="properties" className="section bg-white">
-        <div className="container-responsive">
-          <div className="text-center mb-fluid-xl">
-            <h2 className="section-title text-fluid-3xl">{settings?.featuredTitle || 'Featured Properties'}</h2>
-            <p className="section-subtitle text-fluid-lg mx-auto">
+        <div className="container-xl">
+          <div className="text-center mb-16">
+            <h2 className="section-title">{settings?.featuredTitle || 'Featured Properties'}</h2>
+            <p className="section-subtitle mx-auto">
               {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
             </p>
-            {/* Remove debug messages in production */}
           </div>
 
           {loading ? (
-            <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-3">
+            <div className="grid-auto-fit grid-gap-lg">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="card animate-pulse">
-                  <div className="card-image bg-gray-200"></div>
+                  <div className="card-image bg-[var(--color-warm-200)]"></div>
                   <div className="card-content">
-                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-16 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-6 bg-[var(--color-warm-200)] rounded mb-3"></div>
+                    <div className="h-4 bg-[var(--color-warm-200)] rounded mb-3"></div>
+                    <div className="h-16 bg-[var(--color-warm-200)] rounded mb-4"></div>
                     <div className="flex gap-2">
-                      <div className="h-6 w-16 bg-gray-200 rounded"></div>
-                      <div className="h-6 w-20 bg-gray-200 rounded"></div>
+                      <div className="h-6 w-16 bg-[var(--color-warm-200)] rounded"></div>
+                      <div className="h-6 w-20 bg-[var(--color-warm-200)] rounded"></div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : error ? (
-            <div className="text-center text-red-600 py-8">
-              <p>{error}</p>
+            <div className="card p-8 text-center">
+              <p className="text-red-600 mb-4">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="mt-4 btn-primary"
+                className="btn btn-primary"
               >
-                Retry
+                <span>Try Again</span>
               </button>
             </div>
           ) : (
-            <div className="grid-responsive grid-responsive-md-2 grid-responsive-lg-3">
+            <div className="grid-auto-fit grid-gap-lg">
               {featuredProperties.map((property, index) => (
-              <div
+              <article
                 key={property.id}
-                className="card group animate-fade-in"
+                className="card card-elevated group animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                {/* Image */}
-                <div className="relative card-image bg-gradient-to-br from-[#d4b896] to-[#b89b7a] overflow-hidden">
+                {/* Enhanced Image */}
+                <div className="card-image">
+                  <div className="card-image-overlay" />
+
                   {property.photos && property.photos.length > 0 ? (
                     <img
                       src={property.photos[property.featuredPhotoIndex || 0]}
                       alt={property.name}
-                      className="card-image"
+                      className="w-full h-full object-cover"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         const fallback = e.currentTarget.nextElementSibling as HTMLElement;
@@ -160,97 +161,113 @@ export default function HomePage() {
                       }}
                     />
                   ) : null}
-                  <div className={`absolute inset-0 flex items-center justify-center ${property.photos && property.photos.length > 0 ? 'hidden' : ''}`}>
-                    <div className="text-center text-white/80">
-                      <div className="w-16 h-16 mx-auto mb-2 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <span className="font-display text-2xl font-bold">CC</span>
+
+                  <div className={`w-full h-full flex items-center justify-center ${property.photos && property.photos.length > 0 ? 'hidden' : ''}`}>
+                    <div className="text-center text-[var(--color-warm-600)]">
+                      <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--color-warm-200)] to-[var(--color-warm-300)] flex items-center justify-center shadow-lg">
+                        <span className="font-display text-2xl font-bold text-[var(--color-warm-800)]">CC</span>
                       </div>
-                      <p className="text-sm">Photo coming soon</p>
+                      <p className="text-sm font-medium">Photo coming soon</p>
                     </div>
                   </div>
+
                   {property.featured && (
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-[#14b8a6] text-white text-xs font-medium rounded-full">
+                    <div className="featured-badge">
                       Featured
                     </div>
                   )}
+
+                  {/* Quick action overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
+                    <Link
+                      href={`/properties/${property.slug}`}
+                      className="btn btn-primary btn-sm w-full hover:scale-105"
+                    >
+                      <span>View Details</span>
+                      <ArrowRight className="w-4 h-4 icon-arrow" />
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Content */}
+                {/* Enhanced Content */}
                 <div className="card-content">
-                  <h3 className="card-title group-hover:text-[#0d9488] transition-colors">
-                    {property.name}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-[#9a7d5e] text-fluid-sm mb-fluid-sm">
-                    <MapPin className="w-4 h-4" />
-                    <span>{property.location}</span>
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="card-title group-hover:text-[var(--color-primary-600)]">
+                      {property.name}
+                    </h3>
                   </div>
 
-                  <p className="card-description">
+                  <div className="card-meta flex items-center gap-2 mb-4">
+                    <MapPin className="w-4 h-4 text-[var(--color-primary-500)]" />
+                    <span className="font-medium">{property.location}</span>
+                  </div>
+
+                  <p className="card-description line-clamp-2">
                     {property.short_description}
                   </p>
 
-                  <div className="flex flex-wrap mb-fluid-md">
-                    {property.amenities.map((amenity: string, i: number) => (
-                      <span
-                        key={i}
-                        className="amenity-tag"
-                      >
-                        {amenity}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="text-xs text-gray-500 mb-fluid-sm">
-                    ID: {property.id} | Featured: {property.featured ? 'Yes' : 'No'} | Active: {property.active ? 'Yes' : 'No'}
-                  </div>
-                  <Link
-                    href={`/properties/${property.slug}`}
-                    className="inline-flex items-center gap-1 text-[#0d9488] font-medium text-fluid-sm hover:gap-2 transition-all touch-target"
-                  >
-                    <span>View Details</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  {/* Enhanced amenities */}
+                  {property.amenities && (
+                    <div className="flex flex-wrap gap-2">
+                      {property.amenities.slice(0, 3).map((amenity: string, i: number) => (
+                        <span key={i} className="amenity-tag">
+                          <span className="capitalize">{amenity}</span>
+                        </span>
+                      ))}
+                      {property.amenities.length > 3 && (
+                        <span className="amenity-tag bg-[var(--color-primary-50)] border-[var(--color-primary-200)] text-[var(--color-primary-800)]">
+                          +{property.amenities.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
+              </article>
               ))}
             </div>
           )}
 
-          <div className="text-center mt-fluid-xl">
-            <Link href="/properties" className="btn-primary inline-flex items-center gap-2 touch-target">
+          <div className="text-center mt-16">
+            <Link
+              href="/properties"
+              className="btn btn-primary btn-xl hover:scale-105 shadow-lg hover:shadow-2xl transition-all duration-300"
+            >
               <span>View All Properties</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-6 h-6 icon-arrow" />
             </Link>
+            <p className="text-[var(--color-warm-600)] text-sm mt-4">
+              Discover all our premium accommodations in Iloilo City
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="section gradient-warm">
-        <div className="container-responsive">
-          <div className="text-center mb-fluid-xl">
-            <h2 className="section-title text-fluid-3xl">Why Choose Cozy Condo?</h2>
-            <p className="section-subtitle text-fluid-lg mx-auto">
-              We go beyond just providing a place to stay. We create memorable experiences.
+      {/* Enhanced Features Section */}
+      <section className="section bg-gradient-to-br from-[var(--color-warm-100)] to-[var(--color-warm-50)]">
+        <div className="container-xl">
+          <div className="text-center mb-16">
+            <h2 className="section-title">Why Choose Cozy Condo?</h2>
+            <p className="section-subtitle mx-auto">
+              We go beyond just providing a place to stay. We create memorable experiences with warm Filipino hospitality.
             </p>
           </div>
 
-          <div className="grid-responsive grid-responsive-sm-2 grid-responsive-lg-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div
                   key={index}
-                  className="text-center p-fluid-lg rounded-2xl bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-lg transition-all duration-300"
+                  className="card card-flat text-center p-8 hover:card-elevated group transition-all duration-300 hover:scale-105"
+                  style={{ animationDelay: `${index * 150}ms` }}
                 >
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-fluid-md rounded-xl bg-gradient-to-br from-[#14b8a6] to-[#0d9488] flex items-center justify-center shadow-lg">
-                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-700)] flex items-center justify-center shadow-lg group-hover:shadow-2xl group-hover:scale-110 transition-all duration-300">
+                    <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-display text-fluid-lg font-semibold text-[#5f4a38] mb-fluid-sm">
+                  <h3 className="card-title text-center mb-3 group-hover:text-[var(--color-primary-600)]">
                     {feature.title}
                   </h3>
-                  <p className="text-[#7d6349] text-fluid-sm">
+                  <p className="card-description text-center">
                     {feature.description}
                   </p>
                 </div>
@@ -260,18 +277,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About Section */}
+      {/* Enhanced About Section */}
       <section className="section bg-white">
-        <div className="container-responsive">
-          <div className="grid-responsive grid-responsive-md-2 items-center">
-            {/* Image side */}
-            <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl">
+        <div className="container-xl">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Enhanced Image side */}
+            <div className="relative order-2 lg:order-1">
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[var(--color-warm-300)] to-[var(--color-warm-500)] ring-1 ring-white/20">
+                {/* Enhanced image overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
+
                 {aboutImage ? (
                   <img
                     src={aboutImage}
                     alt="About Cozy Condo"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       const fallback = e.currentTarget.nextElementSibling as HTMLElement;
@@ -279,35 +299,68 @@ export default function HomePage() {
                     }}
                   />
                 ) : null}
-                <div className={`aspect-[4/3] bg-gradient-to-br from-[#0d9488] to-[#14b8a6] flex items-center justify-center ${aboutImage ? 'hidden' : ''}`}>
-                  <div className="text-center text-white">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-fluid-md rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="font-display text-2xl sm:text-3xl font-bold">CC</span>
+
+                <div className={`w-full h-full flex items-center justify-center ${aboutImage ? 'hidden' : ''}`}>
+                  <div className="text-center text-white/80">
+                    <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <span className="font-display text-3xl font-bold">CC</span>
                     </div>
-                    <p className="text-fluid-xl font-display font-semibold">Cozy Condo</p>
-                    <p className="text-sm opacity-80">Iloilo City</p>
+                    <p className="text-2xl font-display font-bold">Cozy Condo</p>
+                    <p className="text-sm opacity-80">Premium Stays • Iloilo City</p>
                   </div>
                 </div>
+
+                {/* Subtle pattern overlay */}
+                <div
+                  className="absolute inset-0 opacity-10 z-20"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+                    backgroundSize: '20px 20px'
+                  }}
+                />
               </div>
-              {/* Decorative element */}
-              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-16 h-16 sm:w-32 sm:h-32 bg-[#fb923c]/20 rounded-full blur-xl sm:blur-2xl" />
+
+              {/* Enhanced decorative elements */}
+              <div className="absolute -top-8 -right-8 w-24 h-24 lg:w-40 lg:h-40 bg-gradient-to-br from-[var(--color-accent-orange)]/20 to-[var(--color-accent-orange-light)]/10 rounded-full blur-2xl animate-pulse" />
+              <div className="absolute bottom-1/4 -left-4 w-3 h-3 bg-[var(--color-primary-400)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/4 -right-2 w-2 h-2 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-60" style={{ animationDelay: '2s' }} />
             </div>
 
-            {/* Content side */}
-            <div>
-              <h2 className="section-title text-fluid-3xl">Welcome to Cozy Condo</h2>
-              <p className="text-[#7d6349] text-fluid-lg mb-fluid-lg">
+            {/* Enhanced Content side */}
+            <div className="order-1 lg:order-2">
+              <div className="hero-badge mb-8">
+                <div className="hero-badge-dot" />
+                <span>Trusted by 1000+ Guests Since 2020</span>
+              </div>
+
+              <h2 className="section-title mb-6">Welcome to Cozy Condo</h2>
+              <p className="text-[var(--color-warm-700)] text-lg mb-6 leading-relaxed">
                 Founded with a passion for hospitality, Cozy Condo has been providing exceptional short-term rental experiences in Iloilo City. Our carefully curated collection of condominiums combines modern comfort with warm Filipino hospitality.
               </p>
-              <p className="text-[#7d6349] text-fluid-base mb-fluid-xl">
-                Whether you&apos;re a business traveler, a vacationing family, or someone relocating to the city, we have the perfect space for you. Each of our 9+ properties is thoughtfully designed and maintained to ensure your stay is nothing short of cozy.
+              <p className="text-[var(--color-warm-600)] mb-8 leading-relaxed">
+                Whether you're a business traveler, a vacationing family, or someone relocating to the city, we have the perfect space for you. Each of our premium properties is thoughtfully designed and maintained to ensure your stay is nothing short of exceptional.
               </p>
-              <div className="flex flex-col sm:flex-row gap-fluid-md">
-                <Link href="/contact" className="btn-primary touch-target">
-                  Get in Touch
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                {[
+                  { value: '1000+', label: 'Happy Guests' },
+                  { value: '10+', label: 'Properties' },
+                  { value: '4.9★', label: 'Average Rating' }
+                ].map((stat, index) => (
+                  <div key={index} className="text-center">
+                    <div className="text-2xl font-bold text-[var(--color-primary-600)] mb-1">{stat.value}</div>
+                    <div className="text-xs text-[var(--color-warm-600)] font-medium">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/contact" className="btn btn-primary btn-lg hover:scale-105">
+                  <span>Get in Touch</span>
                 </Link>
-                <Link href="/properties" className="btn-secondary touch-target">
-                  Browse Properties
+                <Link href="/properties" className="btn btn-secondary btn-lg hover:scale-105">
+                  <span>Browse Properties</span>
                 </Link>
               </div>
             </div>

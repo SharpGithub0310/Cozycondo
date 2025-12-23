@@ -286,6 +286,45 @@ export const DEFAULT_SETTINGS = {
   checkoutTime: '11:00 AM',
   timezone: 'Asia/Manila',
   currency: 'PHP',
+  faqs: [
+    {
+      id: '1',
+      question: 'How do I make a reservation?',
+      answer: 'You can make a reservation by contacting us directly through Facebook Messenger, phone, or email. We\'ll help you check availability and process your booking quickly.',
+      order: 0
+    },
+    {
+      id: '2',
+      question: 'What are your check-in and check-out times?',
+      answer: 'Check-in time is 3:00 PM and check-out time is 11:00 AM (Philippine Time). Early check-in or late check-out may be available upon request and subject to availability.',
+      order: 1
+    },
+    {
+      id: '3',
+      question: 'Are your properties fully furnished?',
+      answer: 'Yes, all our properties are fully furnished with modern amenities including WiFi, air conditioning, kitchen facilities, linens, towels, and essential household items.',
+      order: 2
+    },
+    {
+      id: '4',
+      question: 'Do you provide airport transfers?',
+      answer: 'While we don\'t provide direct airport transfer services, we can help arrange transportation or provide recommendations for reliable taxi services and ride-sharing options.',
+      order: 3
+    },
+    {
+      id: '5',
+      question: 'What is your cancellation policy?',
+      answer: 'Our cancellation policy varies depending on the booking terms and timing. Please contact us directly to discuss your specific situation and we\'ll work with you to find a fair solution.',
+      order: 4
+    },
+    {
+      id: '6',
+      question: 'Are pets allowed in the properties?',
+      answer: 'Pet policies vary by property and building regulations. Please let us know if you\'re traveling with pets when making your inquiry, and we\'ll check availability at pet-friendly locations.',
+      order: 5
+    }
+  ],
+  companyName: 'Cozy Condo'
 };
 
 export function getProductionFallbackProperties() {

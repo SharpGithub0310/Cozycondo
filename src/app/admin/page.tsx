@@ -16,10 +16,10 @@ import {
 
 // Quick stats data
 const stats = [
-  { name: 'Total Properties', value: '9', icon: Building2, href: '/admin/properties', color: 'bg-[#14b8a6]' },
-  { name: 'Active Bookings', value: '—', icon: Calendar, href: '/admin/calendar', color: 'bg-[#fb923c]' },
+  { name: 'Total Properties', value: '9', icon: Building2, href: '/admin/properties', color: 'bg-[color:var(--color-primary-500)]' },
+  { name: 'Active Bookings', value: '—', icon: Calendar, href: '/admin/calendar', color: 'bg-[color:var(--color-accent-orange)]' },
   { name: 'Blog Posts', value: '5', icon: FileText, href: '/admin/blog', color: 'bg-[#1877F2]' },
-  { name: 'This Month Views', value: '—', icon: Eye, href: '#', color: 'bg-[#9a7d5e]' },
+  { name: 'This Month Views', value: '—', icon: Eye, href: '#', color: 'bg-[color:var(--color-warm-600)]' },
 ];
 
 // Quick actions
@@ -41,8 +41,8 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="font-display text-2xl font-semibold text-[#5f4a38]">Dashboard</h1>
-        <p className="text-[#7d6349] mt-1">Welcome back! Here&apos;s an overview of your business.</p>
+        <h1 className="font-display text-2xl font-semibold text-[color:var(--color-warm-900)]">Dashboard</h1>
+        <p className="text-[color:var(--color-warm-700)] mt-1">Welcome back! Here&apos;s an overview of your business.</p>
       </div>
 
       {/* Stats Grid */}
@@ -57,8 +57,8 @@ export default function AdminDashboard() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-[#9a7d5e]">{stat.name}</p>
-                  <p className="font-display text-3xl font-semibold text-[#5f4a38] mt-1">
+                  <p className="text-sm text-[color:var(--color-warm-600)]">{stat.name}</p>
+                  <p className="font-display text-3xl font-semibold text-[color:var(--color-warm-900)] mt-1">
                     {stat.value}
                   </p>
                 </div>
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="lg:col-span-2 space-y-6">
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
               Quick Actions
             </h2>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -86,15 +86,15 @@ export default function AdminDashboard() {
                   <Link
                     key={action.name}
                     href={action.href}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[#faf3e6] hover:bg-[#f5e6cc] transition-colors group"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[color:var(--color-warm-200)] hover:bg-[color:var(--color-warm-300)] transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                      <Icon className="w-5 h-5 text-[#14b8a6]" />
+                      <Icon className="w-5 h-5 text-[color:var(--color-primary-500)]" />
                     </div>
-                    <span className="font-medium text-[#5f4a38] group-hover:text-[#0d9488] transition-colors">
+                    <span className="font-medium text-[color:var(--color-warm-900)] group-hover:text-[color:var(--color-primary-600)] transition-colors">
                       {action.name}
                     </span>
-                    <ArrowRight className="w-4 h-4 text-[#9a7d5e] ml-auto group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto group-hover:translate-x-1 transition-transform" />
                   </Link>
                 );
               })}
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
 
           {/* External Links */}
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
               External Links
             </h2>
             <div className="grid sm:grid-cols-3 gap-4">
@@ -111,48 +111,48 @@ export default function AdminDashboard() {
                 href="https://www.facebook.com/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 rounded-xl border border-[#faf3e6] hover:border-[#14b8a6]/30 hover:shadow-md transition-all"
+                className="flex items-center gap-3 p-4 rounded-xl border border-[color:var(--color-warm-200)] hover:border-[color:var(--color-primary-500)]/30 hover:shadow-md transition-all"
               >
                 <div className="w-10 h-10 rounded-lg bg-[#1877F2] flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="font-medium text-[#5f4a38] block">Facebook</span>
-                  <span className="text-xs text-[#9a7d5e]">View Page</span>
+                  <span className="font-medium text-[color:var(--color-warm-900)] block">Facebook</span>
+                  <span className="text-xs text-[color:var(--color-warm-600)]">View Page</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[#9a7d5e] ml-auto" />
+                <ExternalLink className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto" />
               </a>
 
               <a
                 href="https://airbnb.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 rounded-xl border border-[#faf3e6] hover:border-[#14b8a6]/30 hover:shadow-md transition-all"
+                className="flex items-center gap-3 p-4 rounded-xl border border-[color:var(--color-warm-200)] hover:border-[color:var(--color-primary-500)]/30 hover:shadow-md transition-all"
               >
                 <div className="w-10 h-10 rounded-lg bg-[#FF5A5F] flex items-center justify-center">
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="font-medium text-[#5f4a38] block">Airbnb</span>
-                  <span className="text-xs text-[#9a7d5e]">Manage Listings</span>
+                  <span className="font-medium text-[color:var(--color-warm-900)] block">Airbnb</span>
+                  <span className="text-xs text-[color:var(--color-warm-600)]">Manage Listings</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[#9a7d5e] ml-auto" />
+                <ExternalLink className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto" />
               </a>
 
               <a
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 rounded-xl border border-[#faf3e6] hover:border-[#14b8a6]/30 hover:shadow-md transition-all"
+                className="flex items-center gap-3 p-4 rounded-xl border border-[color:var(--color-warm-200)] hover:border-[color:var(--color-primary-500)]/30 hover:shadow-md transition-all"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#14b8a6] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-[color:var(--color-primary-500)] flex items-center justify-center">
                   <Eye className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="font-medium text-[#5f4a38] block">Website</span>
-                  <span className="text-xs text-[#9a7d5e]">View Live</span>
+                  <span className="font-medium text-[color:var(--color-warm-900)] block">Website</span>
+                  <span className="text-xs text-[color:var(--color-warm-600)]">View Live</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[#9a7d5e] ml-auto" />
+                <ExternalLink className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto" />
               </a>
             </div>
           </div>
@@ -162,22 +162,22 @@ export default function AdminDashboard() {
         <div className="space-y-6">
           {/* Contact Info Card */}
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
               Contact Info
             </h2>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm">
-                <Phone className="w-4 h-4 text-[#14b8a6]" />
-                <span className="text-[#7d6349]">+63 977 887 0724</span>
+                <Phone className="w-4 h-4 text-[color:var(--color-primary-500)]" />
+                <span className="text-[color:var(--color-warm-700)]">+63 977 887 0724</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <MessageCircle className="w-4 h-4 text-[#14b8a6]" />
-                <span className="text-[#7d6349]">admin@cozycondo.net</span>
+                <MessageCircle className="w-4 h-4 text-[color:var(--color-primary-500)]" />
+                <span className="text-[color:var(--color-warm-700)]">admin@cozycondo.net</span>
               </div>
             </div>
             <Link
               href="/admin/settings"
-              className="inline-flex items-center gap-1 text-[#0d9488] text-sm font-medium mt-4 hover:underline"
+              className="inline-flex items-center gap-1 text-[color:var(--color-primary-600)] text-sm font-medium mt-4 hover:underline"
             >
               Edit in Settings
               <ArrowRight className="w-3 h-3" />
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
 
           {/* Recent Activity */}
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
               Recent Activity
             </h2>
             <div className="space-y-3">
@@ -196,11 +196,11 @@ export default function AdminDashboard() {
                   className="flex items-start gap-3 text-sm"
                 >
                   <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                    activity.type === 'system' ? 'bg-[#14b8a6]' : 'bg-[#fb923c]'
+                    activity.type === 'system' ? 'bg-[color:var(--color-primary-500)]' : 'bg-[color:var(--color-accent-orange)]'
                   }`} />
                   <div>
-                    <p className="text-[#5f4a38]">{activity.action}</p>
-                    <p className="text-xs text-[#9a7d5e]">{activity.time}</p>
+                    <p className="text-[color:var(--color-warm-900)]">{activity.action}</p>
+                    <p className="text-xs text-[color:var(--color-warm-600)]">{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Help Card */}
-          <div className="admin-card bg-gradient-to-br from-[#14b8a6] to-[#0d9488] text-white">
+          <div className="admin-card bg-gradient-to-br from-[color:var(--color-primary-500)] to-[color:var(--color-primary-600)] text-white">
             <h2 className="font-display text-lg font-semibold mb-2">
               Need Help?
             </h2>
