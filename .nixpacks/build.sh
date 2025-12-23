@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Ensure environment variables are available during build
+export NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+export SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+export NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+export NEXT_PUBLIC_ADMIN_PASSWORD=$NEXT_PUBLIC_ADMIN_PASSWORD
+
+# Run the build
+npm run build
