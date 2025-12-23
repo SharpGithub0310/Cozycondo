@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Force dynamic rendering to ensure database access works
+export const dynamic = 'force-dynamic';
+
 // Server Component - runs on the server, faster initial page load
 export default async function PropertiesPage() {
   // Fetch properties on the server
