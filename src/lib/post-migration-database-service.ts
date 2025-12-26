@@ -10,16 +10,42 @@ import { getProductionFallbackProperties, getProductionFallbackSettings } from '
 import { createAdminClient } from './api-auth';
 
 class PostMigrationService {
+  private logToAdmin(level: 'info' | 'warn' | 'error', message: string, data?: any) {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+      timestamp,
+      level,
+      service: 'PostMigrationService',
+      message,
+      data,
+      environment: typeof window === 'undefined' ? 'server' : 'client'
+    };
+
+    // Always log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console[level === 'info' ? 'log' : level](`[${timestamp}] ${message}`, data);
+    }
+
+    // Store logs for admin console
+    if (typeof window !== 'undefined' && (window as any).adminLogs) {
+      (window as any).adminLogs.push(logEntry);
+    }
+  }
 
   async getProperties(options?: { active?: boolean }) {
+    const startTime = Date.now();
+
     try {
       // Check if we're on the server - use direct database access
       if (typeof window === 'undefined') {
-        console.log('Server-side: Using direct database access');
+        this.logToAdmin('info', 'Server-side: Initiating direct database access for properties', { options });
         const adminClient = createAdminClient();
 
         if (!adminClient) {
-          console.log('⚠️ Server-side: Database not configured, using fallback properties');
+          this.logToAdmin('warn', '⚠️ Server-side: Database not configured, falling back to static properties', {
+            reason: 'No admin client available',
+            fallbackCount: Object.keys(getProductionFallbackProperties()).length
+          });
           return getProductionFallbackProperties();
         }
 
@@ -70,9 +96,21 @@ class PostMigrationService {
         const { data, error } = await query;
 
         if (error) {
-          console.error('Server-side database error:', error);
+          this.logToAdmin('error', 'Server-side database query failed', {
+            error: error.message,
+            code: error.code,
+            details: error.details,
+            fallbackUsed: true
+          });
           return getProductionFallbackProperties();
         }
+
+        const loadTime = Date.now() - startTime;
+        this.logToAdmin('info', `Server-side: Successfully loaded ${data?.length || 0} properties in ${loadTime}ms`, {
+          count: data?.length || 0,
+          loadTime,
+          activeFilter: options?.active
+        });
 
         // Convert to the format expected by the frontend
         const result: Record<string, any> = {};
@@ -127,33 +165,53 @@ class PostMigrationService {
         });
 
         if (Object.keys(result).length > 0) {
-          console.log(`✅ Server-side: Loaded ${Object.keys(result).length} properties from database`);
+          this.logToAdmin('info', `✅ Server-side: Loaded ${Object.keys(result).length} properties from database`, {
+            count: Object.keys(result).length
+          });
           return result;
         } else {
-          console.log('⚠️ Server-side: No properties found in database, using fallback');
+          this.logToAdmin('warn', '⚠️ Server-side: No properties found in database, using fallback', {
+            fallbackUsed: true
+          });
           return getProductionFallbackProperties();
         }
       }
 
       // Client-side: Use API calls
-      console.log('Client-side: Using API calls');
+      this.logToAdmin('info', 'Client-side: Initiating API call for properties', { options });
       const dbProperties = await enhancedDatabaseService.getProperties(options);
+
+      const loadTime = Date.now() - startTime;
 
       // Check if we have real database data (not empty fallback)
       if (dbProperties && Object.keys(dbProperties).length > 0) {
         // Check if this looks like database data vs fallback
         const firstProperty = Object.values(dbProperties)[0] as any;
         if (firstProperty && (firstProperty.id || firstProperty.name)) {
-          console.log('✅ Client-side: Loading properties from database');
+          this.logToAdmin('info', `✅ Client-side: Successfully loaded ${Object.keys(dbProperties).length} properties in ${loadTime}ms`, {
+            count: Object.keys(dbProperties).length,
+            loadTime,
+            source: 'database'
+          });
           return dbProperties;
         }
       }
 
       // If database is empty or unavailable, use production fallback
-      console.log('⚠️ Client-side: Database unavailable, using fallback properties');
+      this.logToAdmin('warn', '⚠️ Client-side: Database unavailable, using fallback properties', {
+        reason: 'Empty or invalid response',
+        fallbackUsed: true,
+        loadTime
+      });
       return getProductionFallbackProperties();
-    } catch (error) {
-      console.error('Database error, using fallback:', error);
+    } catch (error: any) {
+      const loadTime = Date.now() - startTime;
+      this.logToAdmin('error', 'Database error, using fallback', {
+        error: error.message,
+        stack: error.stack,
+        fallbackUsed: true,
+        loadTime
+      });
       return getProductionFallbackProperties();
     }
   }

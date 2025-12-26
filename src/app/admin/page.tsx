@@ -1,17 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  Building2, 
-  Calendar, 
-  FileText, 
-  Users, 
-  TrendingUp, 
+import {
+  Building2,
+  Calendar,
+  FileText,
+  Users,
+  TrendingUp,
   ExternalLink,
   MessageCircle,
   Phone,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Terminal
 } from 'lucide-react';
 
 // Quick stats data
@@ -28,6 +29,7 @@ const quickActions = [
   { name: 'Block Dates', href: '/admin/calendar', icon: Calendar },
   { name: 'New Blog Post', href: '/admin/blog/new', icon: FileText },
   { name: 'Update Settings', href: '/admin/settings', icon: Users },
+  { name: 'Admin Console', href: '/admin/console', icon: Terminal },
 ];
 
 // Recent activities (placeholder)

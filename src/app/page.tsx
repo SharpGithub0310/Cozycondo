@@ -42,12 +42,31 @@ export default function HomePage() {
   const [settings, setSettings] = useState<WebsiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadMetrics, setLoadMetrics] = useState<{ duration: number; source: string } | null>(null);
 
   useEffect(() => {
+    // Initialize admin logs if in admin mode
+    if (typeof window !== 'undefined') {
+      (window as any).adminLogs = (window as any).adminLogs || [];
+    }
+
     const loadData = async () => {
+      const startTime = performance.now();
+
       try {
         setLoading(true);
         setError(null);
+
+        // Log start of data loading
+        if (typeof window !== 'undefined' && (window as any).adminLogs) {
+          (window as any).adminLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            service: 'HomePage',
+            message: 'Starting data load for home page',
+            data: { startTime }
+          });
+        }
 
         // Load settings and only active properties from database
         const [loadedSettings, propertiesData] = await Promise.all([
@@ -55,8 +74,22 @@ export default function HomePage() {
           postMigrationDatabaseService.getProperties({ active: true })
         ]);
 
-        // console.log('Loaded settings from database:', loadedSettings);
-        // console.log('Loaded properties from database:', propertiesData);
+        const loadDuration = performance.now() - startTime;
+
+        // Log successful data load
+        if (typeof window !== 'undefined' && (window as any).adminLogs) {
+          (window as any).adminLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            service: 'HomePage',
+            message: `Data loaded successfully in ${loadDuration.toFixed(2)}ms`,
+            data: {
+              settingsLoaded: !!loadedSettings,
+              propertiesCount: Object.keys(propertiesData).length,
+              duration: loadDuration
+            }
+          });
+        }
 
         setSettings(loadedSettings);
 
@@ -70,23 +103,50 @@ export default function HomePage() {
           normalizePropertyData(property)
         );
 
-        console.log('Converted properties array:', propertiesArray);
-        console.log('Property slugs:', propertiesArray.map(p => ({ name: p.name, slug: p.slug })));
-
         // Filter to show featured properties (all are already active)
         let featured = propertiesArray.filter(p => p.featured);
-        console.log('Filtered featured properties:', featured);
 
         // If no featured properties, show first 3 properties
         if (featured.length === 0) {
           featured = propertiesArray.slice(0, 3);
-          // console.log('No featured properties, using first 3:', featured);
+
+          if (typeof window !== 'undefined' && (window as any).adminLogs) {
+            (window as any).adminLogs.push({
+              timestamp: new Date().toISOString(),
+              level: 'warn',
+              service: 'HomePage',
+              message: 'No featured properties found, using first 3',
+              data: { totalProperties: propertiesArray.length }
+            });
+          }
         }
 
         setFeaturedProperties(featured);
-      } catch (err) {
+        setLoadMetrics({
+          duration: loadDuration,
+          source: propertiesArray.length > 0 ? 'database' : 'fallback'
+        });
+      } catch (err: any) {
+        const loadDuration = performance.now() - startTime;
+
+        // Log error to admin console
+        if (typeof window !== 'undefined' && (window as any).adminLogs) {
+          (window as any).adminLogs.push({
+            timestamp: new Date().toISOString(),
+            level: 'error',
+            service: 'HomePage',
+            message: 'Failed to load data',
+            data: {
+              error: err.message,
+              stack: err.stack,
+              duration: loadDuration
+            }
+          });
+        }
+
         console.error('Error loading data:', err);
         setError('Failed to load data. Please try again later.');
+        setLoadMetrics({ duration: loadDuration, source: 'error' });
       } finally {
         setLoading(false);
       }
