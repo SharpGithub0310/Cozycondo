@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Shield, Clock, AlertCircle, CheckCircle, Info, XCircle, RefreshCw, Download, Trash2 } from 'lucide-react';
-import AdminLayout from '../AdminLayout';
 import Link from 'next/link';
 
 export default function AdminConsolePage() {
@@ -98,8 +97,7 @@ export default function AdminConsolePage() {
   const metrics = getMetrics();
 
   return (
-    <AdminLayout>
-      <div className="container-responsive py-8">
+    <div className="container-responsive py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[var(--color-warm-900)] mb-2">Admin Console</h1>
           <p className="text-[var(--color-warm-600)]">Real-time logging and performance monitoring</p>
@@ -250,6 +248,5 @@ export default function AdminConsolePage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }
