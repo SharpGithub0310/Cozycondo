@@ -145,30 +145,31 @@ export default function CalendarPage() {
   };
 
   // Save iCal URL
-  const saveIcalUrl = () => {
+  const saveIcalUrl = async () => {
     if (selectedProperty) {
-      // Get full property data
-      const storedProperty = getStoredProperties()[selectedProperty.id];
-      const defaultProperty = getDefaultPropertyData(selectedProperty.id);
-      const fullPropertyData = storedProperty || defaultProperty;
+      try {
+        // Update the property in the database with the new iCal URL
+        await postMigrationDatabaseService.updatePropertyStatus(selectedProperty.id, {
+          icalUrl: icalImportUrl
+        });
 
-      // Save with updated iCal URL
-      saveProperty(selectedProperty.id, {
-        ...fullPropertyData,
-        icalUrl: icalImportUrl
-      });
+        // Update local state
+        setProperties(properties.map(p =>
+          p.id === selectedProperty.id
+            ? { ...p, icalUrl: icalImportUrl }
+            : p
+        ));
 
-      // Update local state
-      setProperties(properties.map(p =>
-        p.id === selectedProperty.id
-          ? { ...p, icalUrl: icalImportUrl }
-          : p
-      ));
+        setSelectedProperty({
+          ...selectedProperty,
+          icalUrl: icalImportUrl
+        });
 
-      setSelectedProperty({
-        ...selectedProperty,
-        icalUrl: icalImportUrl
-      });
+        console.log('✅ Successfully saved iCal URL for property:', selectedProperty.name);
+      } catch (error) {
+        console.error('❌ Failed to save iCal URL:', error);
+        // You could add a toast notification here
+      }
     }
   };
 
