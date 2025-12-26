@@ -1,13 +1,19 @@
 'use client';
 
-import Hero from '@/components/Hero';
+import dynamic from 'next/dynamic';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/types';
 import type { WebsiteSettings } from '@/lib/types';
 import { normalizePropertyData } from '@/utils/slugify';
+
+// Lazy load the Hero component
+const Hero = dynamic(() => import('@/components/Hero'), {
+  loading: () => <div className="h-[60vh] bg-gradient-to-br from-[var(--color-warm-100)] to-[var(--color-warm-200)] animate-pulse" />,
+  ssr: true
+});
 
 // Features section data
 const features = [
@@ -205,7 +211,7 @@ export default function HomePage() {
                 className="card card-elevated group animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                {/* Enhanced Image */}
+                {/* Enhanced Image with lazy loading */}
                 <div className="card-image">
                   <div className="card-image-overlay" />
 
@@ -213,6 +219,9 @@ export default function HomePage() {
                     <img
                       src={property.photos[property.featuredPhotoIndex || 0]}
                       alt={property.name}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      fetchPriority={index === 0 ? "high" : "auto"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -351,6 +360,8 @@ export default function HomePage() {
                   <img
                     src={aboutImage}
                     alt="About Cozy Condo"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';

@@ -1,17 +1,73 @@
+# Docker files
 Dockerfile
 .dockerignore
+
+# Dependencies
 node_modules
-npm-debug.log
-README.md
+.npm
+.pnp
+.pnp.js
+
+# Testing
+coverage
+.nyc_output
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Next.js
 .next
-.git
-.gitignore
+out
+build
+dist
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+
+# Environment files
+.env*.local
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env.local.example
 .env.production.example
-*.log
-.DS_Store
-*.swp
-*.swo
+
+# Git
+.git
+.github
+.gitignore
+
+# Editor directories
 .vscode
 .idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Misc
+.vercel
+.eslintrc.json
+.prettierrc

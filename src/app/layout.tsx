@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MessengerWidget from "@/components/MessengerWidget";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
+import PerformanceDisplay from "@/components/PerformanceDisplay";
 
 export const metadata: Metadata = {
   title: {
@@ -42,12 +43,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.supabase.co" />
+        <link rel="dns-prefetch" href="https://www.facebook.com" />
+      </head>
       <body className="font-body antialiased bg-[#fefdfb] text-[#5f4a38]">
         <Navbar />
         <main>{children}</main>
         <Footer />
         <MessengerWidget />
         <PerformanceMonitor />
+        <PerformanceDisplay />
       </body>
     </html>
   );
