@@ -1,20 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Shield, Clock, AlertCircle, CheckCircle, Info, XCircle, RefreshCw, Download, Trash2 } from 'lucide-react';
+import { Shield, Clock, AlertCircle, CheckCircle, Info, XCircle, RefreshCw, Download, Trash2, BarChart3, Users, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { SimpleAnalytics, type VisitorStats } from '@/lib/analytics';
 
 export default function AdminConsolePage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState<string>('');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [visitorStats, setVisitorStats] = useState<VisitorStats>({ today: 0, thisWeek: 0, thisMonth: 0, total: 0 });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Initialize admin logs if not present
       (window as any).adminLogs = (window as any).adminLogs || [];
       setLogs((window as any).adminLogs);
+
+      // Load visitor statistics
+      setVisitorStats(SimpleAnalytics.getVisitorStats());
     }
   }, []);
 
@@ -24,6 +29,8 @@ export default function AdminConsolePage() {
     const interval = setInterval(() => {
       if (typeof window !== 'undefined' && (window as any).adminLogs) {
         setLogs([...(window as any).adminLogs]);
+        // Also refresh visitor stats
+        setVisitorStats(SimpleAnalytics.getVisitorStats());
       }
     }, 2000);
 
@@ -136,6 +143,69 @@ export default function AdminConsolePage() {
             </div>
             <div className="text-2xl font-bold text-[var(--color-warm-900)]">
               {metrics.avgLoadTime.toFixed(0)}ms
+            </div>
+          </div>
+        </div>
+
+        {/* Website Analytics */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-[var(--color-warm-900)] mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-[var(--color-primary-500)]" />
+            Website Analytics
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-[var(--color-warm-600)]">Today</span>
+                <Eye className="w-4 h-4 text-[var(--color-primary-500)]" />
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-warm-900)]">{visitorStats.today}</div>
+              <span className="text-xs text-[var(--color-warm-500)]">Visitors</span>
+            </div>
+
+            <div className="card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-[var(--color-warm-600)]">This Week</span>
+                <Users className="w-4 h-4 text-blue-500" />
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-warm-900)]">{visitorStats.thisWeek}</div>
+              <span className="text-xs text-[var(--color-warm-500)]">Visitors</span>
+            </div>
+
+            <div className="card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-[var(--color-warm-600)]">This Month</span>
+                <BarChart3 className="w-4 h-4 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-warm-900)]">{visitorStats.thisMonth}</div>
+              <span className="text-xs text-[var(--color-warm-500)]">Visitors</span>
+            </div>
+
+            <div className="card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-[var(--color-warm-600)]">Total</span>
+                <Shield className="w-4 h-4 text-purple-500" />
+              </div>
+              <div className="text-2xl font-bold text-[var(--color-warm-900)]">{visitorStats.total}</div>
+              <span className="text-xs text-[var(--color-warm-500)]">All-time visitors</span>
+            </div>
+          </div>
+
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-blue-900 mb-1">Analytics Info</h4>
+                <p className="text-sm text-blue-700 mb-2">
+                  Visitor tracking uses browser localStorage and session storage for privacy-friendly analytics.
+                </p>
+                <ul className="text-xs text-blue-600 space-y-1">
+                  <li>• Each unique browser session counts as one visitor per day</li>
+                  <li>• Data is stored locally and resets daily</li>
+                  <li>• Page views tracked on route changes</li>
+                  <li>• Today's count: {SimpleAnalytics.getTodayPageViews()} page views</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Building2,
@@ -12,16 +13,27 @@ import {
   Phone,
   Eye,
   ArrowRight,
-  Terminal
+  Terminal,
+  BarChart3
 } from 'lucide-react';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import { SimpleAnalytics, type VisitorStats } from '@/lib/analytics';
 
-// Quick stats data
-const stats = [
-  { name: 'Total Properties', value: '9', icon: Building2, href: '/admin/properties', color: 'bg-[color:var(--color-primary-500)]' },
-  { name: 'Active Bookings', value: '—', icon: Calendar, href: '/admin/calendar', color: 'bg-[color:var(--color-accent-orange)]' },
-  { name: 'Blog Posts', value: '5', icon: FileText, href: '/admin/blog', color: 'bg-[#1877F2]' },
-  { name: 'This Month Views', value: '—', icon: Eye, href: '#', color: 'bg-[color:var(--color-warm-600)]' },
-];
+// Stats interface
+interface DashboardStats {
+  totalProperties: number;
+  activeBookings: string;
+  blogPosts: number;
+  visitorStats: VisitorStats;
+}
+
+// Initial stats state
+const initialStats: DashboardStats = {
+  totalProperties: 0,
+  activeBookings: '—',
+  blogPosts: 0,
+  visitorStats: { today: 0, thisWeek: 0, thisMonth: 0, total: 0 }
+};
 
 // Quick actions
 const quickActions = [
@@ -39,6 +51,92 @@ const recentActivities = [
 ];
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<DashboardStats>(initialStats);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch properties count
+        const properties = await postMigrationDatabaseService.getProperties();
+        const propertiesCount = Object.keys(properties).length;
+
+        // Fetch blog posts count
+        try {
+          const blogResponse = await fetch('/api/blog');
+          const blogData = await blogResponse.json();
+          const blogCount = Array.isArray(blogData.posts) ? blogData.posts.length : 0;
+
+          // Get website visitor statistics
+          const visitorStats = SimpleAnalytics.getVisitorStats();
+
+          setStats({
+            totalProperties: propertiesCount,
+            activeBookings: '—', // TODO: Implement booking tracking
+            blogPosts: blogCount,
+            visitorStats
+          });
+        } catch (blogError) {
+          console.warn('Could not fetch blog data:', blogError);
+          const visitorStats = SimpleAnalytics.getVisitorStats();
+          setStats(prev => ({
+            ...prev,
+            totalProperties: propertiesCount,
+            visitorStats
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        // Still get visitor stats even if other data fails
+        const visitorStats = SimpleAnalytics.getVisitorStats();
+        setStats(prev => ({
+          ...prev,
+          visitorStats
+        }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Initialize analytics tracking
+    SimpleAnalytics.initialize();
+    loadDashboardData();
+  }, []);
+
+  // Create dynamic stats array
+  const statsArray = [
+    {
+      name: 'Total Properties',
+      value: isLoading ? '...' : stats.totalProperties.toString(),
+      icon: Building2,
+      href: '/admin/properties',
+      color: 'bg-[color:var(--color-primary-500)]'
+    },
+    {
+      name: 'Active Bookings',
+      value: stats.activeBookings,
+      icon: Calendar,
+      href: '/admin/calendar',
+      color: 'bg-[color:var(--color-accent-orange)]'
+    },
+    {
+      name: 'Blog Posts',
+      value: isLoading ? '...' : stats.blogPosts.toString(),
+      icon: FileText,
+      href: '/admin/blog',
+      color: 'bg-[#1877F2]'
+    },
+    {
+      name: 'Today\'s Visitors',
+      value: isLoading ? '...' : stats.visitorStats.today.toString(),
+      icon: BarChart3,
+      href: '/admin/console',
+      color: 'bg-[color:var(--color-warm-600)]'
+    },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -49,7 +147,7 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => {
+        {statsArray.map((stat) => {
           const Icon = stat.icon;
           return (
             <Link

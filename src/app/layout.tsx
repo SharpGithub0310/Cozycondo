@@ -6,6 +6,7 @@ import MessengerWidget from "@/components/MessengerWidget";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import PerformanceDisplay from "@/components/PerformanceDisplay";
 import CriticalCSS from "@/components/CriticalCSS";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 export const metadata: Metadata = {
   title: {
@@ -58,6 +59,7 @@ export default function RootLayout({
         <PerformanceMonitor />
         <PerformanceDisplay />
         <CriticalCSS />
+        <AnalyticsTracker />
       </body>
     </html>
   );
