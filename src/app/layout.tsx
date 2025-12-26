@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import MessengerWidget from "@/components/MessengerWidget";
 import PerformanceMonitor from "@/components/PerformanceMonitor";
 import PerformanceDisplay from "@/components/PerformanceDisplay";
+import CriticalCSS from "@/components/CriticalCSS";
 
 export const metadata: Metadata = {
   title: {

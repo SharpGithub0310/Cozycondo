@@ -15,18 +15,14 @@ import {
   Info,
   Eye
 } from 'lucide-react';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import type { PropertyData } from '@/lib/types';
 import {
-  getStoredProperties,
-  getDefaultPropertyData,
-  saveProperty,
   getStoredCalendarBlocks,
   addCalendarBlock,
   removeCalendarBlock,
   updatePropertyCalendarBlocks
 } from '@/utils/propertyStorage';
-
-// Property IDs
-const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 export default function CalendarPage() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -38,6 +34,8 @@ export default function CalendarPage() {
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [icalImportUrl, setIcalImportUrl] = useState('');
+  const [loadingProperties, setLoadingProperties] = useState(true);
+  const [propertiesError, setPropertiesError] = useState<string | null>(null);
   const [newBlock, setNewBlock] = useState({
     startDate: '',
     endDate: '',
@@ -52,29 +50,44 @@ export default function CalendarPage() {
   };
 
   useEffect(() => {
-    // Load properties from storage
-    const storedProperties = getStoredProperties();
-    const loadedProperties = propertyIds.map(id => {
-      const stored = storedProperties[id];
-      const defaultData = getDefaultPropertyData(id);
-      if (stored) {
-        return {
-          id: stored.id,
-          name: stored.name,
-          icalUrl: stored.icalUrl || ''
-        };
-      }
-      return {
-        id: defaultData.id,
-        name: defaultData.name,
-        icalUrl: ''
-      };
-    });
-    setProperties(loadedProperties);
-    if (loadedProperties.length > 0) {
-      setSelectedProperty(loadedProperties[0]);
-    }
+    const loadProperties = async () => {
+      try {
+        setLoadingProperties(true);
+        setPropertiesError(null);
 
+        // Load properties from database
+        const propertiesData = await postMigrationDatabaseService.getProperties();
+
+        console.log('Calendar: Raw properties data:', propertiesData);
+
+        if (!propertiesData || Object.keys(propertiesData).length === 0) {
+          throw new Error('No properties found in database');
+        }
+
+        const loadedProperties = Object.values(propertiesData).map((property: any) => ({
+          id: property.id || property.slug || property.uuid,
+          name: property.name || property.title || 'Unnamed Property',
+          icalUrl: property.icalUrl || property.airbnbIcalUrl || property.airbnbUrl || ''
+        })).filter(property => property.name !== 'Unnamed Property'); // Filter out invalid properties
+
+        console.log('Calendar: Processed properties:', loadedProperties);
+        setProperties(loadedProperties);
+
+        if (loadedProperties.length > 0) {
+          setSelectedProperty(loadedProperties[0]);
+        } else {
+          setPropertiesError('No valid properties found');
+        }
+      } catch (error: any) {
+        console.error('Calendar: Error loading properties:', error);
+        setPropertiesError(error.message || 'Failed to load properties');
+        setProperties([]);
+      } finally {
+        setLoadingProperties(false);
+      }
+    };
+
+    loadProperties();
     // Load calendar data
     loadCalendarData();
   }, []);
@@ -381,17 +394,41 @@ export default function CalendarPage() {
       {/* Property Selector */}
       <div className="admin-card">
         <label className="form-label">Select Property</label>
-        <select
-          value={selectedProperty?.id || ''}
-          onChange={(e) => setSelectedProperty(properties.find(p => p.id === e.target.value) || properties[0])}
-          className="form-input max-w-md"
-        >
-          {properties.map((property) => (
-            <option key={property.id} value={property.id}>
-              {property.name}
-            </option>
-          ))}
-        </select>
+        {loadingProperties ? (
+          <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50">
+            <RefreshCw className="w-4 h-4 animate-spin" />
+            <span>Loading properties...</span>
+          </div>
+        ) : propertiesError ? (
+          <div className="flex items-center gap-2 p-3 border rounded-lg bg-red-50 text-red-700">
+            <Info className="w-4 h-4" />
+            <span>{propertiesError}</span>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="flex items-center gap-2 p-3 border rounded-lg bg-yellow-50 text-yellow-700">
+            <Info className="w-4 h-4" />
+            <span>No properties found. Please add properties first.</span>
+          </div>
+        ) : (
+          <select
+            value={selectedProperty?.id || ''}
+            onChange={(e) => setSelectedProperty(properties.find(p => p.id === e.target.value) || properties[0])}
+            className="form-input max-w-md"
+          >
+            {properties.map((property) => (
+              <option key={property.id} value={property.id}>
+                {property.name}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Debug info in development */}
+        {process.env.NODE_ENV === 'development' && properties.length > 0 && (
+          <div className="mt-2 p-2 bg-gray-100 rounded text-xs">
+            <strong>Debug:</strong> Found {properties.length} properties: {properties.map(p => p.name).join(', ')}
+          </div>
+        )}
       </div>
 
       {/* Calendar Grid */}

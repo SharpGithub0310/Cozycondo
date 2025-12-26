@@ -1,19 +1,13 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import Hero from '@/components/Hero';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/types';
 import type { WebsiteSettings } from '@/lib/types';
 import { normalizePropertyData } from '@/utils/slugify';
-
-// Lazy load the Hero component
-const Hero = dynamic(() => import('@/components/Hero'), {
-  loading: () => <div className="h-[60vh] bg-gradient-to-br from-[var(--color-warm-100)] to-[var(--color-warm-200)] animate-pulse" />,
-  ssr: true
-});
 
 // Features section data
 const features = [

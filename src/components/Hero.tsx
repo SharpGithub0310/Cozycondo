@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, MapPin, Star, Home, ArrowRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { WebsiteSettings } from '@/lib/types';
 
@@ -30,6 +31,14 @@ export default function Hero() {
 
         if (loadedSettings.heroBackground) {
           setHeroBackground(loadedSettings.heroBackground);
+
+          // Preload the hero background image for faster LCP
+          const preloadLink = document.createElement('link');
+          preloadLink.rel = 'preload';
+          preloadLink.as = 'image';
+          preloadLink.href = loadedSettings.heroBackground;
+          preloadLink.fetchPriority = 'high';
+          document.head.appendChild(preloadLink);
         }
       } catch (err) {
         console.error('Hero: Error loading settings:', err);
@@ -44,14 +53,23 @@ export default function Hero() {
 
   if (loading) {
     return (
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-32 lg:py-40">
-          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded mb-4"></div>
-              <div className="h-12 bg-gray-200 rounded mb-4"></div>
-              <div className="h-6 bg-gray-200 rounded mb-8"></div>
+      <section className="hero">
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
+
+        <div className="relative hero-container">
+          <div className="hero-content">
+            <div className="hero-left">
+              <div className="animate-pulse">
+                <div className="h-8 bg-gray-200/50 rounded mb-4"></div>
+                <div className="h-12 bg-gray-200/50 rounded mb-4"></div>
+                <div className="h-6 bg-gray-200/50 rounded mb-8"></div>
+                <div className="h-10 w-32 bg-gray-200/50 rounded"></div>
+              </div>
+            </div>
+            <div className="hero-right">
+              <div className="animate-pulse">
+                <div className="w-full h-80 bg-gray-200/50 rounded-2xl"></div>
+              </div>
               <div className="flex gap-4 mb-12">
                 <div className="h-12 w-32 bg-gray-200 rounded"></div>
                 <div className="h-12 w-32 bg-gray-200 rounded"></div>
@@ -103,12 +121,27 @@ export default function Hero() {
       {/* Enhanced Background */}
       {heroBackground ? (
         <>
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url(${heroBackground})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
+          <Image
+            src={heroBackground}
+            alt="Cozy Condo Hero Background"
+            fill
+            priority
+            quality={85}
+            sizes="100vw"
+            className="object-cover"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
+            onLoad={() => {
+              // Mark LCP element as loaded for performance tracking
+              if (typeof window !== 'undefined' && (window as any).adminLogs) {
+                (window as any).adminLogs.push({
+                  timestamp: new Date().toISOString(),
+                  level: 'info',
+                  service: 'Hero',
+                  message: 'Hero background image loaded',
+                  data: { url: heroBackground }
+                });
+              }
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40" />
