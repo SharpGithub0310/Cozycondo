@@ -7,6 +7,7 @@ import PerformanceMonitor from "@/components/PerformanceMonitor";
 import PerformanceDisplay from "@/components/PerformanceDisplay";
 import CriticalCSS from "@/components/CriticalCSS";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import ResourcePreloader from "@/components/ResourcePreloader";
 
 export const metadata: Metadata = {
   title: {
@@ -46,12 +47,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* Optimized font loading with display=swap and preload */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
+        />
         <link rel="dns-prefetch" href="https://api.supabase.co" />
         <link rel="dns-prefetch" href="https://www.facebook.com" />
+        {/* Preload critical resources */}
+        <link rel="preload" href="/logo.png" as="image" />
       </head>
       <body className="font-body antialiased bg-[#fefdfb] text-[#5f4a38]">
+        <ResourcePreloader />
         <Navbar />
         <main>{children}</main>
         <Footer />

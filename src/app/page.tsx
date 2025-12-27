@@ -1,13 +1,25 @@
-'use client';
-
 import Hero from '@/components/Hero';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import { getProductionFallbackProperties } from '@/lib/production-fallback-service';
 import type { PropertyData } from '@/lib/types';
 import type { WebsiteSettings } from '@/lib/types';
 import { normalizePropertyData } from '@/utils/slugify';
+import type { Metadata } from 'next';
+
+// Force dynamic rendering for server-side database access
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Cozy Condo - Premium Short-Term Rentals in Iloilo City',
+  description: 'Discover comfortable and convenient short-term rental condominiums in Iloilo City, Philippines. Modern amenities, prime locations, and exceptional hospitality.',
+  openGraph: {
+    title: 'Cozy Condo - Premium Short-Term Rentals in Iloilo City',
+    description: 'Discover comfortable and convenient short-term rental condominiums in Iloilo City, Philippines.',
+  },
+};
 
 // Features section data
 const features = [
@@ -36,129 +48,57 @@ const features = [
 // Legacy property IDs - no longer used
 // Properties are now loaded dynamically from database
 
-export default function HomePage() {
-  const [aboutImage, setAboutImage] = useState('');
-  const [featuredProperties, setFeaturedProperties] = useState<any[]>([]);
-  const [settings, setSettings] = useState<WebsiteSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [loadMetrics, setLoadMetrics] = useState<{ duration: number; source: string } | null>(null);
+export default async function HomePage() {
+  // Server-side data loading for faster initial page load
+  let settings: WebsiteSettings | null = null;
+  let featuredProperties: PropertyData[] = [];
+  let aboutImage = '';
 
-  useEffect(() => {
-    // Initialize admin logs if in admin mode
-    if (typeof window !== 'undefined') {
-      (window as any).adminLogs = (window as any).adminLogs || [];
+  try {
+    // Load settings and properties server-side
+    console.log('Loading home page data server-side...');
+    const startTime = Date.now();
+
+    const [loadedSettings, propertiesData] = await Promise.all([
+      postMigrationDatabaseService.getWebsiteSettings(),
+      postMigrationDatabaseService.getProperties({ active: true })
+    ]);
+
+    const loadDuration = Date.now() - startTime;
+    console.log(`Home page data loaded in ${loadDuration}ms`);
+
+    settings = loadedSettings;
+
+    if (loadedSettings?.aboutImage) {
+      aboutImage = loadedSettings.aboutImage;
     }
 
-    const loadData = async () => {
-      const startTime = performance.now();
+    // Convert properties object to array format for processing
+    const propertiesArray = Object.values(propertiesData).map((property: any) =>
+      normalizePropertyData(property)
+    );
 
-      try {
-        setLoading(true);
-        setError(null);
+    // Filter to show featured properties (all are already active)
+    featuredProperties = propertiesArray.filter(p => p.featured);
 
-        // Log start of data loading
-        if (typeof window !== 'undefined' && (window as any).adminLogs) {
-          (window as any).adminLogs.push({
-            timestamp: new Date().toISOString(),
-            level: 'info',
-            service: 'HomePage',
-            message: 'Starting data load for home page',
-            data: { startTime }
-          });
-        }
+    // If no featured properties, show first 3 properties
+    if (featuredProperties.length === 0) {
+      featuredProperties = propertiesArray.slice(0, 3);
+      console.log('No featured properties found, using first 3');
+    }
 
-        // Load settings and only active properties from database
-        const [loadedSettings, propertiesData] = await Promise.all([
-          postMigrationDatabaseService.getWebsiteSettings(),
-          postMigrationDatabaseService.getProperties({ active: true })
-        ]);
+  } catch (err: any) {
+    console.error('Error loading home page data server-side:', err);
 
-        const loadDuration = performance.now() - startTime;
-
-        // Log successful data load
-        if (typeof window !== 'undefined' && (window as any).adminLogs) {
-          (window as any).adminLogs.push({
-            timestamp: new Date().toISOString(),
-            level: 'info',
-            service: 'HomePage',
-            message: `Data loaded successfully in ${loadDuration.toFixed(2)}ms`,
-            data: {
-              settingsLoaded: !!loadedSettings,
-              propertiesCount: Object.keys(propertiesData).length,
-              duration: loadDuration
-            }
-          });
-        }
-
-        setSettings(loadedSettings);
-
-        if (loadedSettings.aboutImage) {
-          setAboutImage(loadedSettings.aboutImage);
-        }
-
-        // Convert properties object to array format for processing
-        // Properties are already filtered to active only
-        const propertiesArray = Object.values(propertiesData).map((property: any) =>
-          normalizePropertyData(property)
-        );
-
-        // Filter to show featured properties (all are already active)
-        let featured = propertiesArray.filter(p => p.featured);
-
-        // If no featured properties, show first 3 properties
-        if (featured.length === 0) {
-          featured = propertiesArray.slice(0, 3);
-
-          if (typeof window !== 'undefined' && (window as any).adminLogs) {
-            (window as any).adminLogs.push({
-              timestamp: new Date().toISOString(),
-              level: 'warn',
-              service: 'HomePage',
-              message: 'No featured properties found, using first 3',
-              data: { totalProperties: propertiesArray.length }
-            });
-          }
-        }
-
-        setFeaturedProperties(featured);
-        setLoadMetrics({
-          duration: loadDuration,
-          source: propertiesArray.length > 0 ? 'database' : 'fallback'
-        });
-      } catch (err: any) {
-        const loadDuration = performance.now() - startTime;
-
-        // Log error to admin console
-        if (typeof window !== 'undefined' && (window as any).adminLogs) {
-          (window as any).adminLogs.push({
-            timestamp: new Date().toISOString(),
-            level: 'error',
-            service: 'HomePage',
-            message: 'Failed to load data',
-            data: {
-              error: err.message,
-              stack: err.stack,
-              duration: loadDuration
-            }
-          });
-        }
-
-        console.error('Error loading data:', err);
-        setError('Failed to load data. Please try again later.');
-        setLoadMetrics({ duration: loadDuration, source: 'error' });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+    // Use fallback data if server-side loading fails
+    const fallbackProps = getProductionFallbackProperties();
+    featuredProperties = Object.values(fallbackProps).slice(0, 3);
+  }
 
   return (
     <>
-      {/* Hero Section */}
-      <Hero />
+      {/* Hero Section with server-side props */}
+      <Hero settings={settings} />
 
       {/* Enhanced Properties Section */}
       <section id="properties" className="section bg-white">
@@ -170,36 +110,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          {loading ? (
-            <div className="grid-auto-fit grid-gap-lg">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="card animate-pulse">
-                  <div className="card-image bg-[var(--color-warm-200)]"></div>
-                  <div className="card-content">
-                    <div className="h-6 bg-[var(--color-warm-200)] rounded mb-3"></div>
-                    <div className="h-4 bg-[var(--color-warm-200)] rounded mb-3"></div>
-                    <div className="h-16 bg-[var(--color-warm-200)] rounded mb-4"></div>
-                    <div className="flex gap-2">
-                      <div className="h-6 w-16 bg-[var(--color-warm-200)] rounded"></div>
-                      <div className="h-6 w-20 bg-[var(--color-warm-200)] rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="card p-8 text-center">
-              <p className="text-red-600 mb-4">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="btn btn-primary"
-              >
-                <span>Try Again</span>
-              </button>
-            </div>
-          ) : (
-            <div className="grid-auto-fit grid-gap-lg">
-              {featuredProperties.map((property, index) => (
+          <div className="grid-auto-fit grid-gap-lg">
+            {featuredProperties.map((property, index) => (
               <article
                 key={property.id}
                 className="card card-elevated group animate-fade-in"
@@ -210,18 +122,16 @@ export default function HomePage() {
                   <div className="card-image-overlay" />
 
                   {property.photos && property.photos.length > 0 ? (
-                    <img
+                    <Image
                       src={property.photos[property.featuredPhotoIndex || 0]}
                       alt={property.name}
-                      loading={index === 0 ? "eager" : "lazy"}
-                      decoding="async"
-                      fetchPriority={index === 0 ? "high" : "auto"}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      priority={index === 0}
+                      quality={index === 0 ? 95 : 85}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
                     />
                   ) : null}
 
@@ -286,9 +196,8 @@ export default function HomePage() {
                   )}
                 </div>
               </article>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
 
           <div className="text-center mt-16">
             <Link
@@ -351,29 +260,27 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
 
                 {aboutImage ? (
-                  <img
+                  <Image
                     src={aboutImage}
                     alt="About Cozy Condo"
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                      if (fallback) fallback.style.display = 'flex';
-                    }}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={85}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
                   />
-                ) : null}
-
-                <div className={`w-full h-full flex items-center justify-center ${aboutImage ? 'hidden' : ''}`}>
-                  <div className="text-center text-white/80">
-                    <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="font-display text-3xl font-bold">CC</span>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center text-white/80">
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <span className="font-display text-3xl font-bold">CC</span>
+                      </div>
+                      <p className="text-2xl font-display font-bold">Cozy Condo</p>
+                      <p className="text-sm opacity-80">Premium Stays • Iloilo City</p>
                     </div>
-                    <p className="text-2xl font-display font-bold">Cozy Condo</p>
-                    <p className="text-sm opacity-80">Premium Stays • Iloilo City</p>
                   </div>
-                </div>
+                )}
 
                 {/* Subtle pattern overlay */}
                 <div

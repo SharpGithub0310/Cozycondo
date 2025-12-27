@@ -11,7 +11,8 @@
     "type-check:watch": "tsc --noEmit --watch",
     "type-check:dev": "./scripts/dev-type-check.sh",
     "pre-deploy": "./scripts/pre-deploy-check.sh",
-    "check-types": "node check-types.js"
+    "check-types": "node check-types.js",
+    "migrate-images": "node scripts/migrate-base64-images.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",
