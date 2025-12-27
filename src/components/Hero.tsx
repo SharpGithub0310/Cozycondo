@@ -4,111 +4,40 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, MapPin, Star, Home, ArrowRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { WebsiteSettings } from '@/lib/types';
 
-// Stats will be loaded from settings
+interface HeroProps {
+  settings?: WebsiteSettings | null;
+}
 
-export default function Hero() {
+export default function Hero({ settings }: HeroProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [heroBackground, setHeroBackground] = useState('');
-  const [settings, setSettings] = useState<WebsiteSettings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
-
-    const loadSettings = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const loadedSettings = await postMigrationDatabaseService.getWebsiteSettings();
-        // console.log('Hero: Loaded settings from database:', loadedSettings);
-
-        setSettings(loadedSettings);
-
-        if (loadedSettings.heroBackground) {
-          setHeroBackground(loadedSettings.heroBackground);
-
-          // Preload the hero background image for faster LCP
-          const preloadLink = document.createElement('link');
-          preloadLink.rel = 'preload';
-          preloadLink.as = 'image';
-          preloadLink.href = loadedSettings.heroBackground;
-          preloadLink.fetchPriority = 'high';
-          document.head.appendChild(preloadLink);
-        }
-      } catch (err) {
-        console.error('Hero: Error loading settings:', err);
-        setError('Failed to load settings');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSettings();
   }, []);
 
-  if (loading) {
+  const heroBackground = settings?.heroBackground;
+
+  if (!settings) {
     return (
       <section className="hero">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
-
-        <div className="relative hero-container">
-          <div className="hero-content">
-            <div className="hero-left">
-              <div className="animate-pulse">
-                <div className="h-8 bg-gray-200/50 rounded mb-4"></div>
-                <div className="h-12 bg-gray-200/50 rounded mb-4"></div>
-                <div className="h-6 bg-gray-200/50 rounded mb-8"></div>
-                <div className="h-10 w-32 bg-gray-200/50 rounded"></div>
-              </div>
-            </div>
-            <div className="hero-right">
-              <div className="animate-pulse">
-                <div className="w-full h-80 bg-gray-200/50 rounded-2xl"></div>
-              </div>
-              <div className="flex gap-4 mb-12">
-                <div className="h-12 w-32 bg-gray-200 rounded"></div>
-                <div className="h-12 w-32 bg-gray-200 rounded"></div>
-              </div>
-              <div className="flex gap-8">
-                <div className="h-16 w-24 bg-gray-200 rounded"></div>
-                <div className="h-16 w-24 bg-gray-200 rounded"></div>
-                <div className="h-16 w-24 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-            <div className="animate-pulse">
-              <div className="aspect-[4/5] bg-gray-200 rounded-2xl"></div>
+        <div className="container-xl hero-content">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div className="text-center lg:text-left">
+              <h1 className="hero-title text-[var(--color-warm-900)]">
+                Welcome to Cozy Condo
+              </h1>
+              <p className="hero-subtitle text-[var(--color-warm-700)]">
+                Premium short-term rentals in Iloilo City
+              </p>
             </div>
           </div>
         </div>
       </section>
     );
   }
-
-  if (error) {
-    return (
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#fefdfb] via-[#fdf9f3] to-[#f5e6cc]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <div className="text-red-600 mb-4">
-            <p>{error}</p>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="btn-primary"
-          >
-            Retry
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (!settings) return null;
 
   const stats = [
     { icon: Home, value: settings.statsUnits, label: settings.statsUnitsLabel },
@@ -126,23 +55,11 @@ export default function Hero() {
             alt="Cozy Condo Hero Background"
             fill
             priority
-            quality={85}
+            quality={90}
             sizes="100vw"
             className="object-cover"
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
-            onLoad={() => {
-              // Mark LCP element as loaded for performance tracking
-              if (typeof window !== 'undefined' && (window as any).adminLogs) {
-                (window as any).adminLogs.push({
-                  timestamp: new Date().toISOString(),
-                  level: 'info',
-                  service: 'Hero',
-                  message: 'Hero background image loaded',
-                  data: { url: heroBackground }
-                });
-              }
-            }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40" />
           {/* Subtle pattern overlay */}
@@ -183,8 +100,8 @@ export default function Hero() {
         </>
       )}
 
-      <div className="container-xl hero-content">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div className="container-xl">
+        <div className="hero-content">
           {/* Enhanced Text content */}
           <div
             className={`transition-all duration-1000 ${

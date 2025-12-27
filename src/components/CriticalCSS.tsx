@@ -32,33 +32,34 @@ export default function CriticalCSS() {
       }
 
       .hero-content {
-        display: grid;
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 3rem;
         align-items: center;
       }
 
       @media (min-width: 1024px) {
         .hero-content {
+          display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 5rem;
+          align-items: center;
         }
       }
 
-      .hero-left {
-        text-align: center;
+      /* Critical typography */
+      .hero-title {
+        font-family: var(--font-playfair, Georgia, serif);
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
       }
 
-      @media (min-width: 1024px) {
-        .hero-left {
-          text-align: left;
-        }
-      }
-
-      .hero-right {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      .hero-subtitle {
+        font-size: clamp(1.125rem, 2.5vw, 1.25rem);
+        line-height: 1.6;
+        margin-bottom: 2rem;
       }
 
       /* Button critical styles */
@@ -72,7 +73,7 @@ export default function CriticalCSS() {
         border-radius: 0.75rem;
         font-weight: 600;
         text-decoration: none;
-        transition: transform 0.2s;
+        transition: transform 0.2s ease-out;
       }
 
       .btn-primary:hover {
@@ -84,6 +85,12 @@ export default function CriticalCSS() {
         background: white;
         border-radius: 1rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       }
 
       .card-image {
@@ -92,6 +99,28 @@ export default function CriticalCSS() {
         height: 16rem;
         border-radius: 0.75rem 0.75rem 0 0;
         overflow: hidden;
+      }
+
+      /* Performance optimizations */
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Skeleton loading styles */
+      .skeleton {
+        background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
       }
     `}</style>
   );
