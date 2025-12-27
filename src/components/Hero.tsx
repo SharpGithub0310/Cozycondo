@@ -17,7 +17,7 @@ export default function Hero({ settings }: HeroProps) {
     setIsVisible(true);
   }, []);
 
-  const heroBackground = settings?.heroBackground;
+  const heroBackground = settings?.heroBackground || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80';
 
   if (!settings) {
     return (
@@ -189,9 +189,12 @@ export default function Hero({ settings }: HeroProps) {
                       src={settings.highlyRatedImage}
                       alt="Highly rated property"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                      loading="lazy"
+                      loading="eager"
+                      onLoad={(e) => {
+                        console.log('Hero image loaded successfully');
+                      }}
                       onError={(e) => {
-                        console.log('Hero image failed to load, showing fallback');
+                        console.log('Hero image failed to load, showing fallback', e);
                         e.currentTarget.style.display = 'none';
                         const fallback = e.currentTarget.nextElementSibling as HTMLElement;
                         if (fallback) fallback.style.display = 'flex';
