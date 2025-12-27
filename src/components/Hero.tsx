@@ -17,7 +17,7 @@ export default function Hero({ settings }: HeroProps) {
     setIsVisible(true);
   }, []);
 
-  const heroBackground = settings?.heroBackground || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80';
+  const heroBackground = settings?.heroBackground || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=80';
 
   if (!settings) {
     return (

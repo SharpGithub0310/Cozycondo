@@ -98,7 +98,7 @@ export const DEFAULT_PROPERTIES = {
     amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'Smart TV', 'Workspace', 'Gym Access', 'Pool Access'],
     photos: [
       'https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=800&q=80',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
     ],
     icalUrl: '',
     featuredPhotoIndex: 0,
@@ -145,7 +145,7 @@ export const DEFAULT_PROPERTIES = {
     active: true,
     amenities: ['WiFi', 'Air Conditioning', 'Kitchen', 'Garden', 'Parking', 'Workspace'],
     photos: [
-      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
+      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
       'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&q=80',
     ],
     icalUrl: '',
@@ -170,7 +170,7 @@ export const DEFAULT_PROPERTIES = {
     amenities: ['WiFi', 'Air Conditioning', 'Smart TV', 'Kitchen', '24/7 Security', 'Central Location'],
     photos: [
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
     ],
     icalUrl: '',
     featuredPhotoIndex: 0,
@@ -252,7 +252,7 @@ export const DEFAULT_PROPERTIES = {
 export const DEFAULT_SETTINGS = {
   logo: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=200&q=80', // Professional building logo
   footerLogo: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=200&q=80',
-  heroBackground: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1600&q=80', // Beautiful property hero image
+  heroBackground: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=80', // Beautiful modern condo interior
   aboutImage: 'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=800&q=80',
   contactImage: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
   favicon: '/favicon.ico',
@@ -271,7 +271,7 @@ export const DEFAULT_SETTINGS = {
 
   highlyRatedTitle: 'Highly Rated',
   highlyRatedSubtitle: 'by our guests',
-  highlyRatedImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+  highlyRatedImage: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
 
   featuredTitle: 'Featured Properties',
   featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
