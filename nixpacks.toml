@@ -1,25 +1,14 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "npm-10_x", "bash"]
+nixPkgs = ["nodejs_20", "npm-10_x"]
 
 [phases.install]
 cmds = ["npm install --omit=dev --no-audit --no-fund"]
 
 [phases.build]
-cmds = [
-  "chmod +x start.sh",
-  "npm run build",
-  "echo 'Optimizing standalone build for faster startup...'",
-  "ls -la .next/",
-  "if [ -d '.next/static' ]; then mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/ && echo 'Static files copied to standalone'; else echo 'No static files found'; fi",
-  "if [ -d 'public' ]; then cp -r public .next/standalone/ && echo 'Public files copied to standalone'; else echo 'No public files found'; fi",
-  "echo 'Build optimization completed - verifying structure:'",
-  "ls -la .next/standalone/",
-  "ls -la .next/standalone/.next/ || echo 'No .next directory in standalone'",
-  "ls -la .next/standalone/public/ || echo 'No public directory in standalone'"
-]
+cmds = ["npm run build"]
 
 [start]
-cmd = "./start.sh"
+cmd = "npm start"
 
 [variables]
 NEXT_TELEMETRY_DISABLED = "1"
