@@ -24,7 +24,7 @@ import {
   X,
   ZoomIn
 } from 'lucide-react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
 // Amenity icons mapping
 const amenityIcons: Record<string, React.ReactNode> = {
@@ -82,7 +82,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
         console.log('PropertyDetail: Loading property with slug:', slug);
 
         // Use the slug from props, not the property.id which might be outdated
-        const dbProperty = await enhancedDatabaseService.getProperty(slug);
+        const dbProperty = await postMigrationDatabaseService.getProperty(slug);
 
         if (dbProperty) {
           console.log('PropertyDetail: Successfully loaded property from database');
@@ -121,10 +121,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
     loadProperty();
   }, [slug, defaultProperty]);
 
-  const getDefaultPhotos = () => [
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1502005229762-cf1b2da02f3f?w=500&h=300&fit=crop',
-  ];
+  const getDefaultPhotos = () => [];
 
   const setupPhotos = (propertyData: any) => {
     if (propertyData.photos && propertyData.photos.length > 0) {
@@ -298,7 +295,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
                     alt={`${property.name} main photo`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&h=300&fit=crop';
+                      e.currentTarget.style.display = 'none';
                     }}
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -332,7 +329,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
                         alt={`${property.name} photo ${i + 1}`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {
-                          e.currentTarget.src = `https://images.unsplash.com/photo-152270832359${i}?w=300&h=200&fit=crop`;
+                          e.currentTarget.style.display = 'none';
                         }}
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -539,7 +536,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
               alt={`${property.name} photo ${currentPhotoIndex + 1}`}
               className="max-w-full max-h-[90vh] object-contain"
               onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop';
+                e.currentTarget.style.display = 'none';
               }}
             />
 
@@ -575,7 +572,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=100&h=100&fit=crop';
+                      e.currentTarget.style.display = 'none';
                     }}
                   />
                 </button>

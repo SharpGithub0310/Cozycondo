@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import {
   LayoutDashboard,
   Building2,
@@ -49,7 +49,7 @@ export default function AdminLayout({
 
           // Load website settings including logo
           try {
-            const websiteSettings = await enhancedDatabaseService.getWebsiteSettings();
+            const websiteSettings = await postMigrationDatabaseService.getWebsiteSettings();
             setSettings(websiteSettings);
             if (websiteSettings.logo) {
               setLogoUrl(websiteSettings.logo);

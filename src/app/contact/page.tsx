@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Send, ArrowRight } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
 const contactMethods = [
   {
@@ -78,7 +78,7 @@ export default function ContactPage() {
       setLoading(true);
 
       // Load settings from database
-      const dbSettings = await enhancedDatabaseService.getWebsiteSettings();
+      const dbSettings = await postMigrationDatabaseService.getWebsiteSettings();
       setSettings(dbSettings);
 
       if (dbSettings.contactImage) {

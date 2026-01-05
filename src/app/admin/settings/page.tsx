@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2, Plus, HelpCircle } from 'lucide-react';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import { databaseService } from '@/lib/database-service';
 import type { WebsiteSettings, FAQ } from '@/lib/types';
 
 export default function AdminSettings() {
@@ -17,6 +17,7 @@ export default function AdminSettings() {
     heroTitle: 'Your Cozy Escape in Iloilo City',
     heroSubtitle: '',
     heroDescription: 'Experience the perfect blend of comfort and convenience. Our handpicked condominiums offer modern amenities, stunning views, and prime locations across Iloilo City.',
+    heroScrollText: 'Scroll to explore',
     statsUnits: '9+',
     statsUnitsLabel: 'Premium Units',
     statsRating: '4.9',
@@ -30,7 +31,20 @@ export default function AdminSettings() {
     featuredSubtitle: 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.',
     updatedAt: '',
     faqs: [],
-    companyName: 'Cozy Condo'
+    companyName: 'Cozy Condo',
+    siteName: '',
+    siteTagline: '',
+    companyDescription: '',
+    phone: '',
+    email: '',
+    address: '',
+    website: '',
+    facebookUrl: '',
+    messengerUrl: '',
+    checkinTime: '',
+    checkoutTime: '',
+    timezone: 'Asia/Manila',
+    currency: 'PHP'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +55,7 @@ export default function AdminSettings() {
         setLoading(true);
         setError(null);
 
-        const dbSettings = await postMigrationDatabaseService.getWebsiteSettings();
+        const dbSettings = await databaseService.getWebsiteSettings();
         console.log('Admin Settings: Loaded from database:', dbSettings);
 
         // Enhanced logging for debugging
@@ -79,7 +93,7 @@ export default function AdminSettings() {
 
     try {
       // Save to database
-      await postMigrationDatabaseService.saveWebsiteSettings(settings);
+      await databaseService.saveWebsiteSettings(settings);
       setSaveMessage('Settings saved successfully! Changes will appear on the website immediately.');
       console.log('Admin Settings: Successfully saved to database');
       setTimeout(() => setSaveMessage(''), 3000);
@@ -95,7 +109,7 @@ export default function AdminSettings() {
   const saveIndividualSetting = async (key: keyof WebsiteSettings, value: string) => {
     try {
       const updatedSettings = { ...settings, [key]: value };
-      await postMigrationDatabaseService.saveWebsiteSettings({ [key]: value });
+      await databaseService.saveWebsiteSettings({ [key]: value });
       setSettings(updatedSettings);
       console.log(`Admin Settings: Saved ${key} immediately`);
     } catch (error) {
@@ -179,7 +193,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="tel"
-                  value={settings.phone}
+                  value={settings.phone || ''}
                   onChange={(e) => setSettings({...settings, phone: e.target.value})}
                   className="form-input"
                   placeholder="Phone number"
@@ -193,7 +207,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="email"
-                  value={settings.email}
+                  value={settings.email || ''}
                   onChange={(e) => setSettings({...settings, email: e.target.value})}
                   className="form-input"
                   placeholder="Email address"
@@ -207,7 +221,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="text"
-                  value={settings.address}
+                  value={settings.address || ''}
                   onChange={(e) => setSettings({...settings, address: e.target.value})}
                   className="form-input"
                   placeholder="Business address"
@@ -221,7 +235,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="url"
-                  value={settings.website}
+                  value={settings.website || ''}
                   onChange={(e) => setSettings({...settings, website: e.target.value})}
                   className="form-input"
                   placeholder="https://your-website.com"
@@ -234,7 +248,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="url"
-                  value={settings.facebookUrl}
+                  value={settings.facebookUrl || ''}
                   onChange={(e) => setSettings({...settings, facebookUrl: e.target.value})}
                   className="form-input"
                   placeholder="https://facebook.com/yourpage"
@@ -247,7 +261,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="url"
-                  value={settings.messengerUrl}
+                  value={settings.messengerUrl || ''}
                   onChange={(e) => setSettings({...settings, messengerUrl: e.target.value})}
                   className="form-input"
                   placeholder="https://m.me/yourpage"
@@ -269,7 +283,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="time"
-                  value={settings.checkinTime}
+                  value={settings.checkinTime || ''}
                   onChange={(e) => setSettings({...settings, checkinTime: e.target.value})}
                   className="form-input"
                 />
@@ -282,7 +296,7 @@ export default function AdminSettings() {
                 </label>
                 <input
                   type="time"
-                  value={settings.checkoutTime}
+                  value={settings.checkoutTime || ''}
                   onChange={(e) => setSettings({...settings, checkoutTime: e.target.value})}
                   className="form-input"
                 />
@@ -293,7 +307,7 @@ export default function AdminSettings() {
                   Timezone
                 </label>
                 <select
-                  value={settings.timezone}
+                  value={settings.timezone || 'Asia/Manila'}
                   onChange={(e) => setSettings({...settings, timezone: e.target.value})}
                   className="form-input"
                 >
@@ -309,7 +323,7 @@ export default function AdminSettings() {
                   Currency
                 </label>
                 <select
-                  value={settings.currency}
+                  value={settings.currency || 'PHP'}
                   onChange={(e) => setSettings({...settings, currency: e.target.value})}
                   className="form-input"
                 >
@@ -336,7 +350,7 @@ export default function AdminSettings() {
                   <label className="form-label">Badge Text (Optional)</label>
                   <input
                     type="text"
-                    value={settings.heroBadgeText}
+                    value={settings.heroBadgeText || ''}
                     onChange={(e) => setSettings({...settings, heroBadgeText: e.target.value})}
                     className="form-input"
                     placeholder="Leave empty to hide badge (removes 'Premium Short-Term Rentals')"
@@ -348,7 +362,7 @@ export default function AdminSettings() {
                   <label className="form-label">Main Title</label>
                   <input
                     type="text"
-                    value={settings.heroTitle}
+                    value={settings.heroTitle || ''}
                     onChange={(e) => setSettings({...settings, heroTitle: e.target.value})}
                     className="form-input"
                     placeholder="Your Cozy Escape in Iloilo City"
@@ -358,7 +372,7 @@ export default function AdminSettings() {
                 <div>
                   <label className="form-label">Description</label>
                   <textarea
-                    value={settings.heroDescription}
+                    value={settings.heroDescription || ''}
                     onChange={(e) => setSettings({...settings, heroDescription: e.target.value})}
                     className="form-input min-h-[80px]"
                     placeholder="Experience the perfect blend of comfort and convenience..."
@@ -376,7 +390,7 @@ export default function AdminSettings() {
                   <label className="form-label">Units Count</label>
                   <input
                     type="text"
-                    value={settings.statsUnits}
+                    value={settings.statsUnits || ''}
                     onChange={(e) => setSettings({...settings, statsUnits: e.target.value})}
                     className="form-input"
                     placeholder="9+"
@@ -386,7 +400,7 @@ export default function AdminSettings() {
                   <label className="form-label">Units Label</label>
                   <input
                     type="text"
-                    value={settings.statsUnitsLabel}
+                    value={settings.statsUnitsLabel || ''}
                     onChange={(e) => setSettings({...settings, statsUnitsLabel: e.target.value})}
                     className="form-input"
                     placeholder="Premium Units"
@@ -396,7 +410,7 @@ export default function AdminSettings() {
                   <label className="form-label">Rating</label>
                   <input
                     type="text"
-                    value={settings.statsRating}
+                    value={settings.statsRating || ''}
                     onChange={(e) => setSettings({...settings, statsRating: e.target.value})}
                     className="form-input"
                     placeholder="4.9"
@@ -406,7 +420,7 @@ export default function AdminSettings() {
                   <label className="form-label">Rating Label</label>
                   <input
                     type="text"
-                    value={settings.statsRatingLabel}
+                    value={settings.statsRatingLabel || ''}
                     onChange={(e) => setSettings({...settings, statsRatingLabel: e.target.value})}
                     className="form-input"
                     placeholder="Guest Rating"
@@ -416,7 +430,7 @@ export default function AdminSettings() {
                   <label className="form-label">Location</label>
                   <input
                     type="text"
-                    value={settings.statsLocation}
+                    value={settings.statsLocation || ''}
                     onChange={(e) => setSettings({...settings, statsLocation: e.target.value})}
                     className="form-input"
                     placeholder="Iloilo"
@@ -426,7 +440,7 @@ export default function AdminSettings() {
                   <label className="form-label">Location Label</label>
                   <input
                     type="text"
-                    value={settings.statsLocationLabel}
+                    value={settings.statsLocationLabel || ''}
                     onChange={(e) => setSettings({...settings, statsLocationLabel: e.target.value})}
                     className="form-input"
                     placeholder="City Center"
@@ -443,7 +457,7 @@ export default function AdminSettings() {
                   <label className="form-label">Title</label>
                   <input
                     type="text"
-                    value={settings.highlyRatedTitle}
+                    value={settings.highlyRatedTitle || ''}
                     onChange={(e) => setSettings({...settings, highlyRatedTitle: e.target.value})}
                     className="form-input"
                     placeholder="Highly Rated"
@@ -453,7 +467,7 @@ export default function AdminSettings() {
                   <label className="form-label">Subtitle</label>
                   <input
                     type="text"
-                    value={settings.highlyRatedSubtitle}
+                    value={settings.highlyRatedSubtitle || ''}
                     onChange={(e) => setSettings({...settings, highlyRatedSubtitle: e.target.value})}
                     className="form-input"
                     placeholder="by our guests"
@@ -491,7 +505,7 @@ export default function AdminSettings() {
                 </div>
                 <input
                   type="url"
-                  value={settings.highlyRatedImage}
+                  value={settings.highlyRatedImage || ''}
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setSettings({...settings, highlyRatedImage: newValue});
@@ -530,7 +544,7 @@ export default function AdminSettings() {
                   <label className="form-label">Section Title</label>
                   <input
                     type="text"
-                    value={settings.featuredTitle}
+                    value={settings.featuredTitle || ''}
                     onChange={(e) => setSettings({...settings, featuredTitle: e.target.value})}
                     className="form-input"
                     placeholder="Featured Properties"
@@ -539,7 +553,7 @@ export default function AdminSettings() {
                 <div>
                   <label className="form-label">Section Description</label>
                   <textarea
-                    value={settings.featuredSubtitle}
+                    value={settings.featuredSubtitle || ''}
                     onChange={(e) => setSettings({...settings, featuredSubtitle: e.target.value})}
                     className="form-input min-h-[60px]"
                     placeholder="Handpicked condominiums offering the perfect balance of comfort, convenience, and style."
@@ -591,7 +605,7 @@ export default function AdminSettings() {
                   </div>
                   <input
                     type="url"
-                    value={settings.logo}
+                    value={settings.logo || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, logo: newValue});
@@ -652,7 +666,7 @@ export default function AdminSettings() {
                   </div>
                   <input
                     type="url"
-                    value={settings.footerLogo}
+                    value={settings.footerLogo || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, footerLogo: newValue});
@@ -720,7 +734,7 @@ export default function AdminSettings() {
                 </div>
                 <input
                   type="url"
-                  value={settings.heroBackground}
+                  value={settings.heroBackground || ''}
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setSettings({...settings, heroBackground: newValue});
@@ -786,7 +800,7 @@ export default function AdminSettings() {
                   </div>
                   <input
                     type="url"
-                    value={settings.aboutImage}
+                    value={settings.aboutImage || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, aboutImage: newValue});
@@ -847,7 +861,7 @@ export default function AdminSettings() {
                   </div>
                   <input
                     type="url"
-                    value={settings.contactImage}
+                    value={settings.contactImage || ''}
                     onChange={(e) => {
                       const newValue = e.target.value;
                       setSettings({...settings, contactImage: newValue});
@@ -912,7 +926,7 @@ export default function AdminSettings() {
                 </div>
                 <input
                   type="url"
-                  value={settings.favicon}
+                  value={settings.favicon || ''}
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setSettings({...settings, favicon: newValue});
@@ -1017,18 +1031,76 @@ export default function AdminSettings() {
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
               Company Information
             </h3>
-            <div className="max-w-md">
-              <label className="form-label">Company Name</label>
-              <input
-                type="text"
-                value={settings.companyName}
-                onChange={(e) => setSettings({...settings, companyName: e.target.value})}
-                className="form-input"
-                placeholder="Your company name"
-              />
-              <p className="text-xs text-[#9a7d5e] mt-1">
-                This appears in the admin navbar and other places throughout the site.
-              </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="form-label">Company Name</label>
+                <input
+                  type="text"
+                  value={settings.companyName || ''}
+                  onChange={(e) => setSettings({...settings, companyName: e.target.value})}
+                  className="form-input"
+                  placeholder="Your company name"
+                />
+              </div>
+              <div>
+                <label className="form-label">Site Name</label>
+                <input
+                  type="text"
+                  value={settings.siteName || ''}
+                  onChange={(e) => setSettings({...settings, siteName: e.target.value})}
+                  className="form-input"
+                  placeholder="Site name"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="form-label">Site Tagline</label>
+                <input
+                  type="text"
+                  value={settings.siteTagline || ''}
+                  onChange={(e) => setSettings({...settings, siteTagline: e.target.value})}
+                  className="form-input"
+                  placeholder="Your site tagline"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="form-label">Company Description</label>
+                <textarea
+                  value={settings.companyDescription || ''}
+                  onChange={(e) => setSettings({...settings, companyDescription: e.target.value})}
+                  className="form-input min-h-[80px]"
+                  placeholder="Describe your company..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Content */}
+          <div className="pt-6 border-t border-[#faf3e6]">
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Hero Content
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="form-label">Hero Subtitle</label>
+                <input
+                  type="text"
+                  value={settings.heroSubtitle || ''}
+                  onChange={(e) => setSettings({...settings, heroSubtitle: e.target.value})}
+                  className="form-input"
+                  placeholder="Hero subtitle text"
+                />
+              </div>
+              <div>
+                <label className="form-label">Hero Scroll Text</label>
+                <input
+                  type="text"
+                  value={settings.heroScrollText || ''}
+                  onChange={(e) => setSettings({...settings, heroScrollText: e.target.value})}
+                  className="form-input"
+                  placeholder="Scroll to explore"
+                />
+              </div>
             </div>
           </div>
 

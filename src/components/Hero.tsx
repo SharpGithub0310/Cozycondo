@@ -17,26 +17,10 @@ export default function Hero({ settings }: HeroProps) {
     setIsVisible(true);
   }, []);
 
-  const heroBackground = settings?.heroBackground || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&q=80';
+  const heroBackground = settings?.heroBackground;
 
   if (!settings) {
-    return (
-      <section className="hero">
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
-        <div className="container-xl hero-content">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div className="text-center lg:text-left">
-              <h1 className="hero-title text-[var(--color-warm-900)]">
-                Welcome to Cozy Condo
-              </h1>
-              <p className="hero-subtitle text-[var(--color-warm-700)]">
-                Premium short-term rentals in Iloilo City
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+    return null; // No content when settings unavailable
   }
 
   const stats = [
@@ -52,14 +36,14 @@ export default function Hero({ settings }: HeroProps) {
         <>
           <Image
             src={heroBackground}
-            alt="Cozy Condo Hero Background"
+            alt={`${settings.companyName || 'Company'} Hero Background`}
             fill
             priority
             quality={90}
             sizes="100vw"
             className="object-cover"
             placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4="
           />
           <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40" />
           {/* Subtle pattern overlay */}
@@ -129,15 +113,17 @@ export default function Hero({ settings }: HeroProps) {
                 <span>Explore Properties</span>
                 <ArrowRight className="w-5 h-5 icon-arrow" />
               </Link>
-              <a
-                href="https://m.me/cozycondoiloilocity"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-secondary btn-lg"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Message Us</span>
-              </a>
+              {settings.messengerUrl && (
+                <a
+                  href={settings.messengerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-lg"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Message Us</span>
+                </a>
+              )}
             </div>
 
             {/* Enhanced Stats */}
@@ -203,10 +189,10 @@ export default function Hero({ settings }: HeroProps) {
                     <div className="absolute inset-0 flex items-center justify-center hidden">
                       <div className="text-center text-white/80">
                         <div className="w-20 h-20 lg:w-28 lg:h-28 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <span className="font-display text-3xl lg:text-5xl font-bold">CC</span>
+                          <span className="font-display text-3xl lg:text-5xl font-bold">{settings.companyName?.substring(0, 2) || 'CC'}</span>
                         </div>
-                        <p className="text-xl font-medium">Cozy Condo</p>
-                        <p className="text-sm opacity-80">Premium Living</p>
+                        <p className="text-xl font-medium">{settings.companyName || 'Company'}</p>
+                        <p className="text-sm opacity-80">{settings.siteTagline || 'Premium Living'}</p>
                       </div>
                     </div>
                   </>
@@ -214,10 +200,10 @@ export default function Hero({ settings }: HeroProps) {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center text-white/80">
                       <div className="w-20 h-20 lg:w-28 lg:h-28 mx-auto mb-4 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <span className="font-display text-3xl lg:text-5xl font-bold">CC</span>
+                        <span className="font-display text-3xl lg:text-5xl font-bold">{settings.companyName?.substring(0, 2) || 'CC'}</span>
                       </div>
-                      <p className="text-xl font-medium">Cozy Condo</p>
-                      <p className="text-sm opacity-80">Premium Living</p>
+                      <p className="text-xl font-medium">{settings.companyName || 'Company'}</p>
+                      <p className="text-sm opacity-80">{settings.siteTagline || 'Premium Living'}</p>
                     </div>
                   </div>
                 )}
@@ -267,7 +253,7 @@ export default function Hero({ settings }: HeroProps) {
           }`}
         >
           <span className="text-sm font-medium mb-3 hidden sm:block group-hover:mb-4 transition-all duration-300">
-            Scroll to explore
+            {settings.heroScrollText || 'Scroll to explore'}
           </span>
           <div className="w-8 h-12 border-2 border-current rounded-full flex items-start justify-center p-1">
             <div className="w-1 h-3 bg-current rounded-full animate-bounce" />

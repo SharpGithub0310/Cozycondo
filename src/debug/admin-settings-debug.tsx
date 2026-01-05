@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { databaseService } from '@/lib/database-service';
 
 /**
  * Debug component to test admin settings data loading
@@ -28,14 +27,14 @@ export default function AdminSettingsDebug() {
         console.log('Direct API response:', apiData);
 
         // Test 2: Enhanced database service
-        console.log('2. Testing enhanced database service...');
-        const enhancedData = await enhancedDatabaseService.getWebsiteSettings();
-        console.log('Enhanced database service response:', enhancedData);
+        console.log('2. Testing clean database service...');
+        const cleanData = await databaseService.getWebsiteSettings();
+        console.log('Clean database service response:', cleanData);
 
         // Test 3: Post-migration database service
-        console.log('3. Testing post-migration database service...');
-        const postMigrationData = await postMigrationDatabaseService.getWebsiteSettings();
-        console.log('Post-migration service response:', postMigrationData);
+        console.log('3. Validating database service response...');
+        const validationData = await databaseService.getWebsiteSettings();
+        console.log('Database service validation response:', validationData);
 
         // Test 4: Check individual field values
         console.log('4. Individual field analysis:');
@@ -50,8 +49,8 @@ export default function AdminSettingsDebug() {
         fieldsToCheck.forEach(field => {
           console.log(`  ${field}:`, {
             api: apiData?.data?.[field as keyof typeof apiData.data] || 'NOT FOUND',
-            enhanced: enhancedData?.[field as keyof typeof enhancedData] || 'NOT FOUND',
-            postMigration: postMigrationData?.[field as keyof typeof postMigrationData] || 'NOT FOUND',
+            clean: cleanData?.[field as keyof typeof cleanData] || 'NOT FOUND',
+            validation: validationData?.[field as keyof typeof validationData] || 'NOT FOUND',
           });
         });
 
@@ -59,14 +58,14 @@ export default function AdminSettingsDebug() {
         console.log('5. Data structure analysis:');
         console.log('API response structure:', Object.keys(apiData || {}));
         console.log('API data structure:', Object.keys(apiData?.data || {}));
-        console.log('Enhanced service structure:', Object.keys(enhancedData || {}));
-        console.log('Post-migration structure:', Object.keys(postMigrationData || {}));
+        console.log('Clean service structure:', Object.keys(cleanData || {}));
+        console.log('Validation structure:', Object.keys(validationData || {}));
 
         // Set debug data for display
         setDebugData({
           apiResponse: apiData,
-          enhancedData,
-          postMigrationData,
+          cleanData,
+          validationData,
           timestamp: new Date().toISOString()
         });
 

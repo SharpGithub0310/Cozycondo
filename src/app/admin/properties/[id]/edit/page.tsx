@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2 } from 'lucide-react';
-import { getStoredProperty, getDefaultPropertyData } from '@/utils/propertyStorage';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
 export default function EditProperty() {
@@ -41,18 +40,36 @@ export default function EditProperty() {
   useEffect(() => {
     const loadProperty = async () => {
       try {
-        // Load property from database first, fallback to localStorage/defaults
+        // Load property from database
         let propertyData;
         try {
           propertyData = await postMigrationDatabaseService.getProperty(params.id as string);
         } catch (error) {
-          console.warn('Failed to load from database, trying localStorage:', error);
-          propertyData = getStoredProperty(params.id as string);
+          console.error('Failed to load property from database:', error);
+          propertyData = null;
         }
 
-        // If no data found, use default data
+        // If no data found, create default property structure
         if (!propertyData) {
-          propertyData = getDefaultPropertyData(params.id as string);
+          propertyData = {
+            id: params.id as string,
+            name: '',
+            type: 'apartment',
+            bedrooms: 1,
+            bathrooms: 1,
+            maxGuests: 2,
+            size: '',
+            description: '',
+            location: '',
+            pricePerNight: '',
+            airbnbUrl: '',
+            amenities: [],
+            photos: [],
+            featuredPhotoIndex: 0,
+            icalUrl: '',
+            featured: false,
+            active: true,
+          };
         }
 
         setProperty({

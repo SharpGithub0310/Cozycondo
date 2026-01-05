@@ -2,8 +2,7 @@ import Hero from '@/components/Hero';
 import { Building2, Shield, Clock, Heart, MapPin, Phone, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import { getProductionFallbackProperties } from '@/lib/production-fallback-service';
+import { databaseService } from '@/lib/database-service';
 import type { PropertyData } from '@/lib/types';
 import type { WebsiteSettings } from '@/lib/types';
 import { normalizePropertyData } from '@/utils/slugify';
@@ -60,8 +59,8 @@ export default async function HomePage() {
     const startTime = Date.now();
 
     const [loadedSettings, propertiesData] = await Promise.all([
-      postMigrationDatabaseService.getWebsiteSettings(),
-      postMigrationDatabaseService.getProperties({ active: true })
+      databaseService.getWebsiteSettings(),
+      databaseService.getProperties({ active: true })
     ]);
 
     const loadDuration = Date.now() - startTime;
@@ -90,9 +89,8 @@ export default async function HomePage() {
   } catch (err: any) {
     console.error('Error loading home page data server-side:', err);
 
-    // Use fallback data if server-side loading fails
-    const fallbackProps = getProductionFallbackProperties();
-    featuredProperties = Object.values(fallbackProps).slice(0, 3);
+    // No fallback - return empty array if database fails
+    featuredProperties = [];
   }
 
   return (
@@ -131,7 +129,7 @@ export default async function HomePage() {
                       priority={index === 0}
                       quality={index === 0 ? 95 : 85}
                       placeholder="blur"
-                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
+                      blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4="
                     />
                   ) : null}
 
@@ -268,7 +266,7 @@ export default async function HomePage() {
                     sizes="(max-width: 768px) 100vw, 50vw"
                     quality={85}
                     placeholder="blur"
-                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4="
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

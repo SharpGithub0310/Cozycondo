@@ -102,6 +102,14 @@ export interface SiteSettings {
   updated_at: string;
 }
 
+// Navigation item interface
+export interface NavigationItem {
+  name: string;
+  href: string;
+  icon: string;
+  description?: string;
+}
+
 // Website Settings interface
 export interface WebsiteSettings {
   logo: string;
@@ -114,6 +122,7 @@ export interface WebsiteSettings {
   heroTitle: string;
   heroSubtitle: string;
   heroDescription: string;
+  heroScrollText?: string;
   statsUnits: string;
   statsUnitsLabel: string;
   statsRating: string;
@@ -125,6 +134,7 @@ export interface WebsiteSettings {
   highlyRatedImage: string;
   featuredTitle: string;
   featuredSubtitle: string;
+  // Contact Information
   phone?: string;
   email?: string;
   address?: string;
@@ -135,9 +145,36 @@ export interface WebsiteSettings {
   checkoutTime?: string;
   timezone?: string;
   currency?: string;
+  // Company/Site Information
+  siteName?: string;
+  siteTagline?: string;
+  companyName?: string;
+  companyDescription?: string;
+  // Navigation
+  navigationItems?: NavigationItem[];
+  // Footer Content
+  footerDescription?: string;
+  footerCopyrightText?: string;
+  // Contact Quick Links
+  contactPhone?: string;
+  contactPhoneDisplay?: string;
+  contactEmail?: string;
+  contactEmailDisplay?: string;
+  // Social Links
+  socialFacebook?: string;
+  socialMessenger?: string;
+  // Availability Status
+  availabilityStatus?: string;
+  responseTimeStatus?: string;
+  // System Status
+  systemStatus?: string;
+  // Legal Pages
+  privacyPolicyUrl?: string;
+  termsOfServiceUrl?: string;
+  sitemapUrl?: string;
+  // Meta
   updatedAt?: string;
   faqs?: FAQ[];
-  companyName?: string;
 }
 
 // FAQ Types

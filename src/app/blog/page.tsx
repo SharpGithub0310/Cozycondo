@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getPublishedBlogPosts } from '@/utils/blogStorageHybrid';
-import { initAutoSync } from '@/utils/syncLocalStorageToSupabase';
+import { getPublishedBlogPosts } from '@/utils/blogStorageSupabase';
 
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];
@@ -26,9 +25,6 @@ export default function BlogPage() {
         setLoading(false);
       }
     };
-
-    // Initialize auto-sync to copy localStorage posts to Supabase
-    initAutoSync();
 
     fetchPosts();
   }, []);

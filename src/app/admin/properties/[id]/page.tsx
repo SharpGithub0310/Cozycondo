@@ -14,7 +14,7 @@ import {
   Star,
   Eye
 } from 'lucide-react';
-import { enhancedDatabaseService } from '@/lib/enhanced-database-service';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
 export default function PropertyDetail() {
   const params = useParams();
@@ -28,7 +28,7 @@ export default function PropertyDetail() {
       console.log('Loading property from database:', params.id);
 
       // Fetch property from database using enhanced database service
-      const propertyData = await enhancedDatabaseService.getProperty(params.id as string);
+      const propertyData = await postMigrationDatabaseService.getProperty(params.id as string);
 
       if (!propertyData) {
         console.error('Property not found:', params.id);

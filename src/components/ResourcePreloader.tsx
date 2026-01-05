@@ -65,8 +65,7 @@ export default function ResourcePreloader({ resources = [] }: ResourcePreloaderP
     const domains = [
       'https://fonts.googleapis.com',
       'https://fonts.gstatic.com',
-      'https://api.supabase.co',
-      'https://images.unsplash.com'
+      'https://api.supabase.co'
     ];
 
     domains.forEach((domain) => {

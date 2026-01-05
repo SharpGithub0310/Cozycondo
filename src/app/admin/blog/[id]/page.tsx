@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, Trash2, Eye, Calendar, Tag, User, Upload, Image } from 'lucide-react';
-import { getBlogPostById, updateBlogPost, deleteBlogPost, uploadBlogImage, generateUniqueSlug } from '@/utils/blogStorageHybrid';
+import { getBlogPostById, updateBlogPost, deleteBlogPost, uploadBlogImage, generateUniqueSlug } from '@/utils/blogStorageSupabase';
 
 export default function EditBlogPost() {
   const params = useParams();

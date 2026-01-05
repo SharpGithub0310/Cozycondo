@@ -3,8 +3,7 @@ import { notFound } from 'next/navigation';
 import PropertyDetail from '@/components/PropertyDetail';
 
 // Import database service for server-side data fetching
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import { getProductionFallbackProperties } from '@/lib/production-fallback-service';
+import { databaseService } from '@/lib/database-service';
 
 // Generate static params for all properties with multiple slug variations
 export async function generateStaticParams() {
@@ -40,7 +39,7 @@ export async function generateStaticParams() {
 
   try {
     // Try to fetch properties from database
-    const properties = await postMigrationDatabaseService.getProperties();
+    const properties = await databaseService.getProperties();
     const allSlugs: string[] = [];
 
     Object.values(properties).forEach((property: any) => {
@@ -53,23 +52,8 @@ export async function generateStaticParams() {
     return params;
   } catch (error) {
     console.error('Error generating static params for properties:', error);
-    // Use fallback properties if database is not available during build
-    try {
-      const fallbackProperties = getProductionFallbackProperties();
-      const allSlugs: string[] = [];
-
-      Object.values(fallbackProperties).forEach((property: any) => {
-        const slugVariations = generateSlugVariations(property);
-        allSlugs.push(...slugVariations);
-      });
-
-      const params = allSlugs.map(slug => ({ slug }));
-      console.log('Generated fallback static params:', params.map(p => p.slug));
-      return params;
-    } catch (fallbackError) {
-      console.error('Error with fallback properties:', fallbackError);
-      return [];
-    }
+    // Return empty array if database is not available during build
+    return [];
   }
 }
 
@@ -82,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   try {
     // Try to fetch property from database with fallback
-    const property = await postMigrationDatabaseService.getProperty(slug);
+    const property = await databaseService.getProperty(slug);
 
     if (property) {
       return {
@@ -94,22 +78,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     console.error('Error generating metadata for property:', error);
   }
 
-  // Try fallback properties
-  try {
-    const fallbackProperties = getProductionFallbackProperties();
-    const property = Object.values(fallbackProperties).find((p: any) =>
-      (p.slug || p.id) === slug
-    ) as any;
-
-    if (property) {
-      return {
-        title: property.name || (property as any).title || 'Cozy Condo Property',
-        description: (property as any).short_description || property.description || 'Premium short-term rental in Iloilo City',
-      };
-    }
-  } catch (fallbackError) {
-    console.error('Error with fallback metadata:', fallbackError);
-  }
 
   return {
     title: 'Property Not Found',
@@ -189,7 +157,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
 
   try {
     // Try to fetch property from database with fallback
-    const allProperties = await postMigrationDatabaseService.getProperties();
+    const allProperties = await databaseService.getProperties();
     const propertiesArray = Object.values(allProperties);
 
     const property = findPropertyBySlug(propertiesArray, slug);
@@ -202,24 +170,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
     console.error('PropertyPage: Error fetching property from database:', error);
   }
 
-  // Try fallback properties if database fails
-  try {
-    const fallbackProperties = getProductionFallbackProperties();
-    const fallbackArray = Object.values(fallbackProperties);
-
-    console.log('PropertyPage: Available fallback properties:', fallbackArray.map((p: any) => ({ id: p.id, name: p.name, slug: p.slug })));
-
-    const property = findPropertyBySlug(fallbackArray, slug);
-
-    if (property) {
-      console.log('PropertyPage: Found property in fallback:', property.name);
-      return <PropertyDetail slug={slug} defaultProperty={property} />;
-    }
-  } catch (fallbackError) {
-    console.error('PropertyPage: Error with fallback properties:', fallbackError);
-  }
-
   console.log('PropertyPage: No property found for slug:', slug);
-  // If no property found in database or fallback, show not found
+  // If no property found in database, show not found
   notFound();
 }

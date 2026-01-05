@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import { databaseService } from '@/lib/database-service';
 
 export async function GET() {
   try {
     console.log('Testing server-side property loading...');
 
     // This should use the server-side direct database access
-    const properties = await postMigrationDatabaseService.getProperties();
+    const properties = await databaseService.getProperties();
 
     console.log('Properties loaded:', Object.keys(properties).length);
 

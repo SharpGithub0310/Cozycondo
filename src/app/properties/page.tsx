@@ -2,8 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight, Bed, Bath, Square, Wifi, Car, Wind, Filter, Grid3x3, List, Search, Home, Star } from 'lucide-react';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import { getProductionFallbackProperties } from '@/lib/production-fallback-service';
+import { databaseService } from '@/lib/database-service';
 import type { PropertyData } from '@/lib/types';
 
 export const metadata: Metadata = {
@@ -25,15 +24,14 @@ export default async function PropertiesPage() {
 
   try {
     // Try database first
-    const dbProperties = await postMigrationDatabaseService.getProperties();
+    const dbProperties = await databaseService.getProperties();
     properties = Object.values(dbProperties);
     console.log(`Loaded ${properties.length} properties from database`);
   } catch (error) {
     console.error('Error loading properties from database:', error);
-    // Use fallback if database fails
-    const fallbackProps = getProductionFallbackProperties();
-    properties = Object.values(fallbackProps);
-    console.log(`Using ${properties.length} fallback properties`);
+    // No fallback - return empty array if database fails
+    properties = [];
+    console.log('Database error - no properties available');
   }
 
   // Filter active properties and sort featured first
@@ -282,7 +280,7 @@ function PropertyCard({ property, priority = false }: { property: PropertyData; 
           priority={priority}
           quality={priority ? 95 : 85}
           placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkayRvjWSRz/Z24TdCdZjRDJFDDJ3HXmP2jlNW/8AFXXYNnj3iY3v3sJ/8K/dMgZJq9fHE/Z5t9lmQ9fK//Z"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4="
         />
 
         {property.featured && (

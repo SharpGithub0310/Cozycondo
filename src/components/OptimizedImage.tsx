@@ -51,16 +51,6 @@ export default function OptimizedImage({
   // Create optimized image URL with quality parameter
   const optimizeSrc = (originalSrc: string) => {
     if (!originalSrc) return placeholder;
-
-    // For Unsplash images, add quality and format optimization
-    if (originalSrc.includes('unsplash.com')) {
-      const url = new URL(originalSrc);
-      url.searchParams.set('q', quality.toString());
-      url.searchParams.set('auto', 'format');
-      url.searchParams.set('fit', 'crop');
-      return url.toString();
-    }
-
     return originalSrc;
   };
 

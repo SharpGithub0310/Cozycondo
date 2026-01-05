@@ -3,16 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, Home, Building2, BookOpen, Phone, MessageCircle } from 'lucide-react';
-import { getStoredSettings } from '@/utils/settingsStorage';
+import type { WebsiteSettings, NavigationItem } from '@/lib/types';
+import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
-const navigation = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'Properties', href: '/properties', icon: Building2 },
-  { name: 'Blog', href: '/blog', icon: BookOpen },
-  { name: 'Contact', href: '/contact', icon: Phone },
-];
+const iconMap = {
+  Home,
+  Building2,
+  BookOpen,
+  Phone,
+};
 
-export default function Navbar() {
+interface NavbarProps {
+  settings?: WebsiteSettings | null;
+}
+
+export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Close mobile menu when clicking outside or on escape key
@@ -46,8 +51,8 @@ export default function Navbar() {
     };
   }, [isOpen]);
   const [scrolled, setScrolled] = useState(false);
-  const [logo, setLogo] = useState('');
-  const [logoLoading, setLogoLoading] = useState(true);
+  const [settings, setSettings] = useState<WebsiteSettings | null>(propSettings || null);
+  const [loading, setLoading] = useState(!propSettings);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,39 +63,35 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // Load logo from settings with better handling
-    const loadLogo = async () => {
-      try {
-        setLogoLoading(true);
-        // First check localStorage
-        const settings = getStoredSettings();
-        if (settings.logo) {
-          setLogo(settings.logo);
+    if (!propSettings) {
+      const loadSettings = async () => {
+        try {
+          setLoading(true);
+          const dbSettings = await postMigrationDatabaseService.getWebsiteSettings();
+          setSettings(dbSettings);
+        } catch (error) {
+          console.error('Error loading settings:', error);
+          setSettings(null);
+        } finally {
+          setLoading(false);
         }
+      };
 
-        // Also try to fetch from API/database
-        if (typeof window !== 'undefined') {
-          try {
-            const response = await fetch('/api/settings');
-            if (response.ok) {
-              const data = await response.json();
-              if (data.data?.logo) {
-                setLogo(data.data.logo);
-              }
-            }
-          } catch (apiError) {
-            console.log('Using localStorage logo fallback');
-          }
-        }
-      } catch (error) {
-        console.error('Error loading logo:', error);
-      } finally {
-        setLogoLoading(false);
-      }
-    };
+      loadSettings();
+    }
+  }, [propSettings]);
 
-    loadLogo();
-  }, []);
+  // Get navigation items from settings or fallback to defaults
+  const navigation = settings?.navigationItems || [
+    { name: 'Home', href: '/', icon: 'Home', description: 'Welcome home' },
+    { name: 'Properties', href: '/properties', icon: 'Building2', description: 'Browse properties' },
+    { name: 'Blog', href: '/blog', icon: 'BookOpen', description: 'Read our blog' },
+    { name: 'Contact', href: '/contact', icon: 'Phone', description: 'Get in touch' },
+  ];
+
+  if (!settings) {
+    return null; // No content when settings unavailable
+  }
 
   return (
     <nav
@@ -105,21 +106,21 @@ export default function Navbar() {
           {/* Enhanced Logo */}
           <Link href="/" className="flex items-center gap-3 group touch-target">
             <div className="flex-shrink-0 relative">
-              {!logoLoading && logo ? (
+              {!loading && settings.logo ? (
                 <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 bg-white ring-2 ring-white/20 group-hover:ring-[var(--color-primary-200)]">
                   <img
-                    src={logo}
-                    alt="Cozy Condo Logo"
+                    src={settings.logo}
+                    alt={`${settings.companyName || 'Company'} Logo`}
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       console.log('Logo failed to load, showing fallback');
-                      setLogo('');
+                      // Could set an error state here if needed
                     }}
                   />
                 </div>
               ) : (
                 <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary-600)] to-[var(--color-primary-700)] flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
-                  <span className="text-white font-display text-base sm:text-xl font-bold">CC</span>
+                  <span className="text-white font-display text-base sm:text-xl font-bold">{settings.companyName?.substring(0, 2) || 'CC'}</span>
                 </div>
               )}
 
@@ -134,44 +135,49 @@ export default function Navbar() {
               <span className={`font-display text-base sm:text-xl font-bold leading-tight transition-colors duration-300 ${
                 scrolled ? 'text-[var(--color-warm-900)]' : 'text-[var(--color-warm-900)]'
               }`}>
-                Cozy Condo
+                {settings.siteName || settings.companyName || 'Company'}
               </span>
               <span className={`text-xs leading-tight font-medium transition-colors duration-300 ${
                 scrolled ? 'text-[var(--color-warm-600)]' : 'text-[var(--color-warm-600)]'
               }`}>
-                Premium Stays • Iloilo City
+                {settings.siteTagline || 'Premium Stays'}
               </span>
             </div>
           </Link>
 
           {/* Enhanced Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`relative px-4 lg:px-5 py-2.5 rounded-xl font-medium transition-all duration-300 touch-target group ${
-                  scrolled
-                    ? 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-[var(--color-warm-50)]'
-                    : 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-white/10'
-                }`}
-              >
-                <span className="relative z-10">{item.name}</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-              </Link>
-            ))}
+            {navigation.map((item) => {
+              const IconComponent = iconMap[item.icon as keyof typeof iconMap] || Home;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`relative px-4 lg:px-5 py-2.5 rounded-xl font-medium transition-all duration-300 touch-target group ${
+                    scrolled
+                      ? 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-[var(--color-warm-50)]'
+                      : 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-white/10'
+                  }`}
+                >
+                  <span className="relative z-10">{item.name}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                </Link>
+              );
+            })}
 
             {/* Enhanced CTA Button */}
-            <a
-              href="https://m.me/cozycondoiloilocity"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span className="hidden lg:inline">Book Now</span>
-              <span className="lg:hidden">Book</span>
-            </a>
+            {settings.messengerUrl && (
+              <a
+                href={settings.messengerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden lg:inline">Book Now</span>
+                <span className="lg:hidden">Book</span>
+              </a>
+            )}
           </div>
 
           {/* Enhanced Mobile menu button */}
@@ -207,7 +213,7 @@ export default function Navbar() {
         <div className="bg-white/98 backdrop-blur-2xl border-t border-[var(--color-warm-200)] shadow-2xl safe-area-bottom">
           <div className="px-6 py-6 space-y-2">
             {navigation.map((item, index) => {
-              const Icon = item.icon;
+              const IconComponent = iconMap[item.icon as keyof typeof iconMap] || Home;
               return (
                 <Link
                   key={item.name}
@@ -223,15 +229,12 @@ export default function Navbar() {
                       ? 'bg-[var(--color-primary-100)] text-[var(--color-primary-600)]'
                       : 'bg-[var(--color-warm-100)] text-[var(--color-warm-600)] group-hover:bg-[var(--color-primary-100)] group-hover:text-[var(--color-primary-600)]'
                   }`}>
-                    <Icon className="w-5 h-5" />
+                    <IconComponent className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-semibold">{item.name}</span>
                     <span className="text-xs text-[var(--color-warm-500)]">
-                      {item.name === 'Home' && 'Welcome to Cozy Condo'}
-                      {item.name === 'Properties' && 'Browse our collection'}
-                      {item.name === 'Blog' && 'Travel tips & guides'}
-                      {item.name === 'Contact' && 'Get in touch with us'}
+                      {item.description || item.name}
                     </span>
                   </div>
                 </Link>
@@ -241,26 +244,28 @@ export default function Navbar() {
 
           {/* Enhanced mobile CTA */}
           <div className="px-6 pb-6">
-            <a
-              href="https://m.me/cozycondoiloilocity"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-3 btn btn-primary w-full py-4 hover:scale-[1.02] transition-all duration-300 shadow-lg"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span className="font-semibold">Book Your Stay Now</span>
-            </a>
+            {settings.messengerUrl && (
+              <a
+                href={settings.messengerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-3 btn btn-primary w-full py-4 hover:scale-[1.02] transition-all duration-300 shadow-lg"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span className="font-semibold">Book Your Stay Now</span>
+              </a>
+            )}
 
             {/* Quick stats */}
             <div className="flex items-center justify-center gap-6 mt-4 text-xs text-[var(--color-warm-600)]">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Available 24/7</span>
+                <span>{settings.availabilityStatus || 'Available 24/7'}</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-[var(--color-primary-500)] rounded-full"></div>
-                <span>Fast Response</span>
+                <span>{settings.responseTimeStatus || 'Fast Response'}</span>
               </div>
             </div>
           </div>

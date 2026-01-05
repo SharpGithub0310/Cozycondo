@@ -13,7 +13,7 @@ import {
   Clock,
   MoreVertical
 } from 'lucide-react';
-import { getAllBlogPosts, deleteBlogPost, updateBlogPost } from '@/utils/blogStorageHybrid';
+import { getAllBlogPosts, deleteBlogPost, updateBlogPost } from '@/utils/blogStorageSupabase';
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];
 

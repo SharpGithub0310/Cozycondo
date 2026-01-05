@@ -17,12 +17,6 @@ import {
 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/types';
-import {
-  getStoredCalendarBlocks,
-  addCalendarBlock,
-  removeCalendarBlock,
-  updatePropertyCalendarBlocks
-} from '@/utils/propertyStorage';
 
 export default function CalendarPage() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -43,10 +37,15 @@ export default function CalendarPage() {
     customReason: ''
   });
 
-  // Load calendar data from storage
-  const loadCalendarData = () => {
-    const storedBlocks = getStoredCalendarBlocks();
-    setBlockedDates(storedBlocks);
+  // Load calendar data from database
+  const loadCalendarData = async () => {
+    try {
+      const blocks = await postMigrationDatabaseService.getCalendarBlocks();
+      setBlockedDates(blocks);
+    } catch (error) {
+      console.error('Failed to load calendar blocks:', error);
+      setBlockedDates([]);
+    }
   };
 
   useEffect(() => {
@@ -89,7 +88,7 @@ export default function CalendarPage() {
 
     loadProperties();
     // Load calendar data
-    loadCalendarData();
+    loadCalendarData().catch(console.error);
   }, []);
 
   // Load iCal URL when selected property changes
@@ -249,7 +248,7 @@ export default function CalendarPage() {
   };
 
   // Handle clicking on a calendar date to create manual block
-  const handleDateClick = (dateStr: string) => {
+  const handleDateClick = async (dateStr: string) => {
     if (!selectedProperty) return;
 
     // Check if date is already blocked
@@ -258,10 +257,15 @@ export default function CalendarPage() {
       // If it's a manual block, we can delete it
       if (existingBlock.source === 'manual') {
         if (window.confirm(`Remove block for ${new Date(dateStr).toLocaleDateString()}?`)) {
-          // Remove from storage
-          removeCalendarBlock(existingBlock.id);
-          // Reload calendar data
-          loadCalendarData();
+          // Remove from database
+          try {
+            await postMigrationDatabaseService.removeCalendarBlock(existingBlock.id);
+            // Reload calendar data
+            await loadCalendarData();
+          } catch (error) {
+            console.error('Failed to remove calendar block:', error);
+            alert('Failed to remove calendar block. Please try again.');
+          }
         }
       } else {
         alert('This date is blocked by Airbnb and cannot be modified manually.');
@@ -280,7 +284,7 @@ export default function CalendarPage() {
   };
 
   // Add new manual block
-  const addManualBlock = () => {
+  const addManualBlock = async () => {
     if (!selectedProperty || !newBlock.startDate || !newBlock.endDate) return;
 
     const finalReason = newBlock.reason === 'Custom' ? newBlock.customReason : newBlock.reason;
@@ -293,10 +297,16 @@ export default function CalendarPage() {
       source: 'manual' as const
     };
 
-    // Save to storage
-    addCalendarBlock(newBlockData);
-    // Reload calendar data
-    loadCalendarData();
+    // Save to database
+    try {
+      await postMigrationDatabaseService.addCalendarBlock(newBlockData);
+      // Reload calendar data
+      await loadCalendarData();
+    } catch (error) {
+      console.error('Failed to add calendar block:', error);
+      alert('Failed to add calendar block. Please try again.');
+      return;
+    }
 
     setShowAddModal(false);
     setNewBlock({
@@ -319,10 +329,10 @@ export default function CalendarPage() {
       // Parse iCal data from the configured URL
       const importedEvents = await parseIcalData(selectedProperty.icalUrl);
 
-      // Update storage with new Airbnb events (preserves manual blocks)
-      updatePropertyCalendarBlocks(selectedProperty.id, importedEvents);
+      // Update database with new Airbnb events (preserves manual blocks)
+      await postMigrationDatabaseService.updatePropertyCalendarBlocks(selectedProperty.id, importedEvents);
       // Reload calendar data
-      loadCalendarData();
+      await loadCalendarData();
 
       alert(`Successfully imported ${importedEvents.length} bookings from Airbnb!`);
     } catch (error) {

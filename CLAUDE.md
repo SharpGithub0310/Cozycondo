@@ -30,21 +30,20 @@ This project migrated from localStorage to Supabase with a sophisticated fallbac
 - **Migration**: Complete localStorage-to-database migration system with validation
 
 ### Data Service Layer Architecture
-Three-tier database service architecture:
+Two-tier database service architecture:
 
 1. **`postMigrationDatabaseService`** - Primary interface
    - Server-side: Direct Supabase client calls (faster, more reliable)
    - Client-side: API route calls via enhancedDatabaseService
    - Handles environment detection automatically
+   - Database-only, no fallback data
 
 2. **`enhancedDatabaseService`** - Client-side API interface
    - HTTP requests to `/api/` endpoints
    - Caching and request deduplication
-   - localStorage fallback for offline functionality
+   - Database-only, no fallback functionality
 
-3. **`productionFallbackService`** - Fallback data
-   - Hardcoded property data for emergencies
-   - Used when database is unavailable
+**IMPORTANT**: The database service architecture is now database-only. No fallback services, no hardcoded data. All services will throw errors if the database is unavailable, ensuring proper error handling and preventing stale data issues.
 
 ### Rendering Strategy
 - **Properties page**: `force-dynamic` to ensure server-side database access

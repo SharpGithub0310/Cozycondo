@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Save, Upload, Eye, Calendar, Tag, User, Image, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { saveBlogPost, generateUniqueSlug, uploadBlogImage, checkLocalStorageUsage } from '@/utils/blogStorageHybrid';
+import { saveBlogPost, generateUniqueSlug, uploadBlogImage } from '@/utils/blogStorageSupabase';
 
 export default function NewBlogPost() {
   const router = useRouter();
@@ -81,12 +81,6 @@ export default function NewBlogPost() {
       });
 
       console.log('Blog post saved:', savedPost);
-
-      // Check storage usage after save
-      const storageCheck = checkLocalStorageUsage();
-      if (storageCheck.message) {
-        setStorageWarning(storageCheck.message);
-      }
 
       // Show success message and redirect
       alert(`Blog post ${post.published ? 'published' : 'saved as draft'} successfully!`);

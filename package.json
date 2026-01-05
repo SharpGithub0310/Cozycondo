@@ -15,8 +15,9 @@
     "migrate-images": "node scripts/migrate-base64-images.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.87.1",
+    "@supabase/supabase-js": "^2.89.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "ical-generator": "^10.0.0",
     "lucide-react": "^0.559.0",
     "next": "16.0.8",
