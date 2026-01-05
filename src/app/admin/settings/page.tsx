@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Phone, Mail, MapPin, Globe, Clock, Upload, Image, Trash2, Plus, HelpCircle } from 'lucide-react';
-import { databaseService } from '@/lib/database-service';
+// Remove direct database service import - will use API endpoint instead
 import type { WebsiteSettings, FAQ } from '@/lib/types';
 
 export default function AdminSettings() {
@@ -55,8 +55,14 @@ export default function AdminSettings() {
         setLoading(true);
         setError(null);
 
-        const dbSettings = await databaseService.getWebsiteSettings();
-        console.log('Admin Settings: Loaded from database:', dbSettings);
+        const response = await fetch('/api/settings');
+        if (!response.ok) {
+          throw new Error('Failed to load settings');
+        }
+
+        const result = await response.json();
+        const dbSettings = result.data;
+        console.log('Admin Settings: Loaded from API:', dbSettings);
 
         // Enhanced logging for debugging
         console.log('Admin Settings: Data validation:', {
@@ -92,10 +98,29 @@ export default function AdminSettings() {
     setSaveMessage('');
 
     try {
-      // Save to database
-      await databaseService.saveWebsiteSettings(settings);
+      const adminPassword = localStorage.getItem('adminPassword');
+
+      if (!adminPassword) {
+        throw new Error('Admin session not found');
+      }
+
+      // Save to database via API
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminPassword}`,
+        },
+        body: JSON.stringify(settings)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save settings');
+      }
+
       setSaveMessage('Settings saved successfully! Changes will appear on the website immediately.');
-      console.log('Admin Settings: Successfully saved to database');
+      console.log('Admin Settings: Successfully saved via API');
       setTimeout(() => setSaveMessage(''), 3000);
     } catch (error) {
       console.error('Admin Settings: Error saving settings:', error);
@@ -108,10 +133,32 @@ export default function AdminSettings() {
   // Helper function to save individual settings immediately (for image uploads)
   const saveIndividualSetting = async (key: keyof WebsiteSettings, value: string) => {
     try {
+      const adminPassword = localStorage.getItem('adminPassword');
+
+      if (!adminPassword) {
+        throw new Error('Admin session not found');
+      }
+
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminPassword}`,
+        },
+        body: JSON.stringify({
+          key: key,
+          value: value
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save setting');
+      }
+
       const updatedSettings = { ...settings, [key]: value };
-      await databaseService.saveWebsiteSettings({ [key]: value });
       setSettings(updatedSettings);
-      console.log(`Admin Settings: Saved ${key} immediately`);
+      console.log(`Admin Settings: Saved ${key} successfully`);
     } catch (error) {
       console.error(`Admin Settings: Error saving ${key}:`, error);
       setError('Failed to save setting. Please try again.');
