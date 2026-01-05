@@ -98,9 +98,9 @@ export default function AdminSettings() {
     setSaveMessage('');
 
     try {
-      const adminPassword = localStorage.getItem('adminPassword');
+      const adminSession = localStorage.getItem('cozy_admin_session');
 
-      if (!adminPassword) {
+      if (!adminSession || adminSession !== 'authenticated') {
         throw new Error('Admin session not found');
       }
 
@@ -109,7 +109,7 @@ export default function AdminSettings() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminPassword}`,
+          'x-admin-session': 'authenticated',
         },
         body: JSON.stringify(settings)
       });
@@ -133,9 +133,9 @@ export default function AdminSettings() {
   // Helper function to save individual settings immediately (for image uploads)
   const saveIndividualSetting = async (key: keyof WebsiteSettings, value: string) => {
     try {
-      const adminPassword = localStorage.getItem('adminPassword');
+      const adminSession = localStorage.getItem('cozy_admin_session');
 
-      if (!adminPassword) {
+      if (!adminSession || adminSession !== 'authenticated') {
         throw new Error('Admin session not found');
       }
 
@@ -143,7 +143,7 @@ export default function AdminSettings() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminPassword}`,
+          'x-admin-session': 'authenticated',
         },
         body: JSON.stringify({
           key: key,
