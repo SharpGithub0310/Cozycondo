@@ -1,5 +1,5 @@
 // Script to seed the blog storage with sample posts that can be edited
-import { saveBlogPost } from './blogStorage';
+import { saveBlogPost } from './blogStorageSupabase';
 
 const sampleBlogPosts = [
   {
@@ -54,9 +54,9 @@ The newest development in the city features beautiful parks, modern architecture
     author: 'Cozy Condo Team',
     category: 'travel-tips',
     tags: ['iloilo', 'attractions', 'travel guide', 'sightseeing'],
-    featuredImage: '',
-    publishDate: '2024-12-01',
-    status: 'published' as const,
+    featured_image: '',
+    published: true,
+    published_at: '2024-12-01',
   },
   {
     title: 'Best Restaurants Near Our Properties',
@@ -103,9 +103,9 @@ Famous for their jumbo siopao - perfect for a quick, filling meal.
     author: 'Cozy Condo Team',
     category: 'local-guide',
     tags: ['restaurants', 'food', 'dining', 'iloilo'],
-    featuredImage: '',
-    publishDate: '2024-11-15',
-    status: 'published' as const,
+    featured_image: '',
+    published: true,
+    published_at: '2024-11-15',
   },
   {
     title: 'Why Iloilo City is Perfect for Remote Work',
@@ -143,9 +143,9 @@ Iloilo serves as a gateway to beautiful destinations in the Visayas region. Week
     author: 'Cozy Condo Team',
     category: 'general',
     tags: ['remote work', 'digital nomad', 'lifestyle', 'iloilo'],
-    featuredImage: '',
-    publishDate: '2024-11-01',
-    status: 'published' as const,
+    featured_image: '',
+    published: true,
+    published_at: '2024-11-01',
   },
   {
     title: 'Getting Around Iloilo: Transportation Guide',
@@ -187,9 +187,9 @@ From Iloilo International Airport, you can take a taxi (₱200-300 to city cente
     author: 'Cozy Condo Team',
     category: 'travel-tips',
     tags: ['transportation', 'travel guide', 'getting around', 'iloilo'],
-    featuredImage: '',
-    publishDate: '2024-10-20',
-    status: 'published' as const,
+    featured_image: '',
+    published: true,
+    published_at: '2024-10-20',
   },
   {
     title: 'Weekend Getaways from Iloilo City',
@@ -260,23 +260,23 @@ Another beautiful island destination with fewer crowds.
     author: 'Cozy Condo Team',
     category: 'travel-tips',
     tags: ['weekend trips', 'islands', 'travel guide', 'guimaras', 'gigantes'],
-    featuredImage: '',
-    publishDate: '2024-10-05',
-    status: 'published' as const,
+    featured_image: '',
+    published: true,
+    published_at: '2024-10-05',
   }
 ];
 
-export function seedBlogData() {
+export async function seedBlogData() {
   console.log('Seeding blog data...');
 
-  sampleBlogPosts.forEach(post => {
+  for (const post of sampleBlogPosts) {
     try {
-      const savedPost = saveBlogPost(post);
+      const savedPost = await saveBlogPost(post);
       console.log(`Saved blog post: ${savedPost.title}`);
     } catch (error) {
       console.error(`Error saving blog post: ${post.title}`, error);
     }
-  });
+  }
 
   console.log('Blog data seeding completed!');
 }

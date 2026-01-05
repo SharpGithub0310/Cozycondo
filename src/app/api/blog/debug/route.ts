@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
         addLog('Testing getBlogPostBySlug function...');
         const functionTestStart = Date.now();
 
-        const { getBlogPostBySlug } = await import('@/utils/blogStorageHybrid');
+        const { getBlogPostBySlug } = await import('@/utils/blogStorageSupabase');
         const result = await getBlogPostBySlug(checkSlug);
 
         response.performance.functionTestTime = Date.now() - functionTestStart;

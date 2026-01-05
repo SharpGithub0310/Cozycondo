@@ -147,10 +147,8 @@ export default function CalendarPage() {
   const saveIcalUrl = async () => {
     if (selectedProperty) {
       try {
-        // Update the property in the database with the new iCal URL
-        await postMigrationDatabaseService.updatePropertyStatus(selectedProperty.id, {
-          icalUrl: icalImportUrl
-        });
+        // TODO: Implement iCal URL storage in database schema
+        // For now, we'll just store the URL in local state
 
         // Update local state
         setProperties(properties.map(p =>

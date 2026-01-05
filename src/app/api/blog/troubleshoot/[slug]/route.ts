@@ -85,7 +85,7 @@ export async function GET(
     // Check 2: Try the getBlogPostBySlug function
     try {
       // Import and test our function
-      const { getBlogPostBySlug } = await import('@/utils/blogStorageHybrid');
+      const { getBlogPostBySlug } = await import('@/utils/blogStorageSupabase');
       const functionResult = await getBlogPostBySlug(slug);
 
       report.checks.getBlogPostBySlugFunction = {
@@ -130,7 +130,7 @@ export async function GET(
 
     // Check 4: Check published posts function
     try {
-      const { getPublishedBlogPosts } = await import('@/utils/blogStorageHybrid');
+      const { getPublishedBlogPosts } = await import('@/utils/blogStorageSupabase');
       const publishedPosts = await getPublishedBlogPosts();
 
       const foundInPublished = publishedPosts.find(p => p.slug === slug);
