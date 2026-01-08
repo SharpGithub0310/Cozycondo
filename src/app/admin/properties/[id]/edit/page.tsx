@@ -24,7 +24,6 @@ export default function EditProperty() {
     amenities: [] as string[],
     photos: [] as string[],
     featuredPhotoIndex: 0,
-    icalUrl: '',
     featured: false,
     active: true,
   });
@@ -66,7 +65,6 @@ export default function EditProperty() {
             amenities: [],
             photos: [],
             featuredPhotoIndex: 0,
-            icalUrl: '',
             featured: false,
             active: true,
           };
@@ -86,7 +84,6 @@ export default function EditProperty() {
           amenities: propertyData.amenities,
           photos: propertyData.photos,
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
-          icalUrl: propertyData.icalUrl || '',
           featured: propertyData.featured || false,
           active: propertyData.active !== false,
         });
@@ -127,7 +124,6 @@ export default function EditProperty() {
         photos: property.photos,
         images: property.photos, // API expects 'images' field
         featuredPhotoIndex: property.featuredPhotoIndex,
-        icalUrl: property.icalUrl || '',
         featured: property.featured || false,
         active: property.active !== false,
         updatedAt: new Date().toISOString(),

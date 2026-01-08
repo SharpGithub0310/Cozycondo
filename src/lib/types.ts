@@ -9,7 +9,6 @@ export interface Property {
   address: string;
   map_url?: string;
   airbnb_url?: string;
-  ical_url?: string;
   amenities: string[];
   featured: boolean;
   active: boolean;
@@ -34,7 +33,6 @@ export interface PropertyData {
   location: string;
   pricePerNight: string;
   airbnbUrl: string;
-  icalUrl: string;
   featured: boolean;
   active: boolean;
   amenities: string[];
@@ -54,18 +52,6 @@ export interface PropertyPhoto {
   created_at: string;
 }
 
-// Calendar Types
-export interface CalendarEvent {
-  id: string;
-  property_id: string;
-  title: string;
-  start_date: string;
-  end_date: string;
-  source: 'airbnb' | 'manual';
-  external_id?: string;
-  created_at: string;
-  updated_at: string;
-}
 
 // Blog Types
 export interface BlogPost {

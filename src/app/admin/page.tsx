@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Building2,
-  Calendar,
   FileText,
   Users,
   TrendingUp,
@@ -22,7 +21,6 @@ import { SimpleAnalytics, type VisitorStats } from '@/lib/analytics';
 // Stats interface
 interface DashboardStats {
   totalProperties: number;
-  activeBookings: string; // String to handle both numbers and "—" for loading
   blogPosts: number;
   visitorStats: VisitorStats;
 }
@@ -30,7 +28,6 @@ interface DashboardStats {
 // Initial stats state
 const initialStats: DashboardStats = {
   totalProperties: 0,
-  activeBookings: '—',
   blogPosts: 0,
   visitorStats: { today: 0, thisWeek: 0, thisMonth: 0, total: 0 }
 };
@@ -38,7 +35,6 @@ const initialStats: DashboardStats = {
 // Quick actions
 const quickActions = [
   { name: 'Add Property', href: '/admin/properties/new', icon: Building2 },
-  { name: 'Block Dates', href: '/admin/calendar', icon: Calendar },
   { name: 'New Blog Post', href: '/admin/blog/new', icon: FileText },
   { name: 'Update Settings', href: '/admin/settings', icon: Users },
   { name: 'Admin Console', href: '/admin/console', icon: Terminal },
@@ -76,29 +72,12 @@ export default function AdminDashboard() {
           console.warn('Could not fetch blog data:', blogError);
         }
 
-        // Fetch calendar blocks to count active bookings (Airbnb source = bookings)
-        let activeBookingsCount = 0;
-        try {
-          const calendarBlocks = await postMigrationDatabaseService.getCalendarBlocks();
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          activeBookingsCount = calendarBlocks.filter(block => {
-            const startDate = new Date(block.startDate);
-            const endDate = new Date(block.endDate);
-            // Count as active booking if it's from Airbnb and current or future
-            return block.source === 'airbnb' && endDate >= today;
-          }).length;
-        } catch (calendarError) {
-          console.warn('Could not fetch calendar data:', calendarError);
-        }
 
         // Get website visitor statistics
         const visitorStats = SimpleAnalytics.getVisitorStats();
 
         setStats({
           totalProperties: propertiesCount,
-          activeBookings: activeBookingsCount.toString(),
           blogPosts: blogCount,
           visitorStats
         });
@@ -128,13 +107,6 @@ export default function AdminDashboard() {
       icon: Building2,
       href: '/admin/properties',
       color: 'bg-[color:var(--color-primary-500)]'
-    },
-    {
-      name: 'Active Bookings',
-      value: stats.activeBookings,
-      icon: Calendar,
-      href: '/admin/calendar',
-      color: 'bg-[color:var(--color-accent-orange)]'
     },
     {
       name: 'Blog Posts',
@@ -328,13 +300,13 @@ export default function AdminDashboard() {
               Need Help?
             </h2>
             <p className="text-sm text-white/80 mb-4">
-              This admin panel lets you manage your properties, calendar, blog posts, and site settings.
+              This admin panel lets you manage your properties, blog posts, and site settings.
             </p>
             <div className="text-sm">
               <p className="font-medium mb-1">Quick Tips:</p>
               <ul className="text-white/80 space-y-1">
-                <li>• Add iCal URLs to sync Airbnb bookings</li>
-                <li>• Block dates manually in Calendar</li>
+                <li>• Upload high-quality property photos</li>
+                <li>• Manage property amenities and photos</li>
                 <li>• Update contact info in Settings</li>
               </ul>
             </div>

@@ -13,14 +13,6 @@ import { PropertyData, WebsiteSettings } from './types';
 // TYPES
 // =============================================
 
-export interface CalendarBlock {
-  id: string;
-  propertyId: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  source: 'manual' | 'airbnb';
-}
 
 // =============================================
 // CLEAN DATABASE SERVICE
@@ -85,7 +77,6 @@ class CleanDatabaseService {
         price_per_night,
         map_url,
         airbnb_url,
-        ical_url,
         amenities,
         featured,
         active,
@@ -146,7 +137,6 @@ class CleanDatabaseService {
         location: prop.location || '',
         pricePerNight: prop.price_per_night || '2500',
         airbnbUrl: prop.airbnb_url || '',
-        icalUrl: prop.ical_url || '',
         featured: prop.featured === true,
         active: prop.active === true,
         amenities: Array.isArray(prop.amenities) ? prop.amenities : [],
@@ -182,7 +172,6 @@ class CleanDatabaseService {
         price_per_night,
         map_url,
         airbnb_url,
-        ical_url,
         amenities,
         featured,
         active,
@@ -237,7 +226,6 @@ class CleanDatabaseService {
       location: property.location || '',
       pricePerNight: property.price_per_night || '2500',
       airbnbUrl: property.airbnb_url || '',
-      icalUrl: property.ical_url || '',
       featured: property.featured === true,
       active: property.active === true,
       amenities: Array.isArray(property.amenities) ? property.amenities : [],
@@ -263,7 +251,6 @@ class CleanDatabaseService {
       location_text: propertyData.location,
       price_per_night_value: propertyData.pricePerNight,
       airbnb_url_value: propertyData.airbnbUrl,
-      ical_url_value: propertyData.icalUrl || '',
       featured_flag: propertyData.featured || false,
       active_flag: propertyData.active !== false,
       amenities_array: propertyData.amenities,
@@ -372,131 +359,6 @@ class CleanDatabaseService {
     }
   }
 
-  // =============================================
-  // CALENDAR MANAGEMENT
-  // =============================================
-
-  async getCalendarBlocks(): Promise<CalendarBlock[]> {
-    const client = this.isServerSide() ? this.ensureAdminClient() : this.ensureSupabaseClient();
-
-    const { data: blocks, error } = await client
-      .from('calendar_blocks')
-      .select('*')
-      .order('start_date');
-
-    if (error) {
-      throw new Error(`Failed to fetch calendar blocks: ${error.message}`);
-    }
-
-    return (blocks || []).map((block: any) => ({
-      id: block.id,
-      propertyId: block.property_id,
-      startDate: block.start_date,
-      endDate: block.end_date,
-      reason: block.reason || 'Blocked',
-      source: (block.source || 'manual') as 'manual' | 'airbnb'
-    }));
-  }
-
-  async saveCalendarBlocks(blocks: CalendarBlock[]): Promise<void> {
-    const client = this.isServerSide() ? this.ensureAdminClient() : this.ensureSupabaseClient();
-
-    // Delete existing blocks and insert new ones
-    const { error: deleteError } = await client
-      .from('calendar_blocks')
-      .delete()
-      .neq('id', 'never-matches'); // This deletes all
-
-    if (deleteError) {
-      throw new Error(`Failed to clear existing calendar blocks: ${deleteError.message}`);
-    }
-
-    if (blocks.length > 0) {
-      const { error: insertError } = await client
-        .from('calendar_blocks')
-        .insert(
-          blocks.map((block) => ({
-            id: block.id,
-            property_id: block.propertyId,
-            start_date: block.startDate,
-            end_date: block.endDate,
-            reason: block.reason,
-            source: block.source
-          }))
-        );
-
-      if (insertError) {
-        throw new Error(`Failed to save calendar blocks: ${insertError.message}`);
-      }
-    }
-  }
-
-  async addCalendarBlock(block: CalendarBlock): Promise<void> {
-    const client = this.isServerSide() ? this.ensureAdminClient() : this.ensureSupabaseClient();
-
-    const { error } = await client
-      .from('calendar_blocks')
-      .insert({
-        id: block.id,
-        property_id: block.propertyId,
-        start_date: block.startDate,
-        end_date: block.endDate,
-        reason: block.reason,
-        source: block.source
-      });
-
-    if (error) {
-      throw new Error(`Failed to add calendar block: ${error.message}`);
-    }
-  }
-
-  async removeCalendarBlock(blockId: string): Promise<void> {
-    const client = this.isServerSide() ? this.ensureAdminClient() : this.ensureSupabaseClient();
-
-    const { error } = await client
-      .from('calendar_blocks')
-      .delete()
-      .eq('id', blockId);
-
-    if (error) {
-      throw new Error(`Failed to remove calendar block: ${error.message}`);
-    }
-  }
-
-  async updatePropertyCalendarBlocks(propertyId: string, newBlocks: CalendarBlock[]): Promise<void> {
-    const client = this.isServerSide() ? this.ensureAdminClient() : this.ensureSupabaseClient();
-
-    // Delete existing Airbnb blocks for this property
-    const { error: deleteError } = await client
-      .from('calendar_blocks')
-      .delete()
-      .eq('property_id', propertyId)
-      .eq('source', 'airbnb');
-
-    if (deleteError) {
-      throw new Error(`Failed to clear existing calendar blocks for property: ${deleteError.message}`);
-    }
-
-    // Insert new blocks
-    if (newBlocks.length > 0) {
-      const { error: insertError } = await client
-        .from('calendar_blocks')
-        .insert(
-          newBlocks.map((block) => ({
-            id: block.id,
-            property_id: block.propertyId,
-            start_date: block.startDate,
-            end_date: block.endDate,
-            reason: block.reason,
-            source: block.source
-          }))
-        );
-
-      if (insertError) {
-        throw new Error(`Failed to add new calendar blocks for property: ${insertError.message}`);
-      }
-    }
-  }
 }
 
 // =============================================
@@ -515,12 +377,7 @@ export const {
   saveProperty,
   updatePropertyStatus,
   getWebsiteSettings,
-  saveWebsiteSettings,
-  getCalendarBlocks,
-  saveCalendarBlocks,
-  addCalendarBlock,
-  removeCalendarBlock,
-  updatePropertyCalendarBlocks
+  saveWebsiteSettings
 } = databaseService;
 
 export default databaseService;

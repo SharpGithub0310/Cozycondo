@@ -3,8 +3,6 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MessengerWidget from "@/components/MessengerWidget";
-import PerformanceMonitor from "@/components/PerformanceMonitor";
-import PerformanceDisplay from "@/components/PerformanceDisplay";
 import CriticalCSS from "@/components/CriticalCSS";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import ResourcePreloader from "@/components/ResourcePreloader";
@@ -68,8 +66,6 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
         <MessengerWidget />
-        <PerformanceMonitor />
-        <PerformanceDisplay />
         <CriticalCSS />
         <AnalyticsTracker />
       </body>

@@ -27,14 +27,6 @@ interface WebsiteSettings {
   updatedAt?: string;
 }
 
-interface CalendarBlock {
-  id: string;
-  propertyId: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  source: 'manual' | 'airbnb';
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { action, properties, settings, calendarBlocks } = body;
+    const { action, properties, settings } = body;
 
     const errors: string[] = [];
     let migratedCount = 0;
@@ -66,7 +58,6 @@ export async function POST(request: NextRequest) {
               location_text: property.location,
               price_per_night_value: property.pricePerNight,
               airbnb_url_value: property.airbnbUrl,
-              ical_url_value: property.icalUrl || '',
               featured_flag: property.featured || false,
               active_flag: property.active !== false,
               amenities_array: property.amenities,
@@ -111,37 +102,6 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Migrate calendar blocks
-      if (calendarBlocks && Array.isArray(calendarBlocks)) {
-        try {
-          // Clear existing blocks first
-          await supabase
-            .from('calendar_blocks')
-            .delete()
-            .neq('id', 'never-matches');
-
-          if (calendarBlocks.length > 0) {
-            const { error } = await supabase
-              .from('calendar_blocks')
-              .insert(
-                (calendarBlocks as CalendarBlock[]).map((block) => ({
-                  id: block.id,
-                  property_id: block.propertyId,
-                  start_date: block.startDate,
-                  end_date: block.endDate,
-                  reason: block.reason,
-                  source: block.source
-                }))
-              );
-
-            if (error) {
-              errors.push(`Failed to migrate calendar blocks: ${error.message}`);
-            }
-          }
-        } catch (error) {
-          errors.push(`Error migrating calendar blocks: ${error}`);
-        }
-      }
 
       return NextResponse.json({
         success: errors.length === 0,
@@ -154,7 +114,6 @@ export async function POST(request: NextRequest) {
       const validation = {
         propertiesMatch: true,
         settingsMatch: true,
-        calendarMatch: true,
         details: [] as string[]
       };
 
@@ -197,26 +156,11 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Check calendar blocks
-        if (calendarBlocks) {
-          const { data: dbBlocks } = await supabase
-            .from('calendar_blocks')
-            .select('id');
-
-          const dbCount = dbBlocks?.length || 0;
-          const localCount = (calendarBlocks as CalendarBlock[]).length;
-
-          if (dbCount !== localCount) {
-            validation.calendarMatch = false;
-            validation.details.push(`Calendar blocks count mismatch: DB has ${dbCount}, localStorage has ${localCount}`);
-          }
-        }
 
       } catch (error) {
         validation.details.push(`Validation error: ${error}`);
         validation.propertiesMatch = false;
         validation.settingsMatch = false;
-        validation.calendarMatch = false;
       }
 
       return NextResponse.json(validation);

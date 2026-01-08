@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Shield, Clock, AlertCircle, CheckCircle, Info, XCircle, RefreshCw, Download, Trash2, BarChart3, Users, Eye } from 'lucide-react';
+import { Shield, AlertCircle, CheckCircle, Info, XCircle, RefreshCw, Download, Trash2, BarChart3, Users, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { SimpleAnalytics, type VisitorStats } from '@/lib/analytics';
 
@@ -94,11 +94,8 @@ export default function AdminConsolePage() {
   const getMetrics = () => {
     const errorCount = logs.filter(log => log.level === 'error').length;
     const warnCount = logs.filter(log => log.level === 'warn').length;
-    const avgLoadTime = logs
-      .filter(log => log.data?.loadTime)
-      .reduce((sum, log, _, arr) => sum + (log.data.loadTime / arr.length), 0);
 
-    return { errorCount, warnCount, avgLoadTime };
+    return { errorCount, warnCount };
   };
 
   const metrics = getMetrics();
@@ -111,7 +108,7 @@ export default function AdminConsolePage() {
         </div>
 
         {/* Metrics Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="card p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-[var(--color-warm-600)]">Total Logs</span>
@@ -136,15 +133,6 @@ export default function AdminConsolePage() {
             <div className="text-2xl font-bold text-yellow-600">{metrics.warnCount}</div>
           </div>
 
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-[var(--color-warm-600)]">Avg Load Time</span>
-              <Clock className="w-4 h-4 text-green-500" />
-            </div>
-            <div className="text-2xl font-bold text-[var(--color-warm-900)]">
-              {metrics.avgLoadTime.toFixed(0)}ms
-            </div>
-          </div>
         </div>
 
         {/* Website Analytics */}
@@ -297,26 +285,6 @@ export default function AdminConsolePage() {
           )}
         </div>
 
-        {/* Performance Tips */}
-        {metrics.avgLoadTime > 2000 && (
-          <div className="mt-8 card p-6 bg-yellow-50 border-yellow-200">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-yellow-600 mt-1" />
-              <div>
-                <h3 className="font-semibold text-yellow-900 mb-2">Performance Alert</h3>
-                <p className="text-yellow-800 mb-3">
-                  Average load time is high ({metrics.avgLoadTime.toFixed(0)}ms). Consider:
-                </p>
-                <ul className="space-y-1 text-sm text-yellow-700">
-                  <li>• Implementing caching strategies</li>
-                  <li>• Optimizing database queries</li>
-                  <li>• Reducing the number of properties loaded initially</li>
-                  <li>• Using pagination for large datasets</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
   );
 }

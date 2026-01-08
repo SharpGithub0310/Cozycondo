@@ -7,7 +7,6 @@ import { postMigrationDatabaseService } from '@/lib/post-migration-database-serv
 import {
   LayoutDashboard,
   Building2,
-  Calendar,
   FileText,
   Settings,
   LogOut,
@@ -19,7 +18,6 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Properties', href: '/admin/properties', icon: Building2 },
-  { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

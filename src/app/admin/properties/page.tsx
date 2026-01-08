@@ -361,7 +361,7 @@ export default function PropertiesPage() {
           <li>• Click the star to feature a property on the homepage</li>
           <li>• Toggle status to show/hide properties from the website</li>
           <li>• Link Airbnb URLs to enable direct booking buttons</li>
-          <li>• Set up iCal sync in the Calendar section</li>
+          <li>• Upload property images to showcase amenities</li>
         </ul>
       </div>
     </div>
