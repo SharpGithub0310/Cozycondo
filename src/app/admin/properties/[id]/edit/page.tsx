@@ -43,10 +43,17 @@ export default function EditProperty() {
         let propertyData;
         try {
           // Use API endpoint to load property
+          console.log('Loading property with ID:', params.id);
           const response = await fetch(`/api/properties/${params.id}`);
+          console.log('API Response status:', response.status, response.ok);
+
           if (response.ok) {
-            propertyData = await response.json();
+            const apiResponse = await response.json();
+            propertyData = apiResponse.data; // Extract the data object from API response
+            console.log('Property data loaded from API:', propertyData);
           } else {
+            const errorText = await response.text();
+            console.error('API Error:', response.status, errorText);
             propertyData = null;
           }
         } catch (error) {
@@ -78,7 +85,7 @@ export default function EditProperty() {
 
         setProperty({
           name: propertyData.name || '',
-          type: propertyData.type || 'Condo',
+          type: propertyData.type || 'condo',
           bedrooms: propertyData.bedrooms || 1,
           bathrooms: propertyData.bathrooms || 1,
           maxGuests: propertyData.maxGuests || 2,
