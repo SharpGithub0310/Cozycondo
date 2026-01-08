@@ -239,7 +239,8 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               {property.featured && (
-                <div className="featured-badge mb-4">
+                <div className="inline-flex items-center gap-1 px-3 py-1.5 mb-4 text-xs font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 rounded-full shadow-sm">
+                  <span>★</span>
                   Featured
                 </div>
               )}
