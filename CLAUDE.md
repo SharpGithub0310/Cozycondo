@@ -20,6 +20,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Test database health: `curl "http://localhost:3000/api/health/database"`
 - Debug endpoints available at `/api/debug/` for troubleshooting
 
+## Current Project State (January 2026)
+
+### Active Features
+- ✅ Full database integration with Supabase
+- ✅ Admin panel with authentication
+- ✅ Property management system
+- ✅ Blog/content management
+- ✅ Calendar with availability tracking
+- ✅ Settings management for site configuration
+- ✅ API endpoints for all data operations
+- ✅ Rate limiting and security measures
+
+### Removed/Deprecated Features
+- ❌ Storage settings section (removed - not needed)
+- ❌ localStorage fallback (migrated to database-only)
+- ❌ Hardcoded fallback data (database-only approach)
+
 ## Architecture Overview
 
 ### Database Architecture
@@ -58,8 +75,13 @@ Two-tier database service architecture:
 ## Project Structure Insights
 
 ### Key Directories
-- `src/app/admin/` - Complete admin panel (properties, blog, calendar, settings)
-- `src/app/api/` - REST API replacing localStorage functionality
+- `src/app/admin/` - Admin panel with the following sections:
+  - Dashboard - Overview and quick actions
+  - Properties - Manage property listings
+  - Calendar - Availability and bookings
+  - Blog - Content management
+  - Settings - Site configuration (contact info, images, content)
+- `src/app/api/` - REST API endpoints for database operations
 - `src/lib/` - Core services and utilities
 - `src/components/` - Reusable UI components
 
@@ -68,6 +90,15 @@ Two-tier database service architecture:
 - `src/lib/post-migration-database-service.ts` - Main data access layer
 - `API_ENDPOINTS.md` - Complete API documentation
 - `TYPESCRIPT_DEVELOPMENT_GUIDE.md` - Type safety best practices
+
+### Core Dependencies
+- **Next.js 16.0.8** - React framework with App Router
+- **React 18.3.1** - UI library
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **Supabase JS 2.89.0** - Database client
+- **Lucide React** - Icon library
+- **date-fns** - Date formatting
+- **ical-generator** - Calendar generation
 
 ### Environment Variables Required
 ```
