@@ -179,9 +179,9 @@ export default function PropertiesPage() {
           </p>
         </div>
         <div className="admin-card">
-          <p className="text-sm text-[#9a7d5e]">With Airbnb Link</p>
-          <p className="font-display text-2xl font-semibold text-[#FF5A5F]">
-            {loading ? '...' : properties.filter(p => p.airbnbUrl).length}
+          <p className="text-sm text-[#9a7d5e]">Inactive</p>
+          <p className="font-display text-2xl font-semibold text-[#9a7d5e]">
+            {loading ? '...' : properties.filter(p => !p.active).length}
           </p>
         </div>
       </div>
@@ -212,7 +212,6 @@ export default function PropertiesPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-[#7d6349]">Location</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-[#7d6349]">Featured</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-[#7d6349]">Status</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-[#7d6349]">Airbnb</th>
                 <th className="px-4 py-3 text-right text-sm font-medium text-[#7d6349]">Actions</th>
               </tr>
             </thead>
@@ -235,9 +234,6 @@ export default function PropertiesPage() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="w-8 h-8 bg-gray-200 rounded-lg mx-auto"></div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <div className="h-6 bg-gray-200 rounded-full w-16 mx-auto"></div>
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="h-6 bg-gray-200 rounded-full w-16 mx-auto"></div>
@@ -305,21 +301,6 @@ export default function PropertiesPage() {
                       )}
                     </button>
                   </td>
-                  <td className="px-4 py-4 text-center">
-                    {property.airbnbUrl ? (
-                      <a
-                        href={property.airbnbUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-[#FF5A5F]/10 text-[#FF5A5F] hover:bg-[#FF5A5F]/20 transition-colors"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        View
-                      </a>
-                    ) : (
-                      <span className="text-xs text-[#9a7d5e]">Not linked</span>
-                    )}
-                  </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Link
@@ -360,8 +341,8 @@ export default function PropertiesPage() {
         <ul className="text-sm text-[#115e59] space-y-1">
           <li>• Click the star to feature a property on the homepage</li>
           <li>• Toggle status to show/hide properties from the website</li>
-          <li>• Link Airbnb URLs to enable direct booking buttons</li>
           <li>• Upload property images to showcase amenities</li>
+          <li>• Set featured photo to display as the main image</li>
         </ul>
       </div>
     </div>

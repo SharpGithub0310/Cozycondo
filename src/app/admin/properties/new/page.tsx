@@ -16,8 +16,6 @@ export default function NewProperty() {
     size: '',
     description: '',
     location: '',
-    pricePerNight: '',
-    airbnbUrl: '',
     amenities: [] as string[],
     photos: [] as string[],
   });
@@ -49,8 +47,7 @@ export default function NewProperty() {
         area: parseFloat(property.size) || 45, // Map to size_sqm in database
         description: property.description,
         location: property.location,
-        pricePerNight: property.pricePerNight || '2500',
-        airbnbUrl: property.airbnbUrl,
+        pricePerNight: '2500', // Default price
         amenities: property.amenities || [],
         photos: property.photos || [],
         featured: false,
@@ -228,16 +225,6 @@ export default function NewProperty() {
                 />
               </div>
 
-              <div>
-                <label className="form-label">Price per Night (PHP)</label>
-                <input
-                  type="number"
-                  value={property.pricePerNight}
-                  onChange={(e) => setProperty({...property, pricePerNight: e.target.value})}
-                  className="form-input"
-                  placeholder="e.g., 2500"
-                />
-              </div>
             </div>
           </div>
 
@@ -457,16 +444,6 @@ export default function NewProperty() {
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
               External Links
             </h3>
-            <div>
-              <label className="form-label">Airbnb URL (Optional)</label>
-              <input
-                type="url"
-                value={property.airbnbUrl}
-                onChange={(e) => setProperty({...property, airbnbUrl: e.target.value})}
-                className="form-input"
-                placeholder="https://airbnb.com/rooms/..."
-              />
-            </div>
           </div>
 
           {/* Submit Button */}

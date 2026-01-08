@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2 } from 'lucide-react';
+import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2, Star } from 'lucide-react';
 // Using API endpoints instead of direct database calls
 
 export default function EditProperty() {
@@ -498,13 +498,18 @@ export default function EditProperty() {
             {/* Photo Grid */}
             {(property.photos || []).length > 0 && (
               <div>
-                <p className="text-sm text-[#7d6349] mb-3">Uploaded photos ({(property.photos || []).length}):</p>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-sm text-[#7d6349]">Uploaded photos ({(property.photos || []).length}):</p>
+                  <p className="text-xs text-[#9a7d5e]">Click any photo to set it as the featured/main photo</p>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {(property.photos || []).map((photo, index) => (
                     <div key={index} className="relative group">
                       <div
-                        className={`aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer ${
-                          property.featuredPhotoIndex === index ? 'ring-4 ring-[#14b8a6]' : ''
+                        className={`aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer transition-all ${
+                          property.featuredPhotoIndex === index
+                            ? 'ring-4 ring-[#14b8a6] scale-105 shadow-lg'
+                            : 'hover:ring-2 hover:ring-[#14b8a6]/50'
                         }`}
                         onClick={() => {
                           setProperty(prev => ({
@@ -512,6 +517,7 @@ export default function EditProperty() {
                             featuredPhotoIndex: index
                           }));
                         }}
+                        title={property.featuredPhotoIndex === index ? 'This is the featured photo' : 'Click to set as featured photo'}
                       >
                         <img
                           src={photo}
@@ -544,9 +550,16 @@ export default function EditProperty() {
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
-                      <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                        {property.featuredPhotoIndex === index ? '⭐ Featured' : `Photo ${index + 1}`}
-                      </div>
+                      {property.featuredPhotoIndex === index ? (
+                        <div className="absolute bottom-2 left-2 bg-[#14b8a6] text-white px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1 shadow-lg">
+                          <Star className="w-3 h-3 fill-current" />
+                          Featured Photo
+                        </div>
+                      ) : (
+                        <div className="absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                          Photo {index + 1}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
