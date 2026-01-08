@@ -98,100 +98,137 @@ export default async function HomePage() {
       {/* Hero Section with server-side props */}
       <Hero settings={settings} />
 
-      {/* Enhanced Properties Section */}
-      <section id="properties" className="section bg-white">
-        <div className="container-xl">
-          <div className="text-center mb-16">
-            <h2 className="section-title">{settings?.featuredTitle || 'Featured Properties'}</h2>
-            <p className="section-subtitle mx-auto">
-              {settings?.featuredSubtitle || 'Handpicked condominiums offering the perfect balance of comfort, convenience, and style.'}
+      {/* Redesigned Featured Properties Section */}
+      <section id="properties" className="section bg-gradient-to-br from-[var(--color-warm-50)] to-white relative overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[var(--color-primary-100)]/30 to-transparent rounded-full blur-3xl opacity-60" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-[var(--color-accent-orange)]/20 to-transparent rounded-full blur-3xl opacity-40" />
+
+        <div className="container-xl relative z-10">
+          <div className="text-center mb-20">
+            <div className="hero-badge mb-6 mx-auto">
+              <div className="hero-badge-dot" />
+              <span>Handpicked Collection</span>
+            </div>
+            <h2 className="section-title mb-6">{settings?.featuredTitle || 'Featured Properties'}</h2>
+            <p className="section-subtitle mx-auto max-w-3xl">
+              {settings?.featuredSubtitle || 'Discover our carefully curated selection of premium condominiums, each offering the perfect harmony of modern comfort, prime location, and exceptional style in the heart of Iloilo City.'}
             </p>
           </div>
 
-          <div className="grid-auto-fit grid-gap-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
             {featuredProperties.map((property, index) => (
               <article
                 key={property.id}
-                className="card card-elevated group animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 animate-fade-in border border-[var(--color-warm-100)] hover:border-[var(--color-primary-200)]"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                {/* Enhanced Image with lazy loading */}
-                <div className="card-image">
-                  <div className="card-image-overlay" />
-
+                {/* Redesigned Image Container with Perfect Aspect Ratio */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[var(--color-warm-200)] to-[var(--color-warm-300)]">
+                  {/* Image Content */}
                   {property.photos && property.photos.length > 0 ? (
                     <Image
                       src={property.photos[property.featuredPhotoIndex || 0]}
                       alt={property.name}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       priority={index === 0}
                       quality={index === 0 ? 95 : 85}
                       placeholder="blur"
                       blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4="
                     />
-                  ) : null}
-
-                  <div className={`w-full h-full flex items-center justify-center ${property.photos && property.photos.length > 0 ? 'hidden' : ''}`}>
-                    <div className="text-center text-[var(--color-warm-600)]">
-                      <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--color-warm-200)] to-[var(--color-warm-300)] flex items-center justify-center shadow-lg">
-                        <span className="font-display text-2xl font-bold text-[var(--color-warm-800)]">CC</span>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center text-[var(--color-warm-700)]">
+                        <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                          <span className="font-display text-3xl font-bold text-[var(--color-warm-800)]">CC</span>
+                        </div>
+                        <p className="text-sm font-medium opacity-80">Photo coming soon</p>
                       </div>
-                      <p className="text-sm font-medium">Photo coming soon</p>
-                    </div>
-                  </div>
-
-                  {property.featured && (
-                    <div className="featured-badge">
-                      Featured
                     </div>
                   )}
 
-                  {/* Quick action overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-4">
+                  {/* Enhanced Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+
+                  {/* Featured Badge with Premium Styling */}
+                  {property.featured && (
+                    <div className="absolute top-4 left-4 z-20">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] text-white text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Featured
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Interactive Overlay with CTA */}
+                  <div className="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-all duration-400 transform translate-y-2 group-hover:translate-y-0">
                     <Link
                       href={`/properties/${property.slug}`}
-                      className="btn btn-primary btn-sm w-full hover:scale-105"
+                      className="w-full bg-white/95 backdrop-blur-sm text-[var(--color-warm-900)] py-3 px-4 rounded-xl font-semibold text-center hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group/button"
                     >
                       <span>View Details</span>
-                      <ArrowRight className="w-4 h-4 icon-arrow" />
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/button:translate-x-1" />
                     </Link>
                   </div>
+
+                  {/* Subtle corner accent */}
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[var(--color-accent-orange)]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
                 </div>
 
-                {/* Enhanced Content */}
-                <div className="card-content">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="card-title group-hover:text-[var(--color-primary-600)]">
+                {/* Enhanced Content Section */}
+                <div className="p-6 space-y-4">
+                  {/* Property Title */}
+                  <div className="space-y-2">
+                    <h3 className="font-display text-xl font-semibold text-[var(--color-warm-900)] group-hover:text-[var(--color-primary-600)] transition-colors duration-300 line-clamp-1">
                       {property.name}
                     </h3>
+
+                    {/* Location with Icon */}
+                    <div className="flex items-center gap-2 text-[var(--color-warm-600)]">
+                      <MapPin className="w-4 h-4 text-[var(--color-primary-500)] flex-shrink-0" />
+                      <span className="text-sm font-medium">{property.location}</span>
+                    </div>
                   </div>
 
-                  <div className="card-meta flex items-center gap-2 mb-4">
-                    <MapPin className="w-4 h-4 text-[var(--color-primary-500)]" />
-                    <span className="font-medium">{property.location}</span>
-                  </div>
-
-                  <p className="card-description line-clamp-2">
+                  {/* Description */}
+                  <p className="text-[var(--color-warm-700)] text-sm leading-relaxed line-clamp-2">
                     {property.short_description}
                   </p>
 
-                  {/* Enhanced amenities */}
-                  {property.amenities && (
-                    <div className="flex flex-wrap gap-2">
+                  {/* Enhanced Amenities Pills */}
+                  {property.amenities && property.amenities.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2">
                       {property.amenities.slice(0, 3).map((amenity: string, i: number) => (
-                        <span key={i} className="amenity-tag">
-                          <span className="capitalize">{amenity}</span>
+                        <span
+                          key={i}
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-[var(--color-warm-100)] text-[var(--color-warm-800)] rounded-full hover:bg-[var(--color-primary-100)] hover:text-[var(--color-primary-800)] transition-colors duration-200 capitalize"
+                        >
+                          {amenity}
                         </span>
                       ))}
                       {property.amenities.length > 3 && (
-                        <span className="amenity-tag bg-[var(--color-primary-50)] border-[var(--color-primary-200)] text-[var(--color-primary-800)]">
+                        <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-[var(--color-primary-100)] to-[var(--color-primary-50)] text-[var(--color-primary-800)] rounded-full border border-[var(--color-primary-200)]">
                           +{property.amenities.length - 3} more
                         </span>
                       )}
                     </div>
                   )}
+                </div>
+
+                {/* Property Card Footer */}
+                <div className="px-6 pb-6 pt-2">
+                  <div className="h-px bg-gradient-to-r from-transparent via-[var(--color-warm-200)] to-transparent mb-4" />
+                  <Link
+                    href={`/properties/${property.slug}`}
+                    className="group/link flex items-center justify-between text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] transition-colors duration-300"
+                  >
+                    <span className="text-sm font-semibold">Learn More</span>
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/link:translate-x-1" />
+                  </Link>
                 </div>
               </article>
             ))}
