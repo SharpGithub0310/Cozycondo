@@ -237,6 +237,7 @@ export async function PUT(
       Object.entries(body).forEach(([key, value]) => {
         switch (key) {
           case 'pricePerNight':
+          case 'price':
             dbUpdates.price_per_night = value;
             break;
           case 'maxGuests':
@@ -252,6 +253,7 @@ export async function PUT(
             dbUpdates.featured_photo_index = value;
             break;
           case 'size':
+          case 'area':
             dbUpdates.size_sqm = value;
             break;
           case 'name':
@@ -261,6 +263,12 @@ export async function PUT(
           case 'images':
           case 'photos':
             // Handle photo updates separately
+            break;
+          case 'id':
+          case 'areaUnit':
+          case 'priceUnit':
+          case 'updatedAt':
+            // Skip these fields - they don't need database updates
             break;
           default:
             dbUpdates[key] = value;

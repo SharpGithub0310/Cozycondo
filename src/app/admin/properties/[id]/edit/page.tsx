@@ -115,31 +115,25 @@ export default function EditProperty() {
     setIsSaving(true);
 
     try {
-      // Save to database via API
+      // Save to database via API - only send fields that exist in database
+      const priceValue = parseFloat(property.pricePerNight) || 0;
+
       const propertyData = {
-        id: params.id as string,
         name: property.name,
-        title: property.name, // API expects 'title' field
         type: property.type,
         bedrooms: property.bedrooms,
         bathrooms: property.bathrooms,
         maxGuests: property.maxGuests,
-        size: property.size,
-        area: parseFloat(property.size) || 45, // API expects 'area' as number
-        areaUnit: 'sqm',
+        size: property.size, // This gets mapped to size_sqm in API
         description: property.description,
         location: property.location,
-        price: parseFloat(property.pricePerNight) || 0, // API expects 'price' as number
-        pricePerNight: property.pricePerNight,
-        priceUnit: 'PHP/night',
+        pricePerNight: priceValue > 0 ? priceValue : 1500, // This gets mapped to price_per_night
         airbnbUrl: property.airbnbUrl,
         amenities: property.amenities || [],
         photos: property.photos,
-        images: property.photos, // API expects 'images' field
         featuredPhotoIndex: property.featuredPhotoIndex,
         featured: property.featured || false,
         active: property.active !== false,
-        updatedAt: new Date().toISOString(),
       };
 
       // Use API endpoint instead of direct database call to avoid ambiguous column error
