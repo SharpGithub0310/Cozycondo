@@ -22,7 +22,7 @@ import { SimpleAnalytics, type VisitorStats } from '@/lib/analytics';
 // Stats interface
 interface DashboardStats {
   totalProperties: number;
-  activeBookings: string;
+  activeBookings: string; // String to handle both numbers and "—" for loading
   blogPosts: number;
   visitorStats: VisitorStats;
 }
@@ -64,29 +64,44 @@ export default function AdminDashboard() {
         const propertiesCount = Object.keys(properties).length;
 
         // Fetch blog posts count
+        let blogCount = 0;
         try {
           const blogResponse = await fetch('/api/blog');
-          const blogData = await blogResponse.json();
-          const blogCount = Array.isArray(blogData.posts) ? blogData.posts.length : 0;
-
-          // Get website visitor statistics
-          const visitorStats = SimpleAnalytics.getVisitorStats();
-
-          setStats({
-            totalProperties: propertiesCount,
-            activeBookings: '—', // TODO: Implement booking tracking
-            blogPosts: blogCount,
-            visitorStats
-          });
+          if (blogResponse.ok) {
+            const blogData = await blogResponse.json();
+            // The API returns an array directly, not {posts: []}
+            blogCount = Array.isArray(blogData) ? blogData.length : 0;
+          }
         } catch (blogError) {
           console.warn('Could not fetch blog data:', blogError);
-          const visitorStats = SimpleAnalytics.getVisitorStats();
-          setStats(prev => ({
-            ...prev,
-            totalProperties: propertiesCount,
-            visitorStats
-          }));
         }
+
+        // Fetch calendar blocks to count active bookings (Airbnb source = bookings)
+        let activeBookingsCount = 0;
+        try {
+          const calendarBlocks = await postMigrationDatabaseService.getCalendarBlocks();
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          activeBookingsCount = calendarBlocks.filter(block => {
+            const startDate = new Date(block.startDate);
+            const endDate = new Date(block.endDate);
+            // Count as active booking if it's from Airbnb and current or future
+            return block.source === 'airbnb' && endDate >= today;
+          }).length;
+        } catch (calendarError) {
+          console.warn('Could not fetch calendar data:', calendarError);
+        }
+
+        // Get website visitor statistics
+        const visitorStats = SimpleAnalytics.getVisitorStats();
+
+        setStats({
+          totalProperties: propertiesCount,
+          activeBookings: activeBookingsCount.toString(),
+          blogPosts: blogCount,
+          visitorStats
+        });
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         // Still get visitor stats even if other data fails
