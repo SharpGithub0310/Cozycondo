@@ -60,6 +60,9 @@ export async function generateStaticParams() {
 // Enable dynamic rendering for paths not in generateStaticParams
 export const dynamicParams = true;
 
+// Force dynamic rendering to ensure property data is always fresh
+export const dynamic = 'force-dynamic';
+
 // Generate metadata
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
