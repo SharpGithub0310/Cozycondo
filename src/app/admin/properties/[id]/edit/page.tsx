@@ -77,18 +77,18 @@ export default function EditProperty() {
         }
 
         setProperty({
-          name: propertyData.name,
-          type: propertyData.type,
-          bedrooms: propertyData.bedrooms,
-          bathrooms: propertyData.bathrooms,
-          maxGuests: propertyData.maxGuests,
-          size: propertyData.size,
-          description: propertyData.description,
-          location: propertyData.location,
-          pricePerNight: propertyData.pricePerNight,
-          airbnbUrl: propertyData.airbnbUrl,
-          amenities: propertyData.amenities,
-          photos: propertyData.photos,
+          name: propertyData.name || '',
+          type: propertyData.type || 'Condo',
+          bedrooms: propertyData.bedrooms || 1,
+          bathrooms: propertyData.bathrooms || 1,
+          maxGuests: propertyData.maxGuests || 2,
+          size: propertyData.size || 0,
+          description: propertyData.description || '',
+          location: propertyData.location || '',
+          pricePerNight: propertyData.pricePerNight || '',
+          airbnbUrl: propertyData.airbnbUrl || '',
+          amenities: propertyData.amenities || [],  // Ensure amenities is always an array
+          photos: propertyData.photos || [],
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
           featured: propertyData.featured || false,
           active: propertyData.active !== false,
@@ -126,7 +126,7 @@ export default function EditProperty() {
         pricePerNight: property.pricePerNight,
         priceUnit: 'PHP/night',
         airbnbUrl: property.airbnbUrl,
-        amenities: property.amenities,
+        amenities: property.amenities || [],
         photos: property.photos,
         images: property.photos, // API expects 'images' field
         featuredPhotoIndex: property.featuredPhotoIndex,
@@ -162,18 +162,20 @@ export default function EditProperty() {
   };
 
   const addAmenity = (amenity: string) => {
-    if (amenity && !property.amenities.includes(amenity)) {
+    const currentAmenities = property.amenities || [];
+    if (amenity && !currentAmenities.includes(amenity)) {
       setProperty({
         ...property,
-        amenities: [...property.amenities, amenity]
+        amenities: [...currentAmenities, amenity]
       });
     }
   };
 
   const removeAmenity = (amenity: string) => {
+    const currentAmenities = property.amenities || [];
     setProperty({
       ...property,
-      amenities: property.amenities.filter(a => a !== amenity)
+      amenities: currentAmenities.filter(a => a !== amenity)
     });
   };
 
@@ -361,9 +363,9 @@ export default function EditProperty() {
                     key={amenity}
                     type="button"
                     onClick={() => addAmenity(amenity)}
-                    disabled={property.amenities.includes(amenity)}
+                    disabled={(property.amenities || []).includes(amenity)}
                     className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                      property.amenities.includes(amenity)
+                      (property.amenities || []).includes(amenity)
                         ? 'bg-[#14b8a6] text-white border-[#14b8a6]'
                         : 'border-[#faf3e6] text-[#7d6349] hover:border-[#14b8a6] hover:text-[#14b8a6]'
                     }`}
@@ -395,11 +397,11 @@ export default function EditProperty() {
             </div>
 
             {/* Selected Amenities */}
-            {property.amenities.length > 0 && (
+            {(property.amenities || []).length > 0 && (
               <div>
                 <p className="text-sm text-[#7d6349] mb-2">Selected amenities:</p>
                 <div className="flex flex-wrap gap-2">
-                  {property.amenities.map((amenity) => (
+                  {(property.amenities || []).map((amenity) => (
                     <span
                       key={amenity}
                       className="inline-flex items-center gap-2 px-3 py-1 bg-[#14b8a6] text-white text-sm rounded-full"
@@ -501,11 +503,11 @@ export default function EditProperty() {
             </div>
 
             {/* Photo Grid */}
-            {property.photos.length > 0 && (
+            {(property.photos || []).length > 0 && (
               <div>
-                <p className="text-sm text-[#7d6349] mb-3">Uploaded photos ({property.photos.length}):</p>
+                <p className="text-sm text-[#7d6349] mb-3">Uploaded photos ({(property.photos || []).length}):</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {property.photos.map((photo, index) => (
+                  {(property.photos || []).map((photo, index) => (
                     <div key={index} className="relative group">
                       <div
                         className={`aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer ${
