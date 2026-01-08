@@ -35,11 +35,51 @@ export default function NewProperty() {
     setIsSaving(true);
 
     try {
-      // In production, save to database
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Generate a unique slug for the property
+      const slug = property.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+
+      // Prepare property data for API
+      const propertyData: any = {
+        id: slug, // ID is required - this becomes the slug in the database
+        name: property.name,
+        type: property.type,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        maxGuests: property.maxGuests,
+        area: parseFloat(property.size) || 45, // Map to size_sqm in database
+        description: property.description,
+        location: property.location,
+        pricePerNight: property.pricePerNight || '2500',
+        airbnbUrl: property.airbnbUrl,
+        amenities: property.amenities || [],
+        photos: property.photos || [],
+        featured: false,
+        active: true,
+      };
+
+      // Create property via API POST endpoint
+      const response = await fetch('/api/properties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-session': 'authenticated', // Include admin auth
+        },
+        body: JSON.stringify(propertyData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create property');
+      }
+
+      const result = await response.json();
+      console.log('Property created successfully:', result);
+
+      // Redirect to properties list
       router.push('/admin/properties');
     } catch (error) {
       console.error('Failed to save property:', error);
+      alert('Failed to save property. Please try again.');
       setIsSaving(false);
     }
   };
