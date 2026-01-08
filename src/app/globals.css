@@ -6,7 +6,9 @@
   --font-outfit: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Enhanced Color System */
+  --color-primary-25: #f7fffe;
   --color-primary-50: #f0fdfa;
+  --color-primary-75: #e6fcf8;
   --color-primary-100: #ccfbf1;
   --color-primary-200: #99f6e4;
   --color-primary-300: #5eead4;
@@ -18,7 +20,9 @@
   --color-primary-900: #134e4a;
   --color-primary-950: #042f2e;
 
+  --color-warm-25: #fefefc;
   --color-warm-50: #fefdfb;
+  --color-warm-75: #fefcf7;
   --color-warm-100: #fdf9f3;
   --color-warm-200: #faf3e6;
   --color-warm-300: #f5e6cc;
@@ -722,38 +726,67 @@ html {
   animation: pulse 2s infinite;
 }
 
-/* Animation keyframes */
+/* Enhanced Animation keyframes */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(1deg); }
+  50% { transform: translateY(-12px) rotate(0deg); }
+  75% { transform: translateY(-6px) rotate(-1deg); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes subtle-bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+  60% { transform: translateY(-2px); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
+  animation: fadeIn 0.8s ease-out forwards;
+  opacity: 0;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.6s ease-out forwards;
+  animation: slideUp 0.8s ease-out forwards;
+  opacity: 0;
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-subtle-bounce {
+  animation: subtle-bounce 2s ease-in-out infinite;
 }
 
 /* Form styles - Mobile optimized */
@@ -811,7 +844,7 @@ select.form-input {
   50% { opacity: 0.5; }
 }
 
-/* Mobile-first responsive utilities for common device sizes */
+/* Enhanced Mobile-first responsive utilities for common device sizes */
 
 /* Ultra small devices (320px and below) */
 @media (max-width: 320px) {
@@ -829,12 +862,26 @@ select.form-input {
   }
 
   .btn-mobile {
-    padding: 0.65rem 1rem;
-    font-size: 0.85rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    min-height: 48px;
   }
 
   .card-mobile {
     margin: 0.5rem 0;
+    padding: 1rem;
+  }
+
+  /* Reduce complex animations on very small screens */
+  .animate-float {
+    animation: none;
+  }
+
+  /* Ensure touch targets are adequate */
+  .touch-target-mobile {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem;
   }
 }
 
@@ -1012,10 +1059,41 @@ select.form-input {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Improved touch targets */
+/* Enhanced touch targets */
 .touch-target {
   min-height: 44px;
   min-width: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Enhanced touch feedback */
+@media (hover: none) and (pointer: coarse) {
+  .btn:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+  }
+
+  .card:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+  }
+
+  /* Reduce motion for better mobile performance */
+  .animate-float {
+    animation-duration: 8s;
+  }
+
+  /* Larger touch targets for mobile */
+  .btn {
+    min-height: 48px;
+    padding: 0.875rem 1.5rem;
+  }
+
+  .btn-lg {
+    min-height: 56px;
+    padding: 1rem 2rem;
+  }
 }
 
 /* Messenger widget - Mobile optimized */
