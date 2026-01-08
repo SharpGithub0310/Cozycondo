@@ -5,19 +5,19 @@ Premium short-term rental marketing website for Cozy Condo properties in Iloilo 
 ## Features
 
 - 🏠 **Property Showcase** - Display all 9+ properties with photos, amenities, and locations
-- 📅 **iCal Calendar Sync** - Two-way sync with Airbnb calendars
-- 📝 **Blog** - Share travel tips and local guides
+- 📝 **Blog System** - Share travel tips and local guides with rich content
 - 💬 **Contact Integration** - Facebook Messenger, phone, and email
-- 🔧 **Admin Panel** - Manage properties, blog posts, and calendar
+- 🔧 **Admin Panel** - Manage properties, blog posts, and site settings
 - 📱 **Responsive Design** - Beautiful on all devices
+- ⚡ **Optimized Performance** - Fast loading with Next.js 16 and Turbopack
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS
+- **Framework**: Next.js 16 (App Router with Turbopack)
+- **Styling**: Tailwind CSS v4
 - **Database**: Supabase (PostgreSQL)
 - **Deployment**: Dokploy
-- **Calendar**: iCal format for Airbnb sync
+- **UI Components**: Lucide React Icons
 
 ## Quick Start
 
@@ -51,7 +51,7 @@ ADMIN_PASSWORD=your_secure_password
 
 1. Create a new Supabase project at [supabase.com](https://supabase.com)
 2. Go to SQL Editor
-3. Run the SQL in `supabase/schema.sql` to create tables
+3. Run the SQL in `supabase/schema_optimized.sql` to create tables
 4. Create storage buckets:
    - `property-photos` (public)
    - `blog-images` (public)
@@ -71,7 +71,7 @@ cozy-condo/
 ├── src/
 │   ├── app/
 │   │   ├── admin/           # Admin panel pages
-│   │   ├── api/             # API routes (calendar sync)
+│   │   ├── api/             # API routes
 │   │   ├── blog/            # Blog pages
 │   │   ├── contact/         # Contact page
 │   │   ├── properties/      # Property pages
@@ -82,7 +82,7 @@ cozy-condo/
 │   └── lib/                 # Utilities and types
 ├── public/                  # Static assets
 ├── supabase/
-│   └── schema.sql          # Database schema
+│   └── schema_optimized.sql # Optimized database schema
 └── README.md
 ```
 
@@ -92,31 +92,21 @@ Access the admin panel at `/admin`. Enter any password (4+ characters) for demo 
 
 ### Admin Features
 
-- **Dashboard**: Overview of properties and stats
-- **Properties**: Add, edit, and manage property listings
-- **Blog**: Create and publish blog posts
-- **Calendar**: View and manage availability, sync with Airbnb
-- **Settings**: Update site information and contact details
+- **Dashboard**: Real-time overview with properties count, blog posts, and visitor statistics
+- **Properties**: Add, edit, and manage property listings with photos and amenities
+- **Blog**: Create and publish blog posts with rich text and images
+- **Settings**: Update site configuration, contact details, images, and FAQs
 
-## Calendar Sync with Airbnb
+## API Endpoints
 
-### Export (Your Calendar → Airbnb)
+The application provides RESTful API endpoints for all data operations:
 
-Each property has an iCal export URL:
-```
-https://cozycondo.net/api/calendar/[property-slug]
-```
-
-Add this URL in Airbnb under:
-Calendar → Availability Settings → Import Calendar
-
-### Import (Airbnb → Your Calendar)
-
-1. Get the iCal export URL from your Airbnb listing
-2. Go to Admin → Calendar
-3. Select the property
-4. Enter the Airbnb iCal URL
-5. Click "Sync from Airbnb"
+- `/api/properties` - Get all properties
+- `/api/properties/[slug]` - Get specific property
+- `/api/blog` - Get all blog posts
+- `/api/blog/[slug]` - Get specific blog post
+- `/api/settings` - Get/update site settings
+- `/api/health/database` - Check database connectivity
 
 ## Contact Information
 

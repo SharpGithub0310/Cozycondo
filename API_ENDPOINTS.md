@@ -49,7 +49,6 @@ Create or update a property.
   "location": "Iloilo City",
   "pricePerNight": "2500",
   "airbnbUrl": "https://airbnb.com/...",
-  "icalUrl": "https://calendar.../export.ics",
   "featured": false,
   "active": true,
   "amenities": ["WiFi", "Air-conditioning"],
@@ -161,7 +160,6 @@ Migrate data from localStorage to database.
       "location": "Iloilo City",
       "pricePerNight": "2500",
       "airbnbUrl": "https://airbnb.com/...",
-      "icalUrl": "https://calendar.../export.ics",
       "featured": false,
       "active": true,
       "amenities": ["WiFi", "Air-conditioning"],
@@ -173,15 +171,6 @@ Migrate data from localStorage to database.
     "heroTitle": "Your Cozy Escape in Iloilo City",
     "heroDescription": "Experience comfort...",
     "logo": "logo.png"
-  },
-  "calendarEvents": {
-    "event-id": {
-      "propertyId": "property-slug",
-      "startDate": "2024-01-01",
-      "endDate": "2024-01-07",
-      "reason": "Blocked",
-      "source": "manual"
-    }
   }
 }
 ```
@@ -281,7 +270,7 @@ curl -X POST "https://your-domain.com/api/migrate/from-localstorage" \
 The API endpoints are fully compatible with the existing Supabase database schema:
 - `properties` table with `property_photos` relationship
 - `website_settings` table for flexible key-value settings
-- `calendar_blocks` table for calendar events
+- `blog_posts` table for blog content management
 - RLS policies for security
 - Database functions for complex operations
 

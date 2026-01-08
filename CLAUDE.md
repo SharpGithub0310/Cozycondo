@@ -17,8 +17,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Testing Individual Components
 - For API testing, use the comprehensive endpoints in `/api/` routes
 - Test properties API: `curl "http://localhost:3000/api/properties"`
+- Test blog API: `curl "http://localhost:3000/api/blog"`
+- Test settings API: `curl "http://localhost:3000/api/settings"`
 - Test database health: `curl "http://localhost:3000/api/health/database"`
-- Debug endpoints available at `/api/debug/` for troubleshooting
 
 ## Current Project State (January 2026)
 
@@ -27,13 +28,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ Admin panel with authentication
 - ✅ Property management system
 - ✅ Blog/content management
-- ✅ Calendar with availability tracking
 - ✅ Settings management for site configuration
-- ✅ API endpoints for all data operations
+- ✅ API endpoints for core data operations
 - ✅ Rate limiting and security measures
+- ✅ Optimized bundle size (~25% reduction)
+- ✅ Clean, streamlined codebase
 
 ### Removed/Deprecated Features
+- ❌ Calendar functionality (removed - not needed)
 - ❌ Storage settings section (removed - not needed)
+- ❌ Performance monitoring/notifications (removed)
+- ❌ Debug endpoints (removed for production)
+- ❌ Calendar dependencies (date-fns, ical-generator, node-ical)
 - ❌ localStorage fallback (migrated to database-only)
 - ❌ Hardcoded fallback data (database-only approach)
 
@@ -76,11 +82,10 @@ Two-tier database service architecture:
 
 ### Key Directories
 - `src/app/admin/` - Admin panel with the following sections:
-  - Dashboard - Overview and quick actions
-  - Properties - Manage property listings
-  - Calendar - Availability and bookings
-  - Blog - Content management
-  - Settings - Site configuration (contact info, images, content)
+  - Dashboard - Overview and quick actions (properties count, blog posts, visitor stats)
+  - Properties - Manage property listings, amenities, and photos
+  - Blog - Content management with rich text and images
+  - Settings - Site configuration (contact info, images, content, FAQs)
 - `src/app/api/` - REST API endpoints for database operations
 - `src/lib/` - Core services and utilities
 - `src/components/` - Reusable UI components
@@ -91,14 +96,13 @@ Two-tier database service architecture:
 - `API_ENDPOINTS.md` - Complete API documentation
 - `TYPESCRIPT_DEVELOPMENT_GUIDE.md` - Type safety best practices
 
-### Core Dependencies
-- **Next.js 16.0.8** - React framework with App Router
+### Core Dependencies (Optimized)
+- **Next.js 16.0.8** - React framework with App Router and Turbopack
 - **React 18.3.1** - UI library
 - **Tailwind CSS v4** - Utility-first CSS framework
 - **Supabase JS 2.89.0** - Database client
 - **Lucide React** - Icon library
-- **date-fns** - Date formatting
-- **ical-generator** - Calendar generation
+- **dotenv** - Environment variable management
 
 ### Environment Variables Required
 ```
