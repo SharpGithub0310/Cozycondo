@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import Link from 'next/link';
 import {
   Plus,
@@ -11,26 +11,176 @@ import {
   EyeOff,
   Star,
   MapPin,
-  MoreVertical,
-  ExternalLink,
-  GripVertical
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/types';
 
-// Default properties list with IDs
-const propertyIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+// Custom hook for debounced search
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+// Memoized property row component
+interface PropertyRowProps {
+  property: any;
+  onToggleFeatured: (id: string) => void;
+  onToggleActive: (id: string) => void;
+  isUpdating: boolean;
+}
+
+const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onToggleActive, isUpdating }) => {
+  return (
+    <tr className="hover:bg-[#fefdfb] transition-colors">
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#d4b896] to-[#b89b7a] flex items-center justify-center flex-shrink-0">
+            <span className="font-display text-white font-bold text-sm">CC</span>
+          </div>
+          <div>
+            <p className="font-medium text-[#5f4a38]">{property.name}</p>
+            <p className="text-xs text-[#9a7d5e]">ID: {property.id}</p>
+          </div>
+        </div>
+      </td>
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-1 text-[#7d6349]">
+          <MapPin className="w-4 h-4 text-[#9a7d5e]" />
+          <span className="text-sm">{property.location}</span>
+        </div>
+      </td>
+      <td className="px-4 py-4 text-center">
+        <button
+          onClick={() => onToggleFeatured(property.id)}
+          disabled={isUpdating}
+          className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
+            property.featured
+              ? 'bg-[#fb923c] text-white'
+              : 'bg-[#faf3e6] text-[#9a7d5e] hover:bg-[#f5e6cc]'
+          }`}
+        >
+          <Star className={`w-4 h-4 ${property.featured ? 'fill-current' : ''}`} />
+        </button>
+      </td>
+      <td className="px-4 py-4 text-center">
+        <button
+          onClick={() => onToggleActive(property.id)}
+          disabled={isUpdating}
+          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+            property.active
+              ? 'bg-[#14b8a6]/10 text-[#0f766e]'
+              : 'bg-[#9a7d5e]/10 text-[#7d6349]'
+          }`}
+        >
+          {property.active ? (
+            <>
+              <Eye className="w-3 h-3" />
+              Active
+            </>
+          ) : (
+            <>
+              <EyeOff className="w-3 h-3" />
+              Hidden
+            </>
+          )}
+        </button>
+      </td>
+      <td className="px-4 py-4">
+        <div className="flex items-center justify-end gap-2">
+          <Link
+            href={`/admin/properties/${property.id}`}
+            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
+          >
+            <Edit2 className="w-4 h-4" />
+          </Link>
+          <Link
+            href={`/properties/${property.name.toLowerCase().replace(/\s+/g, '-')}`}
+            target="_blank"
+            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+          </Link>
+          <button className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+PropertyRow.displayName = 'PropertyRow';
+
+// Loading skeleton component
+const LoadingSkeleton = memo(() => (
+  <>
+    {Array.from({ length: 5 }, (_, i) => (
+      <tr key={`loading-${i}`} className="animate-pulse">
+        <td className="px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg bg-gray-200"></div>
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-32 mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-16"></div>
+            </div>
+          </div>
+        </td>
+        <td className="px-4 py-4">
+          <div className="h-4 bg-gray-200 rounded w-24"></div>
+        </td>
+        <td className="px-4 py-4 text-center">
+          <div className="w-8 h-8 bg-gray-200 rounded-lg mx-auto"></div>
+        </td>
+        <td className="px-4 py-4 text-center">
+          <div className="h-6 bg-gray-200 rounded-full w-16 mx-auto"></div>
+        </td>
+        <td className="px-4 py-4">
+          <div className="flex items-center justify-end gap-2">
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+          </div>
+        </td>
+      </tr>
+    ))}
+  </>
+));
+
+LoadingSkeleton.displayName = 'LoadingSkeleton';
+
+// Pagination constants
+const PROPERTIES_PER_PAGE = 10;
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showDropdown, setShowDropdown] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingProperty, setUpdatingProperty] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
 
-  const loadProperties = async () => {
+  // Debounce search query to avoid excessive filtering
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  const loadProperties = useCallback(async (skipLoading = false) => {
     try {
-      setLoading(true);
+      if (!skipLoading) {
+        setLoading(true);
+      }
       setError(null);
 
       // Load properties from database
@@ -48,86 +198,130 @@ export default function PropertiesPage() {
       }));
 
       setProperties(propertiesArray);
+      setLastRefresh(Date.now());
     } catch (err) {
       console.error('Admin: Error loading properties:', err);
       setError('Failed to load properties. Please try again later.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadProperties();
 
-    // Reload data when page becomes visible (e.g., after editing)
-    const handleFocus = () => {
-      loadProperties();
-    };
-
-    // Reload on page visibility change
+    // Only reload on visibility change if data is stale (5 minutes)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        loadProperties();
+        const timeSinceLastRefresh = Date.now() - lastRefresh;
+        if (timeSinceLastRefresh > 5 * 60 * 1000) { // 5 minutes
+          loadProperties(true); // Skip loading state for background refresh
+        }
       }
     };
 
-    window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [loadProperties, lastRefresh]);
 
-  const filteredProperties = properties.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Memoized filtered and paginated properties
+  const filteredProperties = useMemo(() => {
+    if (!debouncedSearchQuery) return properties;
 
-  const toggleFeatured = async (id: string) => {
+    const query = debouncedSearchQuery.toLowerCase();
+    return properties.filter(p =>
+      p.name.toLowerCase().includes(query) ||
+      p.location.toLowerCase().includes(query)
+    );
+  }, [properties, debouncedSearchQuery]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProperties.length / PROPERTIES_PER_PAGE);
+  const startIndex = (currentPage - 1) * PROPERTIES_PER_PAGE;
+  const endIndex = startIndex + PROPERTIES_PER_PAGE;
+  const paginatedProperties = useMemo(() => {
+    return filteredProperties.slice(startIndex, endIndex);
+  }, [filteredProperties, startIndex, endIndex]);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery]);
+
+  // Memoized stats calculations
+  const stats = useMemo(() => ({
+    total: properties.length,
+    active: properties.filter(p => p.active).length,
+    featured: properties.filter(p => p.featured).length,
+    inactive: properties.filter(p => !p.active).length
+  }), [properties]);
+
+  const toggleFeatured = useCallback(async (id: string) => {
     const property = properties.find(p => p.id === id);
-    if (!property) return;
+    if (!property || updatingProperty === id) return;
 
     const newFeaturedStatus = !property.featured;
 
     try {
-      // Update in database first
-      await postMigrationDatabaseService.updatePropertyStatus(id, { featured: newFeaturedStatus });
+      setUpdatingProperty(id);
 
-      // Update local state on success
+      // Optimistic update - update UI immediately
       setProperties(prev => prev.map(p =>
         p.id === id ? { ...p, featured: newFeaturedStatus } : p
       ));
 
+      // Update in database
+      await postMigrationDatabaseService.updatePropertyStatus(id, { featured: newFeaturedStatus });
+
       console.log(`Admin: Updated property ${id} featured status to ${newFeaturedStatus}`);
     } catch (err) {
       console.error('Admin: Error updating featured status:', err);
-      setError('Failed to update property status. Please try again.');
-    }
-  };
 
-  const toggleActive = async (id: string) => {
+      // Revert optimistic update on error
+      setProperties(prev => prev.map(p =>
+        p.id === id ? { ...p, featured: property.featured } : p
+      ));
+
+      setError('Failed to update property status. Please try again.');
+    } finally {
+      setUpdatingProperty(null);
+    }
+  }, [properties, updatingProperty]);
+
+  const toggleActive = useCallback(async (id: string) => {
     const property = properties.find(p => p.id === id);
-    if (!property) return;
+    if (!property || updatingProperty === id) return;
 
     const newActiveStatus = !property.active;
 
     try {
-      // Update in database first
-      await postMigrationDatabaseService.updatePropertyStatus(id, { active: newActiveStatus });
+      setUpdatingProperty(id);
 
-      // Update local state on success
+      // Optimistic update - update UI immediately
       setProperties(prev => prev.map(p =>
         p.id === id ? { ...p, active: newActiveStatus } : p
       ));
 
+      // Update in database
+      await postMigrationDatabaseService.updatePropertyStatus(id, { active: newActiveStatus });
+
       console.log(`Admin: Updated property ${id} active status to ${newActiveStatus}`);
     } catch (err) {
       console.error('Admin: Error updating active status:', err);
+
+      // Revert optimistic update on error
+      setProperties(prev => prev.map(p =>
+        p.id === id ? { ...p, active: property.active } : p
+      ));
+
       setError('Failed to update property status. Please try again.');
+    } finally {
+      setUpdatingProperty(null);
     }
-  };
+  }, [properties, updatingProperty]);
 
   return (
     <div className="space-y-6">
@@ -149,7 +343,7 @@ export default function PropertiesPage() {
           <div className="flex items-center justify-between">
             <p className="text-red-600">{error}</p>
             <button
-              onClick={loadProperties}
+              onClick={() => loadProperties()}
               className="btn-primary text-sm"
             >
               Retry
@@ -163,32 +357,32 @@ export default function PropertiesPage() {
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Total Properties</p>
           <p className="font-display text-2xl font-semibold text-[#5f4a38]">
-            {loading ? '...' : properties.length}
+            {loading ? '...' : stats.total}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Active</p>
           <p className="font-display text-2xl font-semibold text-[#14b8a6]">
-            {loading ? '...' : properties.filter(p => p.active).length}
+            {loading ? '...' : stats.active}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Featured</p>
           <p className="font-display text-2xl font-semibold text-[#fb923c]">
-            {loading ? '...' : properties.filter(p => p.featured).length}
+            {loading ? '...' : stats.featured}
           </p>
         </div>
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Inactive</p>
           <p className="font-display text-2xl font-semibold text-[#9a7d5e]">
-            {loading ? '...' : properties.filter(p => !p.active).length}
+            {loading ? '...' : stats.inactive}
           </p>
         </div>
       </div>
 
       {/* Search & Filters */}
       <div className="admin-card">
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9a7d5e]" />
             <input
@@ -199,6 +393,11 @@ export default function PropertiesPage() {
               className="form-input pl-10"
             />
           </div>
+          {filteredProperties.length > 0 && (
+            <div className="text-sm text-[#9a7d5e]">
+              Showing {paginatedProperties.length} of {filteredProperties.length} properties
+            </div>
+          )}
         </div>
       </div>
 
@@ -217,111 +416,16 @@ export default function PropertiesPage() {
             </thead>
             <tbody className="divide-y divide-[#faf3e6]">
               {loading ? (
-                // Loading skeleton rows
-                Array.from({ length: 3 }, (_, i) => (
-                  <tr key={`loading-${i}`} className="animate-pulse">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gray-200"></div>
-                        <div>
-                          <div className="h-4 bg-gray-200 rounded w-32 mb-1"></div>
-                          <div className="h-3 bg-gray-200 rounded w-16"></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-4 bg-gray-200 rounded w-24"></div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <div className="w-8 h-8 bg-gray-200 rounded-lg mx-auto"></div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <div className="h-6 bg-gray-200 rounded-full w-16 mx-auto"></div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
-                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
-                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                <LoadingSkeleton />
               ) : (
-                filteredProperties.map((property) => (
-                <tr key={property.id} className="hover:bg-[#fefdfb] transition-colors">
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#d4b896] to-[#b89b7a] flex items-center justify-center flex-shrink-0">
-                        <span className="font-display text-white font-bold text-sm">CC</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#5f4a38]">{property.name}</p>
-                        <p className="text-xs text-[#9a7d5e]">ID: {property.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-1 text-[#7d6349]">
-                      <MapPin className="w-4 h-4 text-[#9a7d5e]" />
-                      <span className="text-sm">{property.location}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    <button
-                      onClick={() => toggleFeatured(property.id)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        property.featured 
-                          ? 'bg-[#fb923c] text-white' 
-                          : 'bg-[#faf3e6] text-[#9a7d5e] hover:bg-[#f5e6cc]'
-                      }`}
-                    >
-                      <Star className={`w-4 h-4 ${property.featured ? 'fill-current' : ''}`} />
-                    </button>
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    <button
-                      onClick={() => toggleActive(property.id)}
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                        property.active 
-                          ? 'bg-[#14b8a6]/10 text-[#0f766e]' 
-                          : 'bg-[#9a7d5e]/10 text-[#7d6349]'
-                      }`}
-                    >
-                      {property.active ? (
-                        <>
-                          <Eye className="w-3 h-3" />
-                          Active
-                        </>
-                      ) : (
-                        <>
-                          <EyeOff className="w-3 h-3" />
-                          Hidden
-                        </>
-                      )}
-                    </button>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/properties/${property.id}`}
-                        className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Link>
-                      <Link
-                        href={`/properties/${property.name.toLowerCase().replace(/\s+/g, '-')}`}
-                        target="_blank"
-                        className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Link>
-                      <button className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                paginatedProperties.map((property) => (
+                  <PropertyRow
+                    key={property.id}
+                    property={property}
+                    onToggleFeatured={toggleFeatured}
+                    onToggleActive={toggleActive}
+                    isUpdating={updatingProperty === property.id}
+                  />
                 ))
               )}
             </tbody>
@@ -330,10 +434,78 @@ export default function PropertiesPage() {
 
         {!loading && filteredProperties.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-[#9a7d5e]">No properties found</p>
+            <p className="text-[#9a7d5e]">
+              {searchQuery ? 'No properties match your search' : 'No properties found'}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-[#0d9488] hover:underline text-sm mt-2"
+              >
+                Clear search
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="admin-card">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-[#9a7d5e]">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg border border-[#faf3e6] text-[#7d6349] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#faf3e6] transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                        currentPage === pageNum
+                          ? 'bg-[#0d9488] text-white'
+                          : 'text-[#7d6349] hover:bg-[#faf3e6]'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg border border-[#faf3e6] text-[#7d6349] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#faf3e6] transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tips */}
       <div className="admin-card bg-[#f0fdfb] border-[#14b8a6]/20">
