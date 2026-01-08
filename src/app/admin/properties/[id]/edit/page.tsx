@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2 } from 'lucide-react';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+// Using API endpoints instead of direct database calls
 
 export default function EditProperty() {
   const params = useParams();
@@ -42,9 +42,15 @@ export default function EditProperty() {
         // Load property from database
         let propertyData;
         try {
-          propertyData = await postMigrationDatabaseService.getProperty(params.id as string);
+          // Use API endpoint to load property
+          const response = await fetch(`/api/properties/${params.id}`);
+          if (response.ok) {
+            propertyData = await response.json();
+          } else {
+            propertyData = null;
+          }
         } catch (error) {
-          console.error('Failed to load property from database:', error);
+          console.error('Failed to load property from API:', error);
           propertyData = null;
         }
 
@@ -129,9 +135,22 @@ export default function EditProperty() {
         updatedAt: new Date().toISOString(),
       };
 
-      await postMigrationDatabaseService.saveProperty(params.id as string, propertyData);
+      // Use API endpoint instead of direct database call to avoid ambiguous column error
+      const response = await fetch(`/api/properties/${params.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-session': 'authenticated', // Include admin auth
+        },
+        body: JSON.stringify(propertyData),
+      });
 
-      console.log('Property saved successfully to database');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save property');
+      }
+
+      console.log('Property saved successfully via API');
 
       // Redirect back to property view
       router.push(`/admin/properties/${params.id}`);
