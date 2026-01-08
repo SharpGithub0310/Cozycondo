@@ -171,81 +171,143 @@ export default function BlogAdminPage() {
         </div>
       </div>
 
-      {/* Posts List */}
-      <div className="space-y-4">
+      {/* Posts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredPosts.map((post) => (
-          <div key={post.id} className="admin-card hover:shadow-lg transition-shadow">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#faf3e6] text-[#7d6349]">
+          <div key={post.id} className="admin-card hover:shadow-xl transition-all duration-300 group">
+            {/* Featured Image */}
+            <div className="relative h-48 mb-4 rounded-lg overflow-hidden bg-gradient-to-br from-[#faf3e6] to-[#f0e6d6]">
+              {post.featured_image ? (
+                <img
+                  src={post.featured_image}
+                  alt={post.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-[#5f4a38]/10 flex items-center justify-center">
+                      <Edit2 className="w-8 h-8 text-[#5f4a38]/40" />
+                    </div>
+                    <p className="text-[#9a7d5e] text-sm font-medium">No featured image</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Status Badge Overlay */}
+              <div className="absolute top-3 left-3">
+                {post.published ? (
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-[#14b8a6] text-white shadow-lg">
+                    Published
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-[#fb923c] text-white shadow-lg">
+                    Draft
+                  </span>
+                )}
+              </div>
+
+              {/* Category Badge */}
+              {post.category && (
+                <div className="absolute top-3 right-3">
+                  <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/90 backdrop-blur-sm text-[#5f4a38] shadow-md">
                     {post.category}
                   </span>
-                  {post.published ? (
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#14b8a6]/10 text-[#0f766e]">
-                      Published
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-[#fb923c]/10 text-[#c2410c]">
-                      Draft
-                    </span>
-                  )}
                 </div>
-                <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-1">
-                  {post.title}
-                </h3>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-[#9a7d5e]">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                  </span>
-                  <span>By {post.author}</span>
-                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1">
+              <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-3 line-clamp-2 leading-tight">
+                {post.title}
+              </h3>
+
+              {/* Excerpt */}
+              {post.excerpt && (
+                <p className="text-[#7d6349] text-sm leading-relaxed mb-4 line-clamp-3">
+                  {post.excerpt}
+                </p>
+              )}
+
+              {/* Meta Information */}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-[#9a7d5e] mb-4">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Edit2 className="w-3.5 h-3.5" />
+                  {post.author}
+                </span>
               </div>
-              
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-[#e2e8f0]">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => togglePublished(post.id)}
-                  className={`p-2 rounded-lg transition-colors ${
+                  className={`p-2 rounded-lg transition-all duration-200 ${
                     post.published
-                      ? 'text-[#14b8a6] hover:bg-[#14b8a6]/10'
-                      : 'text-[#9a7d5e] hover:bg-[#faf3e6]'
+                      ? 'text-[#14b8a6] hover:bg-[#14b8a6]/10 hover:scale-110'
+                      : 'text-[#9a7d5e] hover:bg-[#faf3e6] hover:text-[#fb923c] hover:scale-110'
                   }`}
                   title={post.published ? 'Unpublish' : 'Publish'}
                 >
-                  {post.published ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  {post.published ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
                 <Link
                   href={`/admin/blog/${post.id}`}
-                  className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
+                  className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] hover:scale-110 rounded-lg transition-all duration-200"
+                  title="Edit post"
                 >
-                  <Edit2 className="w-5 h-5" />
+                  <Edit2 className="w-4 h-4" />
                 </Link>
                 <Link
                   href={`/blog/${post.slug}`}
                   target="_blank"
-                  className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
+                  className="p-2 text-[#7d6349] hover:text-[#3b82f6] hover:bg-[#faf3e6] hover:scale-110 rounded-lg transition-all duration-200"
+                  title="View post"
                 >
-                  <Eye className="w-5 h-5" />
+                  <Eye className="w-4 h-4" />
                 </Link>
-                <button
-                  onClick={() => handleDelete(post.id)}
-                  className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
               </div>
+
+              <button
+                onClick={() => handleDelete(post.id)}
+                className="p-2 text-[#9a7d5e] hover:text-red-500 hover:bg-red-50 hover:scale-110 rounded-lg transition-all duration-200"
+                title="Delete post"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
         ))}
 
         {filteredPosts.length === 0 && (
-          <div className="admin-card text-center py-12">
-            <p className="text-[#9a7d5e]">No posts found</p>
+          <div className="col-span-full admin-card text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#faf3e6] flex items-center justify-center">
+                <Search className="w-10 h-10 text-[#9a7d5e]" />
+              </div>
+              <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-2">No posts found</h3>
+              <p className="text-[#9a7d5e] mb-6">
+                {searchQuery || selectedCategory !== 'All'
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Get started by creating your first blog post'}
+              </p>
+              {!searchQuery && selectedCategory === 'All' && (
+                <Link href="/admin/blog/new" className="btn-primary inline-flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create First Post
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>

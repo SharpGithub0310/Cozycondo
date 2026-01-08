@@ -1938,3 +1938,18 @@ select.form-input {
   left: 0;
   color: rgba(255, 255, 255, 0.6);
 }
+
+/* Line Clamp Utilities for Blog Cards */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}

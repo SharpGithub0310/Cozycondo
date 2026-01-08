@@ -61,6 +61,7 @@ export interface BlogPost {
   excerpt: string;
   content: string;
   featured_image?: string;
+  category?: string;
   published: boolean;
   published_at?: string;
   author: string;

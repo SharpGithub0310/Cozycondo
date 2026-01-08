@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Save, Trash2, Eye, Calendar, Tag, User, Upload, Image } from 'lucide-react';
-import { getBlogPostById, updateBlogPost, deleteBlogPost, uploadBlogImage, generateUniqueSlug } from '@/utils/blogStorageSupabase';
+// Use API endpoints instead of direct Supabase calls
 
 export default function EditBlogPost() {
   const params = useParams();
@@ -37,7 +37,14 @@ export default function EditBlogPost() {
   useEffect(() => {
     const loadPost = async () => {
       try {
-        const blogPost = await getBlogPostById(params.id as string);
+        // Use API endpoint instead of direct Supabase call
+        const response = await fetch(`/api/blog/${params.id}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog post');
+        }
+
+        const blogPost = await response.json();
 
         if (blogPost) {
           setPost({
@@ -72,18 +79,29 @@ export default function EditBlogPost() {
     setIsSaving(true);
 
     try {
-      await updateBlogPost(params.id as string, {
-        title: post.title,
-        slug: post.slug,
-        excerpt: post.excerpt,
-        content: post.content,
-        author: post.author,
-        category: post.category,
-        tags: post.tags,
-        featured_image: post.featured_image,
-        published: post.published,
-        published_at: post.published_at,
+      // Use API endpoint instead of direct Supabase call
+      const response = await fetch(`/api/blog/${params.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt,
+          content: post.content,
+          author: post.author,
+          category: post.category,
+          tags: post.tags,
+          featured_image: post.featured_image,
+          published: post.published,
+          published_at: post.published_at,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to update blog post');
+      }
 
       alert('Blog post updated successfully!');
       router.push('/admin/blog');
@@ -98,7 +116,15 @@ export default function EditBlogPost() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this blog post?')) {
       try {
-        await deleteBlogPost(params.id as string);
+        // Use API endpoint instead of direct Supabase call
+        const response = await fetch(`/api/blog/${params.id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete blog post');
+        }
+
         alert('Blog post deleted successfully!');
         router.push('/admin/blog');
       } catch (error) {
@@ -125,14 +151,21 @@ export default function EditBlogPost() {
     });
   };
 
-  const generateSlug = async () => {
+  const generateSlug = () => {
     if (!post.title.trim()) {
       alert('Please enter a title first.');
       return;
     }
     try {
-      const uniqueSlug = await generateUniqueSlug(post.title, params.id as string);
-      setPost({ ...post, slug: uniqueSlug });
+      // Simple client-side slug generation
+      const baseSlug = post.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      setPost({ ...post, slug: baseSlug });
     } catch (error) {
       console.error('Error generating slug:', error);
     }
@@ -390,8 +423,8 @@ export default function EditBlogPost() {
                       }
 
                       try {
-                        const imageUrl = await uploadBlogImage(file);
-                        setPost({...post, featured_image: imageUrl});
+                        // For now, use a direct URL input instead of upload
+                        alert('Image upload feature is temporarily disabled. Please enter image URL manually in the Featured Image URL field below.');
                       } catch (error) {
                         console.error('Error uploading image:', error);
                         alert('Failed to upload image. Please try again.');
