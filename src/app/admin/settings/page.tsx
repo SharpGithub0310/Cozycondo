@@ -9,8 +9,7 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState<WebsiteSettings>({
     logo: '',
     footerLogo: '',
-    heroBackground: '',
-    aboutImage: '',
+    aboutImage: ''
     contactImage: '',
     favicon: '',
     heroBadgeText: '',
@@ -747,69 +746,6 @@ export default function AdminSettings() {
 
             {/* Background Images */}
             <div className="mb-8">
-              <h4 className="font-medium text-[#5f4a38] mb-3">Background Images</h4>
-
-              {/* Hero Background */}
-              <div className="mb-6">
-                <label className="form-label">Hero Section Background</label>
-                <div className="border-2 border-dashed border-[#faf3e6] rounded-xl p-6 text-center hover:border-[#14b8a6] transition-colors mb-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                          const imageUrl = event.target?.result as string;
-                          const updatedSettings = {...settings, heroBackground: imageUrl};
-                          setSettings(updatedSettings);
-                          saveIndividualSetting('heroBackground', imageUrl);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    className="hidden"
-                    id="hero-bg-upload"
-                  />
-                  <label htmlFor="hero-bg-upload" className="cursor-pointer">
-                    <Upload className="w-10 h-10 mx-auto mb-3 text-[#9a7d5e]" />
-                    <p className="text-[#5f4a38] font-medium mb-1">Upload Hero Background</p>
-                    <p className="text-[#9a7d5e] text-sm">High resolution image for homepage hero</p>
-                    <p className="text-[#9a7d5e] text-xs">Recommended: 1920x1080px</p>
-                  </label>
-                </div>
-                <input
-                  type="url"
-                  value={settings.heroBackground || ''}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setSettings({...settings, heroBackground: newValue});
-                    saveIndividualSetting('heroBackground', newValue);
-                  }}
-                  className="form-input"
-                  placeholder="Or enter hero background URL"
-                />
-                {settings.heroBackground && (
-                  <div className="mt-3 relative group">
-                    <img
-                      src={settings.heroBackground}
-                      alt="Hero background preview"
-                      className="w-full h-32 object-cover rounded-lg border border-[#faf3e6]"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y5ZmFmYiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM2YjczODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5CYWNrZ3JvdW5kIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=';
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setSettings({...settings, heroBackground: ''})}
-                      className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Section Images */}

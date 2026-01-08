@@ -17,8 +17,6 @@ export default function Hero({ settings }: HeroProps) {
     setIsVisible(true);
   }, []);
 
-  const heroBackground = settings?.heroBackground;
-
   if (!settings) {
     return null; // No content when settings unavailable
   }
@@ -32,57 +30,31 @@ export default function Hero({ settings }: HeroProps) {
   return (
     <section className="hero mt-20">
       {/* Enhanced Background */}
-      {heroBackground ? (
-        <>
-          <Image
-            src={heroBackground}
-            alt={`${settings.companyName || 'Company'} Hero Background`}
-            fill
-            priority
-            quality={90}
-            sizes="100vw"
-            className="object-cover"
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjgiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4="
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40" />
-          {/* Subtle pattern overlay */}
-          <div
-            className="absolute inset-0 opacity-5"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}
-          />
-        </>
-      ) : (
-        <>
-          {/* Premium gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
+      {
+        {/* Premium gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
 
-          {/* Mesh gradient overlay */}
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{
-              background: `
-                radial-gradient(ellipse 200% 100% at 50% 0%, var(--color-primary-100) 0%, transparent 50%),
-                radial-gradient(ellipse 200% 100% at 80% 100%, var(--color-accent-orange-light) 0%, transparent 50%),
-                radial-gradient(ellipse 150% 100% at 20% 100%, var(--color-primary-200) 0%, transparent 50%)
-              `
-            }}
-          />
+        {/* Mesh gradient overlay */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: `
+              radial-gradient(ellipse 200% 100% at 50% 0%, var(--color-primary-100) 0%, transparent 50%),
+              radial-gradient(ellipse 200% 100% at 80% 100%, var(--color-accent-orange-light) 0%, transparent 50%),
+              radial-gradient(ellipse 150% 100% at 20% 100%, var(--color-primary-200) 0%, transparent 50%)
+            `
+          }}
+        />
 
-          {/* Enhanced decorative elements */}
-          <div className="hidden lg:block absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-[var(--color-primary-300)]/20 to-[var(--color-primary-500)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
-          <div className="hidden lg:block absolute bottom-32 left-16 w-96 h-96 bg-gradient-to-tr from-[var(--color-accent-orange)]/15 to-[var(--color-warm-400)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        {/* Enhanced decorative elements */}
+        <div className="hidden lg:block absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-[var(--color-primary-300)]/20 to-[var(--color-primary-500)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
+        <div className="hidden lg:block absolute bottom-32 left-16 w-96 h-96 bg-gradient-to-tr from-[var(--color-accent-orange)]/15 to-[var(--color-warm-400)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
 
-          {/* Floating geometric shapes */}
-          <div className="absolute top-1/4 right-1/5 w-3 h-3 bg-[var(--color-primary-500)] rounded-full animate-float opacity-60" />
-          <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-1/3 left-1/4 w-4 h-4 bg-[var(--color-warm-500)] rounded-full animate-float opacity-50" style={{ animationDelay: '2s' }} />
-          <div className="absolute top-2/3 right-2/3 w-1.5 h-1.5 bg-[var(--color-primary-400)] rounded-full animate-float opacity-80" style={{ animationDelay: '0.5s' }} />
-        </>
-      )}
+        {/* Floating geometric shapes */}
+        <div className="absolute top-1/4 right-1/5 w-3 h-3 bg-[var(--color-primary-500)] rounded-full animate-float opacity-60" />
+        <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-1/3 left-1/4 w-4 h-4 bg-[var(--color-warm-500)] rounded-full animate-float opacity-50" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-2/3 right-2/3 w-1.5 h-1.5 bg-[var(--color-primary-400)] rounded-full animate-float opacity-80" style={{ animationDelay: '0.5s' }} />
 
       <div className="container-xl">
         <div className="hero-content">
@@ -100,11 +72,11 @@ export default function Hero({ settings }: HeroProps) {
               </div>
             )}
 
-            <h1 className={`hero-title ${heroBackground ? 'text-white drop-shadow-lg' : 'text-[var(--color-warm-900)]'}`}>
+            <h1 className="hero-title text-[var(--color-warm-900)]">
               {settings.heroTitle}
             </h1>
 
-            <p className={`hero-subtitle ${heroBackground ? 'text-white/90 drop-shadow-md' : 'text-[var(--color-warm-700)]'}`}>
+            <p className="hero-subtitle text-[var(--color-warm-700)]">
               {settings.heroDescription}
             </p>
 
@@ -143,10 +115,10 @@ export default function Hero({ settings }: HeroProps) {
                         <Icon className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className={`font-display text-2xl font-bold ${heroBackground ? 'text-white drop-shadow-md' : 'text-[var(--color-warm-900)]'}`}>
+                        <div className="font-display text-2xl font-bold text-[var(--color-warm-900)]">
                           {stat.value}
                         </div>
-                        <div className={`text-sm font-medium ${heroBackground ? 'text-white/90' : 'text-[var(--color-warm-600)]'}`}>
+                        <div className="text-sm font-medium text-[var(--color-warm-600)]">
                           {stat.label}
                         </div>
                       </div>
@@ -157,14 +129,14 @@ export default function Hero({ settings }: HeroProps) {
             </div>
           </div>
 
-          {/* Enhanced Image composition */}
+          {/* Enhanced Image composition - 3/4 size, centered on right half */}
           <div
-            className={`relative transition-all duration-1000 delay-300 order-first lg:order-last ${
+            className={`relative transition-all duration-1000 delay-300 order-first lg:order-last lg:flex lg:justify-center lg:items-center ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
             }`}
           >
-            <div className="relative">
-              {/* Main image with enhanced styling */}
+            <div className="relative lg:w-3/4">
+              {/* Main image with enhanced styling - 3/4 size */}
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[var(--color-warm-300)] to-[var(--color-warm-500)] ring-1 ring-white/20">
                 {/* Enhanced image overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
@@ -218,8 +190,8 @@ export default function Hero({ settings }: HeroProps) {
                 />
               </div>
 
-              {/* Enhanced floating rating card */}
-              <div className="absolute -bottom-6 -left-6 lg:-bottom-8 lg:-left-8 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30 ring-1 ring-black/5 hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
+              {/* Enhanced floating rating card - adjusted position for 3/4 size */}
+              <div className="absolute -bottom-6 -left-4 lg:-bottom-8 lg:-left-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30 ring-1 ring-black/5 hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg">
                     <Star className="w-6 h-6 lg:w-7 lg:h-7 text-white fill-white" />
@@ -248,9 +220,7 @@ export default function Hero({ settings }: HeroProps) {
       <div className="absolute bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2">
         <a
           href="#properties"
-          className={`group flex flex-col items-center transition-all duration-300 hover:scale-110 ${
-            heroBackground ? 'text-white/80 hover:text-white' : 'text-[var(--color-warm-600)] hover:text-[var(--color-primary-600)]'
-          }`}
+          className="group flex flex-col items-center transition-all duration-300 hover:scale-110 text-[var(--color-warm-600)] hover:text-[var(--color-primary-600)]"
         >
           <span className="text-sm font-medium mb-3 hidden sm:block group-hover:mb-4 transition-all duration-300">
             {settings.heroScrollText || 'Scroll to explore'}

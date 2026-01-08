@@ -100,7 +100,6 @@ export interface NavigationItem {
 export interface WebsiteSettings {
   logo: string;
   footerLogo: string;
-  heroBackground: string;
   aboutImage: string;
   contactImage: string;
   favicon: string;
