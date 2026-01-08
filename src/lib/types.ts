@@ -13,6 +13,7 @@ export interface Property {
   featured: boolean;
   active: boolean;
   display_order: number;
+  featuredPhotoIndex?: number;
   created_at: string;
   updated_at: string;
 }
