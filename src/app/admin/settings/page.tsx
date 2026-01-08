@@ -9,7 +9,7 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState<WebsiteSettings>({
     logo: '',
     footerLogo: '',
-    aboutImage: ''
+    aboutImage: '',
     contactImage: '',
     favicon: '',
     heroBadgeText: '',

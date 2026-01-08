@@ -30,8 +30,7 @@ export default function Hero({ settings }: HeroProps) {
   return (
     <section className="hero mt-20">
       {/* Enhanced Background */}
-      {
-        {/* Premium gradient background */}
+      {/* Premium gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)]" />
 
         {/* Mesh gradient overlay */}

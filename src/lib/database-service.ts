@@ -303,7 +303,6 @@ class CleanDatabaseService {
     return {
       logo: settingsObj.logo || '',
       footerLogo: settingsObj.footerLogo || '',
-      heroBackground: settingsObj.heroBackground || '',
       aboutImage: settingsObj.aboutImage || '',
       contactImage: settingsObj.contactImage || '',
       favicon: settingsObj.favicon || '',

@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
     const result = {
       logo: settingsObj.logo || '',
       footerLogo: settingsObj.footerLogo || '',
-      heroBackground: settingsObj.heroBackground || '',
       aboutImage: settingsObj.aboutImage || '',
       contactImage: settingsObj.contactImage || '',
       favicon: settingsObj.favicon || '',
