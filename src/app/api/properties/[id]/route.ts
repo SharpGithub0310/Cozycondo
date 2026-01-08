@@ -289,6 +289,41 @@ export async function PUT(
         return handleDatabaseError(updateError);
       }
 
+      // Handle featured photo index updates
+      if (body.featuredPhotoIndex !== undefined && !body.images && !body.photos) {
+        // Get property UUID for photo updates
+        const { data: propData, error: propError } = await adminClient
+          .from('properties')
+          .select('id')
+          .eq('slug', id)
+          .single();
+
+        if (!propError && propData) {
+          // First, set all photos to not primary
+          await adminClient
+            .from('property_photos')
+            .update({ is_primary: false })
+            .eq('property_id', propData.id);
+
+          // Then set the selected photo as primary
+          const { data: photos } = await adminClient
+            .from('property_photos')
+            .select('*')
+            .eq('property_id', propData.id)
+            .order('display_order');
+
+          if (photos && photos.length > 0 && body.featuredPhotoIndex < photos.length) {
+            const targetPhoto = photos[body.featuredPhotoIndex];
+            if (targetPhoto) {
+              await adminClient
+                .from('property_photos')
+                .update({ is_primary: true })
+                .eq('id', targetPhoto.id);
+            }
+          }
+        }
+      }
+
       // Handle photo updates if provided
       if (body.images || body.photos) {
         const photos = body.images || body.photos;

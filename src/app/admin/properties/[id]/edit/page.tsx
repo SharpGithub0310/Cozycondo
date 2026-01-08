@@ -20,7 +20,6 @@ export default function EditProperty() {
     description: '',
     location: '',
     pricePerNight: '',
-    airbnbUrl: '',
     amenities: [] as string[],
     photos: [] as string[],
     featuredPhotoIndex: 0,
@@ -73,7 +72,6 @@ export default function EditProperty() {
             size: '45',
             description: '',
             location: '',
-            airbnbUrl: '',
             amenities: [],
             photos: [],
             featuredPhotoIndex: 0,
@@ -92,7 +90,6 @@ export default function EditProperty() {
           description: propertyData.description || '',
           location: propertyData.location || '',
           pricePerNight: propertyData.pricePerNight || propertyData.price?.toString() || '2500',
-          airbnbUrl: propertyData.airbnbUrl || '',
           amenities: propertyData.amenities || [],  // Ensure amenities is always an array
           photos: propertyData.photos || [],
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
@@ -125,7 +122,6 @@ export default function EditProperty() {
         pricePerNight: property.pricePerNight || '2500', // Include price per night
         description: property.description,
         location: property.location,
-        airbnbUrl: property.airbnbUrl,
         amenities: property.amenities || [],
         featuredPhotoIndex: property.featuredPhotoIndex,
         featured: property.featured || false,
@@ -575,16 +571,6 @@ export default function EditProperty() {
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
               External Links
             </h3>
-            <div>
-              <label className="form-label">Airbnb URL (Optional)</label>
-              <input
-                type="url"
-                value={property.airbnbUrl}
-                onChange={(e) => setProperty({...property, airbnbUrl: e.target.value})}
-                className="form-input"
-                placeholder="https://airbnb.com/rooms/..."
-              />
-            </div>
           </div>
 
           {/* Submit Button */}
