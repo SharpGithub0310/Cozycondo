@@ -13,7 +13,6 @@ import {
   Bath,
   Eye,
   Clock,
-  DollarSign,
   Home,
   Calendar
 } from 'lucide-react';
@@ -167,7 +166,7 @@ export default function PropertyDetail() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-3 gap-4 mt-6">
                 <div className="bg-white/60 rounded-lg p-3 backdrop-blur-sm">
                   <div className="flex items-center gap-2 text-[#7d6349] mb-1">
                     <Bed className="w-4 h-4" />
@@ -189,27 +188,20 @@ export default function PropertyDetail() {
                   </div>
                   <p className="text-xl font-bold text-[#5f4a38]">{property.maxGuests}</p>
                 </div>
-                <div className="bg-white/60 rounded-lg p-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 text-[#7d6349] mb-1">
-                    <DollarSign className="w-4 h-4" />
-                    <span className="text-sm font-medium">Per Night</span>
-                  </div>
-                  <p className="text-xl font-bold text-[#5f4a38]">₱{property.pricePerNight}</p>
-                </div>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
               <button
                 onClick={() => router.push(`/admin/properties/${params.id}/edit`)}
-                className="btn-secondary flex items-center justify-center gap-2 transform transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                className="bg-[#14b8a6] hover:bg-[#0d9488] text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 transform hover:scale-105 hover:shadow-xl font-semibold"
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="w-5 h-5" />
                 Edit Property
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 transform hover:scale-105 hover:shadow-lg"
+                className="bg-white hover:bg-red-50 text-red-600 border-2 border-red-200 hover:border-red-300 px-6 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 transform hover:scale-105 hover:shadow-lg"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete
