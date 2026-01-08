@@ -97,8 +97,8 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 safe-area-top ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-white/20'
-          : 'bg-transparent'
+          ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200'
+          : 'bg-white/90 backdrop-blur-lg shadow-md border-b border-gray-100'
       }`}
     >
       <div className="container-responsive">
@@ -137,11 +137,6 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
               }`}>
                 {settings.siteName || settings.companyName || 'Company'}
               </span>
-              <span className={`text-xs leading-tight font-medium transition-colors duration-300 ${
-                scrolled ? 'text-[var(--color-warm-600)]' : 'text-[var(--color-warm-600)]'
-              }`}>
-                {settings.siteTagline || 'Premium Stays'}
-              </span>
             </div>
           </Link>
 
@@ -156,7 +151,7 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
                   className={`relative px-4 lg:px-5 py-2.5 rounded-xl font-medium transition-all duration-300 touch-target group ${
                     scrolled
                       ? 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-[var(--color-warm-50)]'
-                      : 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-white/10'
+                      : 'text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-[var(--color-warm-50)]'
                   }`}
                 >
                   <span className="relative z-10">{item.name}</span>
@@ -186,7 +181,7 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
             className={`md:hidden relative p-2.5 rounded-xl transition-all duration-300 touch-target group ${
               scrolled
                 ? 'text-[var(--color-warm-700)] hover:bg-[var(--color-warm-100)]'
-                : 'text-[var(--color-warm-700)] hover:bg-white/10'
+                : 'text-[var(--color-warm-700)] hover:bg-[var(--color-warm-100)]'
             }`}
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
           >

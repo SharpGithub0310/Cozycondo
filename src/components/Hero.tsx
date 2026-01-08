@@ -30,7 +30,7 @@ export default function Hero({ settings }: HeroProps) {
   ];
 
   return (
-    <section className="hero">
+    <section className="hero mt-20">
       {/* Enhanced Background */}
       {heroBackground ? (
         <>
@@ -94,7 +94,7 @@ export default function Hero({ settings }: HeroProps) {
           >
             {/* Enhanced Badge */}
             {settings.heroBadgeText && (
-              <div className="hero-badge mb-8">
+              <div className="hero-badge mb-8 mt-12">
                 <div className="hero-badge-dot" />
                 <span>{settings.heroBadgeText}</span>
               </div>
