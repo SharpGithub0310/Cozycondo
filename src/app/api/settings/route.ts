@@ -75,6 +75,22 @@ export async function GET(request: NextRequest) {
       settingsObj[camelKey] = setting.setting_value || '';
     });
 
+    // Parse FAQs if it exists
+    let faqs = [];
+    if (settingsObj.faqs) {
+      try {
+        faqs = typeof settingsObj.faqs === 'string'
+          ? JSON.parse(settingsObj.faqs)
+          : settingsObj.faqs;
+        if (!Array.isArray(faqs)) {
+          faqs = [];
+        }
+      } catch (e) {
+        console.error('Error parsing FAQs:', e);
+        faqs = [];
+      }
+    }
+
     // Ensure all required fields exist with defaults for backward compatibility
     const result = {
       logo: settingsObj.logo || '',
@@ -107,6 +123,7 @@ export async function GET(request: NextRequest) {
       checkoutTime: settingsObj.checkoutTime || '',
       timezone: settingsObj.timezone || '',
       currency: settingsObj.currency || '',
+      faqs: faqs,
       updatedAt: new Date().toISOString()
     };
 
@@ -161,12 +178,17 @@ export async function POST(request: NextRequest) {
         const { key, value, type, description, category } = body;
 
         // Upsert setting
+        const settingType = type || detectSettingType(value);
+        const settingValue = (settingType === 'array' || settingType === 'object')
+          ? JSON.stringify(value)
+          : String(value || '');
+
         const { error } = await adminClient
           .from('website_settings')
           .upsert({
             setting_key: key,
-            setting_value: String(value || ''),
-            setting_type: type || detectSettingType(value),
+            setting_value: settingValue,
+            setting_type: settingType,
             description: description || null,
             category: category || getCategoryForKey(key),
             updated_at: new Date().toISOString()
@@ -195,10 +217,15 @@ export async function POST(request: NextRequest) {
         // Convert camelCase to snake_case and prepare for batch update
         const settingsArray = Object.entries(settings).map(([key, value]) => {
           const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+          const settingType = detectSettingType(value);
+          const settingValue = (settingType === 'array' || settingType === 'object')
+            ? JSON.stringify(value)
+            : String(value || '');
+
           return {
             setting_key: snakeKey,
-            setting_value: String(value || ''),
-            setting_type: 'text', // Default type for legacy format
+            setting_value: settingValue,
+            setting_type: settingType,
             category: getCategoryForKey(snakeKey),
             updated_at: new Date().toISOString()
           };
@@ -262,5 +289,6 @@ function getCategoryForKey(key: string): string {
   if (key.includes('phone') || key.includes('email') || key.includes('address')) return 'contact';
   if (key.includes('facebook') || key.includes('messenger') || key.includes('social')) return 'social';
   if (key.includes('featured_') || key.includes('highly_rated_')) return 'sections';
+  if (key === 'faqs') return 'content';
   return 'general';
 }
