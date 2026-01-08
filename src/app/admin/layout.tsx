@@ -13,6 +13,9 @@ import {
   Menu,
   X,
   ChevronRight,
+  Globe,
+  Bell,
+  User,
 } from 'lucide-react';
 
 const navigation = [
@@ -72,12 +75,12 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[color:var(--color-warm-50)] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--color-primary-500)] flex items-center justify-center animate-pulse">
-            <span className="text-[color:var(--color-white)] font-display text-xl font-bold">CC</span>
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center animate-pulse shadow-lg">
+            <span className="text-white font-display text-2xl font-bold">CC</span>
           </div>
-          <p className="text-[color:var(--color-warm-700)]">Loading...</p>
+          <p className="text-slate-600 font-medium">Loading admin panel...</p>
         </div>
       </div>
     );
@@ -88,121 +91,136 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--color-warm-50)]">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="admin-layout">
+      {/* Mobile sidebar overlay */}
+      <div
+        className={`admin-overlay ${sidebarOpen ? 'admin-overlay-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[color:var(--color-warm-900)] transform transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-between h-20 px-6 border-b border-[color:var(--color-warm-700)]">
-            <Link href="/admin" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-[color:var(--color-primary-500)] to-[color:var(--color-primary-600)] flex items-center justify-center">
+      {/* Sidebar - Now properly positioned */}
+      <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar-open' : ''}`}>
+        <div className="admin-sidebar-content">
+          {/* Logo Section */}
+          <div className="admin-sidebar-header">
+            <Link href="/admin" className="admin-logo">
+              <div className="admin-logo-icon">
                 {logoUrl ? (
                   <img
                     src={logoUrl}
                     alt="Logo"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Fallback to default if logo fails to load
-                      e.currentTarget.style.display = 'none';
-                      const parent = e.currentTarget.parentElement;
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
                       if (parent) {
-                        parent.innerHTML = '<span class="text-[color:var(--color-white)] font-display font-bold">CC</span>';
+                        parent.innerHTML = '<span class="text-white font-display font-bold text-lg">CC</span>';
                       }
                     }}
                   />
                 ) : (
-                  <span className="text-[color:var(--color-white)] font-display font-bold">CC</span>
+                  <span className="text-white font-display font-bold text-lg">CC</span>
                 )}
               </div>
-              <div>
-                <span className="font-display text-lg font-semibold text-[color:var(--color-white)]">Admin</span>
-                <span className="block text-xs text-[color:var(--color-warm-500)]">{settings?.companyName || 'Cozy Condo'}</span>
+              <div className="admin-logo-text">
+                <span className="admin-logo-title">Admin Panel</span>
+                <span className="admin-logo-subtitle">{settings?.companyName || 'Cozy Condo'}</span>
               </div>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 text-[color:var(--color-warm-500)] hover:text-[color:var(--color-white)]"
+              className="admin-sidebar-close"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || 
-                (item.href !== '/admin' && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-[color:var(--color-primary-500)] text-[color:var(--color-white)]'
-                      : 'text-[color:var(--color-warm-500)] hover:bg-[color:var(--color-warm-700)] hover:text-[color:var(--color-white)]'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
-                </Link>
-              );
-            })}
+          <nav className="admin-nav">
+            <div className="admin-nav-section">
+              <span className="admin-nav-title">Main</span>
+              <div className="admin-nav-items">
+                {navigation.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href ||
+                    (item.href !== '/admin' && pathname.startsWith(item.href));
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`admin-nav-item ${isActive ? 'admin-nav-item-active' : ''}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.name}</span>
+                      {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </nav>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-[color:var(--color-warm-700)]">
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-[color:var(--color-warm-500)] hover:bg-[color:var(--color-warm-700)] hover:text-[color:var(--color-white)] transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Logout</span>
-            </button>
+          {/* Sidebar Footer */}
+          <div className="admin-sidebar-footer">
             <Link
               href="/"
               target="_blank"
-              className="flex items-center gap-3 mt-2 px-4 py-3 rounded-lg text-[color:var(--color-warm-500)] hover:bg-[color:var(--color-warm-700)] hover:text-[color:var(--color-white)] transition-colors text-sm"
+              className="admin-sidebar-action"
             >
-              <span>View Website →</span>
+              <Globe className="w-5 h-5" />
+              <span>View Website</span>
             </Link>
+            <button
+              onClick={handleLogout}
+              className="admin-sidebar-action admin-sidebar-action-danger"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="lg:ml-64">
+      {/* Main content area - Fixed positioning */}
+      <div className="admin-main">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-[color:var(--color-white)] border-b border-[color:var(--color-warm-200)]">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-[color:var(--color-warm-700)] hover:text-[color:var(--color-warm-900)]"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-            <div className="flex items-center gap-4 ml-auto">
-              <span className="text-sm text-[color:var(--color-warm-700)]">Welcome, Admin</span>
+        <header className="admin-header">
+          <div className="admin-header-content">
+            <div className="admin-header-left">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="admin-menu-toggle"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <div className="admin-breadcrumb">
+                <span className="admin-breadcrumb-item">
+                  {navigation.find(item =>
+                    pathname === item.href ||
+                    (item.href !== '/admin' && pathname.startsWith(item.href))
+                  )?.name || 'Dashboard'}
+                </span>
+              </div>
+            </div>
+            <div className="admin-header-right">
+              <button className="admin-header-action">
+                <Bell className="w-5 h-5" />
+                <span className="admin-notification-badge">2</span>
+              </button>
+              <div className="admin-user-menu">
+                <div className="admin-user-avatar">
+                  <User className="w-4 h-4" />
+                </div>
+                <span className="admin-user-name">Admin</span>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="admin-content">
           {children}
         </main>
       </div>
@@ -210,7 +228,7 @@ export default function AdminLayout({
   );
 }
 
-// Login Form Component
+// Login Form Component - Modernized Design
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -224,7 +242,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
     // Simple password check (in production, use proper authentication)
     // Default password is "cozy2024" - change in production!
     const validPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'cozy2024';
-    
+
     if (password === validPassword) {
       localStorage.setItem('cozy_admin_session', 'authenticated');
       onLogin();
@@ -235,24 +253,24 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[color:var(--color-warm-50)] via-[color:var(--color-warm-100)] to-[color:var(--color-warm-300)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-[color:var(--color-white)] rounded-2xl shadow-[var(--shadow-xl)] p-8">
+        <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/60 p-8 backdrop-blur-sm">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-[color:var(--color-primary-500)] to-[color:var(--color-primary-600)] flex items-center justify-center">
-              <span className="text-[color:var(--color-white)] font-display text-2xl font-bold">CC</span>
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
+              <span className="text-white font-display text-3xl font-bold">CC</span>
             </div>
-            <h1 className="font-display text-2xl font-semibold text-[color:var(--color-warm-900)]">
-              Admin Login
+            <h1 className="font-display text-3xl font-bold text-slate-800 mb-2">
+              Admin Panel
             </h1>
-            <p className="text-[color:var(--color-warm-600)] mt-1">Cozy Condo Management</p>
+            <p className="text-slate-600">Cozy Condo Management System</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="password" className="form-label">
+              <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
                 Password
               </label>
               <input
@@ -260,14 +278,14 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-input"
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none transition-all duration-200"
                 placeholder="Enter admin password"
                 required
               />
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-[color:var(--color-red-50)] text-[color:var(--color-red-600)] text-sm">
+              <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
                 {error}
               </div>
             )}
@@ -275,17 +293,28 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary py-fluid-sm disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Logging in...
+                </div>
+              ) : (
+                'Access Admin Panel'
+              )}
             </button>
           </form>
 
-          <p className="text-center text-sm text-[color:var(--color-warm-600)] mt-6">
-            <Link href="/" className="text-[color:var(--color-primary-600)] hover:underline">
-              ← Back to Website
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <Link
+              href="/"
+              className="flex items-center justify-center gap-2 text-slate-600 hover:text-blue-600 transition-colors font-medium"
+            >
+              <Globe className="w-4 h-4" />
+              Back to Website
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

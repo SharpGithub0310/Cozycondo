@@ -13,7 +13,8 @@ import {
   Eye,
   ArrowRight,
   Terminal,
-  BarChart3
+  BarChart3,
+  HelpCircle
 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import { SimpleAnalytics, type VisitorStats } from '@/lib/analytics';
@@ -125,32 +126,44 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="admin-dashboard">
       {/* Page Header */}
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-[color:var(--color-warm-900)]">Dashboard</h1>
-        <p className="text-[color:var(--color-warm-700)] mt-1">Welcome back! Here&apos;s an overview of your business.</p>
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Dashboard</h1>
+          <p className="admin-page-subtitle">Welcome back! Here's an overview of your business performance.</p>
+        </div>
+        <div className="admin-page-actions">
+          <Link href="/admin/properties/new" className="admin-btn admin-btn-primary">
+            <Building2 className="w-4 h-4" />
+            Add Property
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="admin-stats-grid">
         {statsArray.map((stat) => {
           const Icon = stat.icon;
           return (
             <Link
               key={stat.name}
               href={stat.href}
-              className="admin-card hover:shadow-lg transition-shadow group"
+              className="admin-stat-card"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-[color:var(--color-warm-600)]">{stat.name}</p>
-                  <p className="font-display text-3xl font-semibold text-[color:var(--color-warm-900)] mt-1">
+              <div className="admin-stat-content">
+                <div className="admin-stat-info">
+                  <p className="admin-stat-label">{stat.name}</p>
+                  <p className="admin-stat-value">
                     {stat.value}
                   </p>
+                  <div className="admin-stat-change">
+                    <TrendingUp className="w-3 h-3" />
+                    <span>+12% from last month</span>
+                  </div>
                 </div>
-                <div className={`${stat.color} p-3 rounded-xl group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-6 h-6 text-white" />
+                <div className="admin-stat-icon" style={{ background: stat.color }}>
+                  <Icon className="w-6 h-6" />
                 </div>
               </div>
             </Link>
@@ -158,158 +171,158 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      {/* Dashboard Grid Layout */}
+      <div className="admin-dashboard-grid">
         {/* Quick Actions */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="admin-dashboard-main">
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
-              Quick Actions
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">Quick Actions</h2>
+              <p className="admin-card-subtitle">Common tasks and shortcuts</p>
+            </div>
+            <div className="admin-quick-actions">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
                   <Link
                     key={action.name}
                     href={action.href}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-[color:var(--color-warm-200)] hover:bg-[color:var(--color-warm-300)] transition-colors group"
+                    className="admin-quick-action"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                      <Icon className="w-5 h-5 text-[color:var(--color-primary-500)]" />
+                    <div className="admin-quick-action-icon">
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <span className="font-medium text-[color:var(--color-warm-900)] group-hover:text-[color:var(--color-primary-600)] transition-colors">
-                      {action.name}
-                    </span>
-                    <ArrowRight className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto group-hover:translate-x-1 transition-transform" />
+                    <div className="admin-quick-action-content">
+                      <span className="admin-quick-action-title">{action.name}</span>
+                      <span className="admin-quick-action-desc">
+                        {action.name === 'Add Property' && 'Create new rental listing'}
+                        {action.name === 'New Blog Post' && 'Write and publish content'}
+                        {action.name === 'Update Settings' && 'Configure site options'}
+                        {action.name === 'Admin Console' && 'System management'}
+                      </span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 admin-quick-action-arrow" />
                   </Link>
                 );
               })}
             </div>
           </div>
 
+          {/* Recent Activity */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">Recent Activity</h2>
+              <p className="admin-card-subtitle">Latest system events and changes</p>
+            </div>
+            <div className="admin-activity-list">
+              {recentActivities.map((activity, index) => (
+                <div key={index} className="admin-activity-item">
+                  <div className={`admin-activity-dot ${activity.type === 'system' ? 'admin-activity-dot-blue' : 'admin-activity-dot-green'}`} />
+                  <div className="admin-activity-content">
+                    <p className="admin-activity-text">{activity.action}</p>
+                    <p className="admin-activity-time">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard Sidebar */}
+        <div className="admin-dashboard-sidebar">
           {/* External Links */}
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
-              External Links
-            </h2>
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">Quick Links</h2>
+              <p className="admin-card-subtitle">External platforms and tools</p>
+            </div>
+            <div className="admin-external-links">
               <a
                 href="https://www.facebook.com/cozycondoiloilocity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 rounded-xl border border-[color:var(--color-warm-200)] hover:border-[color:var(--color-primary-500)]/30 hover:shadow-md transition-all"
+                className="admin-external-link"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#1877F2] flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-white" />
+                <div className="admin-external-icon" style={{ backgroundColor: '#1877F2' }}>
+                  <MessageCircle className="w-4 h-4" />
                 </div>
-                <div>
-                  <span className="font-medium text-[color:var(--color-warm-900)] block">Facebook</span>
-                  <span className="text-xs text-[color:var(--color-warm-600)]">View Page</span>
+                <div className="admin-external-content">
+                  <span className="admin-external-title">Facebook</span>
+                  <span className="admin-external-desc">Manage social media</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto" />
+                <ExternalLink className="w-4 h-4 admin-external-arrow" />
               </a>
 
               <a
                 href="https://airbnb.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 rounded-xl border border-[color:var(--color-warm-200)] hover:border-[color:var(--color-primary-500)]/30 hover:shadow-md transition-all"
+                className="admin-external-link"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#FF5A5F] flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-white" />
+                <div className="admin-external-icon" style={{ backgroundColor: '#FF5A5F' }}>
+                  <Building2 className="w-4 h-4" />
                 </div>
-                <div>
-                  <span className="font-medium text-[color:var(--color-warm-900)] block">Airbnb</span>
-                  <span className="text-xs text-[color:var(--color-warm-600)]">Manage Listings</span>
+                <div className="admin-external-content">
+                  <span className="admin-external-title">Airbnb</span>
+                  <span className="admin-external-desc">Manage listings</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto" />
+                <ExternalLink className="w-4 h-4 admin-external-arrow" />
               </a>
 
               <a
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 rounded-xl border border-[color:var(--color-warm-200)] hover:border-[color:var(--color-primary-500)]/30 hover:shadow-md transition-all"
+                className="admin-external-link"
               >
-                <div className="w-10 h-10 rounded-lg bg-[color:var(--color-primary-500)] flex items-center justify-center">
-                  <Eye className="w-5 h-5 text-white" />
+                <div className="admin-external-icon" style={{ backgroundColor: '#3b82f6' }}>
+                  <Eye className="w-4 h-4" />
                 </div>
-                <div>
-                  <span className="font-medium text-[color:var(--color-warm-900)] block">Website</span>
-                  <span className="text-xs text-[color:var(--color-warm-600)]">View Live</span>
+                <div className="admin-external-content">
+                  <span className="admin-external-title">Live Website</span>
+                  <span className="admin-external-desc">View public site</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-[color:var(--color-warm-600)] ml-auto" />
+                <ExternalLink className="w-4 h-4 admin-external-arrow" />
               </a>
             </div>
           </div>
-        </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Contact Info Card */}
+          {/* Contact Info */}
           <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
-              Contact Info
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <Phone className="w-4 h-4 text-[color:var(--color-primary-500)]" />
-                <span className="text-[color:var(--color-warm-700)]">+63 977 887 0724</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <MessageCircle className="w-4 h-4 text-[color:var(--color-primary-500)]" />
-                <span className="text-[color:var(--color-warm-700)]">admin@cozycondo.net</span>
-              </div>
+            <div className="admin-card-header">
+              <h2 className="admin-card-title">Contact Information</h2>
+              <Link href="/admin/settings" className="admin-card-action">
+                Edit Settings
+                <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
-            <Link
-              href="/admin/settings"
-              className="inline-flex items-center gap-1 text-[color:var(--color-primary-600)] text-sm font-medium mt-4 hover:underline"
-            >
-              Edit in Settings
-              <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="admin-card">
-            <h2 className="font-display text-lg font-semibold text-[color:var(--color-warm-900)] mb-4">
-              Recent Activity
-            </h2>
-            <div className="space-y-3">
-              {recentActivities.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 text-sm"
-                >
-                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                    activity.type === 'system' ? 'bg-[color:var(--color-primary-500)]' : 'bg-[color:var(--color-accent-orange)]'
-                  }`} />
-                  <div>
-                    <p className="text-[color:var(--color-warm-900)]">{activity.action}</p>
-                    <p className="text-xs text-[color:var(--color-warm-600)]">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="admin-contact-info">
+              <div className="admin-contact-item">
+                <Phone className="w-4 h-4" />
+                <span>+63 977 887 0724</span>
+              </div>
+              <div className="admin-contact-item">
+                <MessageCircle className="w-4 h-4" />
+                <span>admin@cozycondo.net</span>
+              </div>
             </div>
           </div>
 
           {/* Help Card */}
-          <div className="admin-card bg-gradient-to-br from-[color:var(--color-primary-500)] to-[color:var(--color-primary-600)] text-white">
-            <h2 className="font-display text-lg font-semibold mb-2">
-              Need Help?
-            </h2>
-            <p className="text-sm text-white/80 mb-4">
-              This admin panel lets you manage your properties, blog posts, and site settings.
-            </p>
-            <div className="text-sm">
-              <p className="font-medium mb-1">Quick Tips:</p>
-              <ul className="text-white/80 space-y-1">
-                <li>• Upload high-quality property photos</li>
-                <li>• Manage property amenities and photos</li>
-                <li>• Update contact info in Settings</li>
-              </ul>
+          <div className="admin-help-card">
+            <div className="admin-help-header">
+              <HelpCircle className="w-6 h-6" />
+              <h3 className="admin-help-title">Getting Started</h3>
             </div>
+            <p className="admin-help-text">
+              Welcome to your admin panel! Manage properties, create content, and configure settings.
+            </p>
+            <ul className="admin-help-list">
+              <li>Add property listings with photos</li>
+              <li>Create engaging blog content</li>
+              <li>Update site settings and contact info</li>
+              <li>Monitor visitor analytics</li>
+            </ul>
           </div>
         </div>
       </div>
