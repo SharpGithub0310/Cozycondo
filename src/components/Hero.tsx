@@ -97,34 +97,36 @@ export default function Hero({ settings }: HeroProps) {
               )}
             </div>
 
-            {/* Enhanced Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8">
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <div
-                    key={index}
-                    className={`group transition-all duration-700 ${
-                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
-                    }`}
-                    style={{ transitionDelay: `${(index + 2) * 150}ms` }}
-                  >
-                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-display text-2xl font-bold text-[var(--color-warm-900)]">
-                          {stat.value}
+            {/* Enhanced Stats - 1/5 size, centered on left half */}
+            <div className="lg:absolute lg:left-1/4 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2 lg:gap-3">
+                {stats.map((stat, index) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div
+                      key={index}
+                      className={`group transition-all duration-700 ${
+                        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
+                      }`}
+                      style={{ transitionDelay: `${(index + 2) * 150}ms` }}
+                    >
+                      <div className="flex items-center gap-2 p-2 lg:p-1 rounded-lg bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300">
+                        <div className="w-6 h-6 lg:w-4 lg:h-4 rounded-md bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          <Icon className="w-3 h-3 lg:w-2 lg:h-2 text-white" />
                         </div>
-                        <div className="text-sm font-medium text-[var(--color-warm-600)]">
-                          {stat.label}
+                        <div>
+                          <div className="font-display text-sm lg:text-xs font-bold text-[var(--color-warm-900)]">
+                            {stat.value}
+                          </div>
+                          <div className="text-xs lg:text-[10px] font-medium text-[var(--color-warm-600)]">
+                            {stat.label}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -189,8 +191,8 @@ export default function Hero({ settings }: HeroProps) {
                 />
               </div>
 
-              {/* Enhanced floating rating card - adjusted position for 3/4 size */}
-              <div className="absolute -bottom-6 -left-4 lg:-bottom-8 lg:-left-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30 ring-1 ring-black/5 hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
+              {/* Enhanced floating rating card - bottom left of hero photo */}
+              <div className="absolute bottom-4 left-4 lg:bottom-6 lg:left-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30 ring-1 ring-black/5 hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg">
                     <Star className="w-6 h-6 lg:w-7 lg:h-7 text-white fill-white" />
