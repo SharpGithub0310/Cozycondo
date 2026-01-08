@@ -13,7 +13,7 @@ import {
   Clock,
   MoreVertical
 } from 'lucide-react';
-import { getAllBlogPosts, deleteBlogPost, updateBlogPost } from '@/utils/blogStorageSupabase';
+// Blog posts are now fetched via API endpoints
 
 const categories = ['All', 'General', 'Travel Tips', 'Local Guide', 'Property Updates', 'Guest Stories', 'News'];
 
@@ -25,8 +25,14 @@ export default function BlogAdminPage() {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const blogPosts = await getAllBlogPosts();
+        // Use API endpoint instead of direct Supabase call
+        const response = await fetch('/api/blog');
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog posts');
+        }
+        const blogPosts = await response.json();
         setPosts(blogPosts);
+        console.log('Loaded blog posts in admin:', blogPosts.length);
       } catch (error) {
         console.error('Error loading blog posts:', error);
         setPosts([]);
@@ -46,9 +52,25 @@ export default function BlogAdminPage() {
     const post = posts.find(p => p.id === id);
     if (post) {
       try {
-        await updateBlogPost(id, { published: !post.published });
-        const updatedPosts = await getAllBlogPosts();
-        setPosts(updatedPosts);
+        // Use API endpoint instead of direct Supabase call
+        const response = await fetch(`/api/blog/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...post, published: !post.published }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update post');
+        }
+
+        // Refresh the posts list
+        const refreshResponse = await fetch('/api/blog');
+        if (refreshResponse.ok) {
+          const updatedPosts = await refreshResponse.json();
+          setPosts(updatedPosts);
+        }
       } catch (error) {
         console.error('Error toggling publish status:', error);
         alert('Failed to update post. Please try again.');
@@ -59,9 +81,21 @@ export default function BlogAdminPage() {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this post?')) {
       try {
-        await deleteBlogPost(id);
-        const updatedPosts = await getAllBlogPosts();
-        setPosts(updatedPosts);
+        // Use API endpoint instead of direct Supabase call
+        const response = await fetch(`/api/blog/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete post');
+        }
+
+        // Refresh the posts list
+        const refreshResponse = await fetch('/api/blog');
+        if (refreshResponse.ok) {
+          const updatedPosts = await refreshResponse.json();
+          setPosts(updatedPosts);
+        }
       } catch (error) {
         console.error('Error deleting post:', error);
         alert('Failed to delete post. Please try again.');

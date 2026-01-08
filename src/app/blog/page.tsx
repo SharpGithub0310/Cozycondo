@@ -361,7 +361,7 @@ export default function BlogPage() {
               <div className={`${
                 viewMode === 'grid'
                   ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-8'
-                  : 'space-y-6'
+                  : 'space-y-8'
               }`}>
                 {regularPosts.map((post) => (
                   viewMode === 'grid' ? (

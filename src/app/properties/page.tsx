@@ -240,8 +240,6 @@ export default async function PropertiesPage() {
             <div className="flex items-center gap-4">
               <select className="px-4 py-3 rounded-xl border border-[var(--color-warm-200)] bg-white text-[var(--color-warm-700)] font-medium focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-100)] transition-all">
                 <option>Sort by: Featured</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
                 <option>Newest First</option>
                 <option>Most Popular</option>
               </select>
@@ -390,17 +388,6 @@ function PremiumPropertyCard({ property, priority = false, animationDelay = 0 }:
           </div>
         )}
 
-        {/* Price Badge */}
-        {property.pricePerNight && (
-          <div className="absolute top-4 right-4 z-20">
-            <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-              <div className="text-sm font-bold text-[var(--color-primary-600)]">
-                {property.pricePerNight}
-              </div>
-              <div className="text-xs text-[var(--color-warm-600)] text-center">per night</div>
-            </div>
-          </div>
-        )}
 
         {/* Interactive Overlay with CTA */}
         <div className="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-all duration-400 transform translate-y-2 group-hover:translate-y-0">
