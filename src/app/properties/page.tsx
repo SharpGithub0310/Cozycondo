@@ -348,7 +348,16 @@ function PremiumPropertyCard({ property, priority = false, animationDelay = 0 }:
   priority?: boolean;
   animationDelay?: number;
 }) {
-  const imageUrl = property.photos?.[0] || (property as any).images?.[0] || (property as any).image_url || '/property-placeholder.jpg';
+  // Get the featured photo based on featuredPhotoIndex, fallback to first photo
+  const getFeaturedPhoto = () => {
+    const photos = property.photos || (property as any).images || [];
+    if (photos.length === 0) return '/property-placeholder.jpg';
+
+    const featuredIndex = property.featuredPhotoIndex || 0;
+    return photos[featuredIndex] || photos[0] || '/property-placeholder.jpg';
+  };
+
+  const imageUrl = getFeaturedPhoto();
   const amenityIcons: Record<string, any> = {
     'WiFi': Wifi,
     'Parking': Car,

@@ -21,7 +21,20 @@ interface PropertyCardProps {
 export default function PropertyCard({ property, photos = [] }: PropertyCardProps) {
   const [imageError, setImageError] = useState(false);
 
-  const primaryPhoto = photos.find(p => p.is_primary) || photos[0];
+  // Get the featured photo based on featuredPhotoIndex or find the primary photo
+  const getFeaturedPhoto = () => {
+    if (photos.length === 0) return null;
+
+    // If property has featuredPhotoIndex, use that
+    if (property.featuredPhotoIndex !== undefined && property.featuredPhotoIndex < photos.length) {
+      return photos[property.featuredPhotoIndex];
+    }
+
+    // Fallback to finding primary photo or first photo
+    return photos.find(p => p.is_primary) || photos[0];
+  };
+
+  const primaryPhoto = getFeaturedPhoto();
   const displayAmenities = property.amenities?.slice(0, 3) || [];
 
   return (
