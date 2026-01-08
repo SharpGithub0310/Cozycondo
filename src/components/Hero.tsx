@@ -92,7 +92,7 @@ export default function Hero({ settings }: HeroProps) {
               )}
             </div>
 
-            {/* Enhanced Stats - Under buttons */}
+            {/* Enhanced Stats - Under buttons - uniform size */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
@@ -104,15 +104,15 @@ export default function Hero({ settings }: HeroProps) {
                     }`}
                     style={{ transitionDelay: `${(index + 2) * 150}ms` }}
                   >
-                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300 h-20 min-w-0">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                         <Icon className="w-6 h-6 text-white" />
                       </div>
-                      <div>
-                        <div className="font-display text-2xl font-bold text-[var(--color-warm-900)]">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display text-2xl font-bold text-[var(--color-warm-900)] truncate">
                           {stat.value}
                         </div>
-                        <div className="text-sm font-medium text-[var(--color-warm-600)]">
+                        <div className="text-sm font-medium text-[var(--color-warm-600)] truncate">
                           {stat.label}
                         </div>
                       </div>
@@ -201,10 +201,6 @@ export default function Hero({ settings }: HeroProps) {
                 </div>
               </div>
 
-              {/* Enhanced decorative elements */}
-              <div className="absolute -top-8 -right-8 w-24 h-24 lg:w-40 lg:h-40 bg-gradient-to-br from-[var(--color-primary-400)]/30 to-[var(--color-primary-600)]/20 rounded-full blur-2xl animate-pulse" />
-              <div className="absolute top-1/4 -right-4 w-3 h-3 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
-              <div className="absolute bottom-1/4 -left-2 w-2 h-2 bg-[var(--color-primary-400)] rounded-full animate-float opacity-60" style={{ animationDelay: '2s' }} />
             </div>
           </div>
         </div>

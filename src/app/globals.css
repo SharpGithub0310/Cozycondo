@@ -885,6 +885,10 @@ select.form-input {
 
 .container-xl {
   max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .container-2xl {
