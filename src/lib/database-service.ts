@@ -299,6 +299,22 @@ class CleanDatabaseService {
       settingsObj[camelKey] = setting.setting_value || '';
     });
 
+    // Parse FAQs if it exists
+    let faqs = [];
+    if (settingsObj.faqs) {
+      try {
+        faqs = typeof settingsObj.faqs === 'string'
+          ? JSON.parse(settingsObj.faqs)
+          : settingsObj.faqs;
+        if (!Array.isArray(faqs)) {
+          faqs = [];
+        }
+      } catch (e) {
+        console.error('Error parsing FAQs:', e);
+        faqs = [];
+      }
+    }
+
     // Ensure all required fields exist with defaults
     return {
       logo: settingsObj.logo || '',
@@ -331,7 +347,7 @@ class CleanDatabaseService {
       checkoutTime: settingsObj.checkoutTime || '',
       timezone: settingsObj.timezone || '',
       currency: settingsObj.currency || '',
-      faqs: settingsObj.faqs || [],
+      faqs: faqs,
       companyName: settingsObj.companyName || '',
       updatedAt: new Date().toISOString()
     };
