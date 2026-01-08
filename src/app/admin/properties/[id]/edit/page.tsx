@@ -19,7 +19,6 @@ export default function EditProperty() {
     size: '',
     description: '',
     location: '',
-    pricePerNight: '',
     airbnbUrl: '',
     amenities: [] as string[],
     photos: [] as string[],
@@ -70,10 +69,9 @@ export default function EditProperty() {
             bedrooms: 1,
             bathrooms: 1,
             maxGuests: 2,
-            size: '',
+            size: '45',
             description: '',
             location: '',
-            pricePerNight: '',
             airbnbUrl: '',
             amenities: [],
             photos: [],
@@ -89,10 +87,9 @@ export default function EditProperty() {
           bedrooms: propertyData.bedrooms || 1,
           bathrooms: propertyData.bathrooms || 1,
           maxGuests: propertyData.maxGuests || 2,
-          size: propertyData.size || 0,
+          size: propertyData.size || '45',
           description: propertyData.description || '',
           location: propertyData.location || '',
-          pricePerNight: propertyData.pricePerNight || '',
           airbnbUrl: propertyData.airbnbUrl || '',
           amenities: propertyData.amenities || [],  // Ensure amenities is always an array
           photos: propertyData.photos || [],
@@ -116,25 +113,27 @@ export default function EditProperty() {
 
     try {
       // Save to database via API - only send fields that exist in database
-      const priceValue = parseFloat(property.pricePerNight) || 0;
-
-      const propertyData = {
+      const propertyData: any = {
         name: property.name,
         type: property.type,
         bedrooms: property.bedrooms,
         bathrooms: property.bathrooms,
         maxGuests: property.maxGuests,
-        size: property.size, // This gets mapped to size_sqm in API
+        area: parseFloat(property.size) || 45, // Keep area field mapped to size_sqm
         description: property.description,
         location: property.location,
-        pricePerNight: priceValue > 0 ? priceValue : 1500, // This gets mapped to price_per_night
         airbnbUrl: property.airbnbUrl,
         amenities: property.amenities || [],
-        photos: property.photos,
         featuredPhotoIndex: property.featuredPhotoIndex,
         featured: property.featured || false,
         active: property.active !== false,
       };
+
+      // Only include photos if they're changed (not empty or default)
+      // Don't send photos: [] as it will delete all existing photos
+      if (property.photos && property.photos.length > 0) {
+        propertyData.photos = property.photos;
+      }
 
       // Use API endpoint instead of direct database call to avoid ambiguous column error
       const response = await fetch(`/api/properties/${params.id}`, {
@@ -321,16 +320,6 @@ export default function EditProperty() {
                 />
               </div>
 
-              <div>
-                <label className="form-label">Price per Night (PHP)</label>
-                <input
-                  type="number"
-                  value={property.pricePerNight}
-                  onChange={(e) => setProperty({...property, pricePerNight: e.target.value})}
-                  className="form-input"
-                  placeholder="e.g., 2500"
-                />
-              </div>
             </div>
           </div>
 

@@ -253,7 +253,7 @@ export async function PUT(
             dbUpdates.featured_photo_index = value;
             break;
           case 'size':
-          case 'area':
+          case 'area': // Map area field to size_sqm database column
             dbUpdates.size_sqm = value;
             break;
           case 'name':
