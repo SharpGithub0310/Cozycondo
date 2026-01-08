@@ -49,17 +49,12 @@ export default function Hero({ settings }: HeroProps) {
         <div className="hidden lg:block absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-[var(--color-primary-300)]/20 to-[var(--color-primary-500)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
         <div className="hidden lg:block absolute bottom-32 left-16 w-96 h-96 bg-gradient-to-tr from-[var(--color-accent-orange)]/15 to-[var(--color-warm-400)]/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
 
-        {/* Floating geometric shapes */}
-        <div className="absolute top-1/4 right-1/5 w-3 h-3 bg-[var(--color-primary-500)] rounded-full animate-float opacity-60" />
-        <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-[var(--color-accent-orange)] rounded-full animate-float opacity-70" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-1/3 left-1/4 w-4 h-4 bg-[var(--color-warm-500)] rounded-full animate-float opacity-50" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-2/3 right-2/3 w-1.5 h-1.5 bg-[var(--color-primary-400)] rounded-full animate-float opacity-80" style={{ animationDelay: '0.5s' }} />
 
       <div className="container-xl">
-        <div className="hero-content">
-          {/* Enhanced Text content */}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-[80vh]">
+          {/* Enhanced Text content - Left half centered */}
           <div
-            className={`transition-all duration-1000 ${
+            className={`flex flex-col justify-center transition-all duration-1000 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
@@ -97,46 +92,44 @@ export default function Hero({ settings }: HeroProps) {
               )}
             </div>
 
-            {/* Enhanced Stats - 1/5 size, centered on left half */}
-            <div className="lg:absolute lg:left-1/4 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2 lg:gap-3">
-                {stats.map((stat, index) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={index}
-                      className={`group transition-all duration-700 ${
-                        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
-                      }`}
-                      style={{ transitionDelay: `${(index + 2) * 150}ms` }}
-                    >
-                      <div className="flex items-center gap-2 p-2 lg:p-1 rounded-lg bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300">
-                        <div className="w-6 h-6 lg:w-4 lg:h-4 rounded-md bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                          <Icon className="w-3 h-3 lg:w-2 lg:h-2 text-white" />
+            {/* Enhanced Stats - Under buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+              {stats.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={index}
+                    className={`group transition-all duration-700 ${
+                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
+                    }`}
+                    style={{ transitionDelay: `${(index + 2) * 150}ms` }}
+                  >
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-display text-2xl font-bold text-[var(--color-warm-900)]">
+                          {stat.value}
                         </div>
-                        <div>
-                          <div className="font-display text-sm lg:text-xs font-bold text-[var(--color-warm-900)]">
-                            {stat.value}
-                          </div>
-                          <div className="text-xs lg:text-[10px] font-medium text-[var(--color-warm-600)]">
-                            {stat.label}
-                          </div>
+                        <div className="text-sm font-medium text-[var(--color-warm-600)]">
+                          {stat.label}
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Enhanced Image composition - 3/4 size, centered on right half */}
+          {/* Enhanced Image composition - Right half centered */}
           <div
-            className={`relative transition-all duration-1000 delay-300 order-first lg:order-last lg:flex lg:justify-center lg:items-center ${
+            className={`relative flex justify-center items-center transition-all duration-1000 delay-300 order-first lg:order-last ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
             }`}
           >
-            <div className="relative lg:w-3/4">
+            <div className="relative w-full max-w-md">
               {/* Main image with enhanced styling - 3/4 size */}
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[var(--color-warm-300)] to-[var(--color-warm-500)] ring-1 ring-white/20">
                 {/* Enhanced image overlay */}
@@ -191,17 +184,17 @@ export default function Hero({ settings }: HeroProps) {
                 />
               </div>
 
-              {/* Enhanced floating rating card - bottom left of hero photo */}
-              <div className="absolute bottom-4 left-4 lg:bottom-6 lg:left-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 lg:p-6 border border-white/30 ring-1 ring-black/5 hover:shadow-3xl hover:-translate-y-1 transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg">
-                    <Star className="w-6 h-6 lg:w-7 lg:h-7 text-white fill-white" />
+              {/* Enhanced floating rating card - 1/5 size, bottom left of hero photo */}
+              <div className="absolute bottom-2 left-2 lg:bottom-3 lg:left-3 bg-white/95 backdrop-blur-xl rounded-lg shadow-xl p-2 border border-white/30 ring-1 ring-black/5 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] flex items-center justify-center shadow-lg">
+                    <Star className="w-3 h-3 text-white fill-white" />
                   </div>
                   <div>
-                    <div className="font-display text-lg lg:text-xl font-bold text-[var(--color-warm-900)]">
+                    <div className="font-display text-xs font-bold text-[var(--color-warm-900)]">
                       {settings.highlyRatedTitle}
                     </div>
-                    <div className="text-sm lg:text-base text-[var(--color-warm-600)] font-medium">
+                    <div className="text-[10px] text-[var(--color-warm-600)] font-medium">
                       {settings.highlyRatedSubtitle}
                     </div>
                   </div>
@@ -217,20 +210,6 @@ export default function Hero({ settings }: HeroProps) {
         </div>
       </div>
 
-      {/* Enhanced scroll indicator */}
-      <div className="absolute bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2">
-        <a
-          href="#properties"
-          className="group flex flex-col items-center transition-all duration-300 hover:scale-110 text-[var(--color-warm-600)] hover:text-[var(--color-primary-600)]"
-        >
-          <span className="text-sm font-medium mb-3 hidden sm:block group-hover:mb-4 transition-all duration-300">
-            {settings.heroScrollText || 'Scroll to explore'}
-          </span>
-          <div className="w-8 h-12 border-2 border-current rounded-full flex items-start justify-center p-1">
-            <div className="w-1 h-3 bg-current rounded-full animate-bounce" />
-          </div>
-        </a>
-      </div>
     </section>
   );
 }
