@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import MessengerWidget from "@/components/MessengerWidget";
+import ConditionalLayout from "@/components/ConditionalLayout";
 import CriticalCSS from "@/components/CriticalCSS";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import ResourcePreloader from "@/components/ResourcePreloader";
@@ -62,10 +60,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-[#fefdfb] text-[#5f4a38]">
         <ResourcePreloader />
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <MessengerWidget />
+        <ConditionalLayout>
+          {children}
+        </ConditionalLayout>
         <CriticalCSS />
         <AnalyticsTracker />
       </body>

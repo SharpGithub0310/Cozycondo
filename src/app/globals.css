@@ -1026,21 +1026,11 @@ select.form-input {
   z-index: 1000;
 }
 
-/* Modern Admin Panel Architecture - CSS Grid Layout */
+/* Modern Admin Panel Architecture - Fixed Layout Structure */
 .admin-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  grid-template-rows: 1fr;
+  position: relative;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-}
-
-/* Mobile-first responsive layout */
-@media (max-width: 1023px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-    position: relative;
-  }
 }
 
 /* Sidebar Styles - Fixed positioning issue */
@@ -1063,11 +1053,11 @@ select.form-input {
   transform: translateX(0);
 }
 
-/* Desktop sidebar - always visible */
+/* Desktop sidebar - always visible and positioned */
 @media (min-width: 1024px) {
   .admin-sidebar {
-    position: static;
-    transform: translateX(0);
+    position: fixed;
+    transform: translateX(0) !important;
     box-shadow: none;
     border-right: 1px solid #e2e8f0;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
@@ -1317,7 +1307,7 @@ select.form-input {
   color: #ef4444;
 }
 
-/* Main Content Area - NO MORE OVERLAY ISSUES */
+/* Main Content Area - Content starts right after sidebar */
 .admin-main {
   display: flex;
   flex-direction: column;
@@ -1464,10 +1454,10 @@ select.form-input {
   color: #1e293b;
 }
 
-/* Content Area */
+/* Content Area - Minimal padding for content to start right after sidebar */
 .admin-content {
   flex: 1;
-  padding: 2rem;
+  padding: 1.5rem;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
