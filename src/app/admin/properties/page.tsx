@@ -313,11 +313,15 @@ export default function PropertiesPage() {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
 
   // Mobile performance optimization - detect mobile browsers
-  const [isMobile, setIsMobile] = useState(false);
+  // Use undefined initially to avoid hydration mismatch
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    // Set mobile state after component mounts to avoid hydration mismatch
+    const checkMobile = () => window.innerWidth < 768;
+    setIsMobile(checkMobile());
+
+    const handleResize = () => setIsMobile(checkMobile());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -409,7 +413,8 @@ export default function PropertiesPage() {
   })();
 
   // Pagination calculations - mobile optimization
-  const propertiesPerPage = isMobile ? PROPERTIES_PER_PAGE_MOBILE : PROPERTIES_PER_PAGE_DESKTOP;
+  // Use desktop pagination as default when mobile state is unknown to avoid hydration issues
+  const propertiesPerPage = isMobile === true ? PROPERTIES_PER_PAGE_MOBILE : PROPERTIES_PER_PAGE_DESKTOP;
   const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
   const startIndex = (currentPage - 1) * propertiesPerPage;
   const endIndex = startIndex + propertiesPerPage;
