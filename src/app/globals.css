@@ -846,6 +846,25 @@ select.form-input {
 
 /* Enhanced Mobile-first responsive utilities for common device sizes */
 
+/* Extra small breakpoint utilities (480px and up) */
+@media (min-width: 480px) {
+  .xs\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .xs\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .xs\:flex-row {
+    flex-direction: row;
+  }
+
+  .xs\:gap-4 {
+    gap: 1rem;
+  }
+}
+
 /* Ultra small devices (320px and below) */
 @media (max-width: 320px) {
   .container-xs {

@@ -33,7 +33,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// Memoized property row component
+// Memoized property row component for desktop
 interface PropertyRowProps {
   property: any;
   onToggleFeatured: (id: string) => void;
@@ -49,23 +49,23 @@ const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onTogg
           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#d4b896] to-[#b89b7a] flex items-center justify-center flex-shrink-0">
             <span className="font-display text-white font-bold text-sm">CC</span>
           </div>
-          <div>
-            <p className="font-medium text-[#5f4a38]">{property.name}</p>
-            <p className="text-xs text-[#9a7d5e]">ID: {property.id}</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-[#5f4a38] truncate">{property.name}</p>
+            <p className="text-xs text-[#9a7d5e] truncate">ID: {property.id}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-1 text-[#7d6349]">
-          <MapPin className="w-4 h-4 text-[#9a7d5e]" />
-          <span className="text-sm">{property.location}</span>
+          <MapPin className="w-4 h-4 text-[#9a7d5e] flex-shrink-0" />
+          <span className="text-sm truncate">{property.location}</span>
         </div>
       </td>
       <td className="px-4 py-4 text-center">
         <button
           onClick={() => onToggleFeatured(property.id)}
           disabled={isUpdating}
-          className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
+          className={`p-2 rounded-lg transition-colors disabled:opacity-50 min-w-[44px] min-h-[44px] ${
             property.featured
               ? 'bg-[#fb923c] text-white'
               : 'bg-[#faf3e6] text-[#9a7d5e] hover:bg-[#f5e6cc]'
@@ -78,7 +78,7 @@ const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onTogg
         <button
           onClick={() => onToggleActive(property.id)}
           disabled={isUpdating}
-          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors disabled:opacity-50 min-h-[32px] ${
             property.active
               ? 'bg-[#14b8a6]/10 text-[#0f766e]'
               : 'bg-[#9a7d5e]/10 text-[#7d6349]'
@@ -101,18 +101,23 @@ const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onTogg
         <div className="flex items-center justify-end gap-2">
           <Link
             href={`/admin/properties/${property.id}`}
-            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
+            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            title="Edit property"
           >
             <Edit2 className="w-4 h-4" />
           </Link>
           <Link
             href={`/properties/${property.name.toLowerCase().replace(/\s+/g, '-')}`}
             target="_blank"
-            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors"
+            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            title="View property"
           >
             <Eye className="w-4 h-4" />
           </Link>
-          <button className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors">
+          <button
+            className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            title="Delete property"
+          >
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -121,9 +126,108 @@ const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onTogg
   );
 });
 
-PropertyRow.displayName = 'PropertyRow';
+// Memoized property card component for mobile
+interface PropertyCardProps {
+  property: any;
+  onToggleFeatured: (id: string) => void;
+  onToggleActive: (id: string) => void;
+  isUpdating: boolean;
+}
 
-// Loading skeleton component
+const PropertyCard = memo<PropertyCardProps>(({ property, onToggleFeatured, onToggleActive, isUpdating }) => {
+  return (
+    <div className="admin-card hover:shadow-lg transition-all duration-200">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[#d4b896] to-[#b89b7a] flex items-center justify-center flex-shrink-0">
+            <span className="font-display text-white font-bold text-sm">CC</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium text-[#5f4a38] truncate">{property.name}</h3>
+            <p className="text-xs text-[#9a7d5e] truncate">ID: {property.id}</p>
+          </div>
+        </div>
+
+        {/* Featured toggle */}
+        <button
+          onClick={() => onToggleFeatured(property.id)}
+          disabled={isUpdating}
+          className={`p-2 rounded-lg transition-colors disabled:opacity-50 min-w-[44px] min-h-[44px] flex-shrink-0 ${
+            property.featured
+              ? 'bg-[#fb923c] text-white'
+              : 'bg-[#faf3e6] text-[#9a7d5e]'
+          }`}
+          title={property.featured ? 'Remove from featured' : 'Mark as featured'}
+        >
+          <Star className={`w-4 h-4 ${property.featured ? 'fill-current' : ''}`} />
+        </button>
+      </div>
+
+      {/* Location */}
+      <div className="flex items-center gap-2 mb-4">
+        <MapPin className="w-4 h-4 text-[#9a7d5e] flex-shrink-0" />
+        <span className="text-sm text-[#7d6349] truncate">{property.location}</span>
+      </div>
+
+      {/* Status and Actions */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        {/* Status toggle */}
+        <button
+          onClick={() => onToggleActive(property.id)}
+          disabled={isUpdating}
+          className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+            property.active
+              ? 'bg-[#14b8a6]/10 text-[#0f766e]'
+              : 'bg-[#9a7d5e]/10 text-[#7d6349]'
+          }`}
+        >
+          {property.active ? (
+            <>
+              <Eye className="w-3 h-3" />
+              Active
+            </>
+          ) : (
+            <>
+              <EyeOff className="w-3 h-3" />
+              Hidden
+            </>
+          )}
+        </button>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/properties/${property.id}`}
+            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            title="Edit property"
+          >
+            <Edit2 className="w-4 h-4" />
+          </Link>
+          <Link
+            href={`/properties/${property.name.toLowerCase().replace(/\s+/g, '-')}`}
+            target="_blank"
+            className="p-2 text-[#7d6349] hover:text-[#0d9488] hover:bg-[#faf3e6] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            title="View property"
+          >
+            <Eye className="w-4 h-4" />
+          </Link>
+          <button
+            className="p-2 text-[#7d6349] hover:text-red-500 hover:bg-[#faf3e6] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            title="Delete property"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+PropertyRow.displayName = 'PropertyRow';
+PropertyCard.displayName = 'PropertyCard';
+
+// Loading skeleton components
 const LoadingSkeleton = memo(() => (
   <>
     {Array.from({ length: 5 }, (_, i) => (
@@ -131,7 +235,7 @@ const LoadingSkeleton = memo(() => (
         <td className="px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-lg bg-gray-200"></div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="h-4 bg-gray-200 rounded w-32 mb-1"></div>
               <div className="h-3 bg-gray-200 rounded w-16"></div>
             </div>
@@ -158,7 +262,44 @@ const LoadingSkeleton = memo(() => (
   </>
 ));
 
+const LoadingCards = memo(() => (
+  <>
+    {Array.from({ length: 5 }, (_, i) => (
+      <div key={`loading-card-${i}`} className="admin-card animate-pulse">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="w-12 h-12 rounded-lg bg-gray-200"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 rounded w-32 mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded w-16"></div>
+            </div>
+          </div>
+          <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+        </div>
+
+        {/* Location */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-4 h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-24"></div>
+        </div>
+
+        {/* Bottom */}
+        <div className="flex items-center justify-between">
+          <div className="h-6 bg-gray-200 rounded-full w-16"></div>
+          <div className="flex gap-2">
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </>
+));
+
 LoadingSkeleton.displayName = 'LoadingSkeleton';
+LoadingCards.displayName = 'LoadingCards';
 
 // Pagination constants
 const PROPERTIES_PER_PAGE = 10;
@@ -399,7 +540,7 @@ export default function PropertiesPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="admin-card">
           <p className="text-sm text-[#9a7d5e]">Total Properties</p>
           <p className="font-display text-2xl font-semibold text-[#5f4a38]">
@@ -428,27 +569,27 @@ export default function PropertiesPage() {
 
       {/* Search & Filters */}
       <div className="admin-card">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="space-y-4">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9a7d5e]" />
             <input
               type="text"
               placeholder="Search properties..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="form-input pl-10"
+              className="form-input pl-10 w-full"
             />
           </div>
           {filteredProperties.length > 0 && (
-            <div className="text-sm text-[#9a7d5e]">
+            <div className="text-sm text-[#9a7d5e] text-center sm:text-left">
               Showing {paginatedProperties.length} of {filteredProperties.length} properties
             </div>
           )}
         </div>
       </div>
 
-      {/* Properties List */}
-      <div className="admin-card p-0 overflow-hidden">
+      {/* Properties List - Desktop Table */}
+      <div className="hidden md:block admin-card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#faf3e6]">
@@ -486,7 +627,40 @@ export default function PropertiesPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="text-[#0d9488] hover:underline text-sm mt-2"
+                className="text-[#0d9488] hover:underline text-sm mt-2 min-h-[44px] px-4"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Properties List - Mobile Cards */}
+      <div className="block md:hidden space-y-4">
+        {loading ? (
+          <LoadingCards />
+        ) : (
+          paginatedProperties.map((property) => (
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onToggleFeatured={toggleFeatured}
+              onToggleActive={toggleActive}
+              isUpdating={updatingProperty === property.id}
+            />
+          ))
+        )}
+
+        {!loading && filteredProperties.length === 0 && (
+          <div className="admin-card text-center py-8">
+            <p className="text-[#9a7d5e] mb-4">
+              {searchQuery ? 'No properties match your search' : 'No properties found'}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="btn-primary text-sm min-h-[44px]"
               >
                 Clear search
               </button>
@@ -498,21 +672,22 @@ export default function PropertiesPage() {
       {/* Pagination */}
       {!loading && totalPages > 1 && (
         <div className="admin-card">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-[#9a7d5e]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-[#9a7d5e] order-2 sm:order-1">
               Page {currentPage} of {totalPages}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 order-1 sm:order-2">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-[#faf3e6] text-[#7d6349] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#faf3e6] transition-colors"
+                className="p-2 rounded-lg border border-[#faf3e6] text-[#7d6349] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#faf3e6] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                title="Previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
 
-              {/* Page numbers */}
-              <div className="flex items-center gap-1">
+              {/* Page numbers - Simplified for mobile */}
+              <div className="hidden sm:flex items-center gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
                   if (totalPages <= 5) {
@@ -529,7 +704,7 @@ export default function PropertiesPage() {
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                      className={`px-3 py-2 rounded-lg text-sm transition-colors min-w-[44px] min-h-[44px] ${
                         currentPage === pageNum
                           ? 'bg-[#0d9488] text-white'
                           : 'text-[#7d6349] hover:bg-[#faf3e6]'
@@ -541,10 +716,16 @@ export default function PropertiesPage() {
                 })}
               </div>
 
+              {/* Mobile page indicator */}
+              <div className="sm:hidden px-3 py-2 text-sm text-[#7d6349] bg-[#faf3e6] rounded-lg">
+                {currentPage} / {totalPages}
+              </div>
+
               <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-[#faf3e6] text-[#7d6349] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#faf3e6] transition-colors"
+                className="p-2 rounded-lg border border-[#faf3e6] text-[#7d6349] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#faf3e6] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                title="Next page"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
