@@ -33,6 +33,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ Rate limiting and security measures
 - ✅ Optimized bundle size (~25% reduction)
 - ✅ Clean, streamlined codebase
+- ✅ Mobile-optimized admin panel with responsive design
+- ✅ Fixed hydration mismatches for mobile compatibility
 
 ### Removed/Deprecated Features
 - ❌ Calendar functionality (removed - not needed)
@@ -175,6 +177,13 @@ useEffect(() => {
 - Properties page requires `force-dynamic` for database access
 - Build-time environment variables needed for SSG
 - Check Dokploy logs for deployment errors
+
+### Mobile Compatibility Issues
+- **Hydration Mismatches**: Use `useState<boolean | undefined>(undefined)` for mobile detection to prevent server/client rendering differences
+- **Performance**: Remove React.memo overhead on mobile - use simple function components instead
+- **Responsive Design**: Admin panel uses dual layout system (table for desktop, cards for mobile)
+- **Touch Targets**: All interactive elements have minimum 44px touch targets for mobile usability
+- **Pagination**: Mobile uses 5 items per page vs 10 for desktop to improve performance
 
 ## Security Considerations
 
