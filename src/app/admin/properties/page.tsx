@@ -14,7 +14,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 import type { PropertyData } from '@/lib/types';
 
 // Custom hook for debounced search
@@ -183,9 +182,26 @@ export default function PropertiesPage() {
       }
       setError(null);
 
-      // Load properties from database
-      const dbProperties = await postMigrationDatabaseService.getProperties();
-      console.log('Admin: Loaded properties from database:', dbProperties);
+      // Call API endpoint directly with admin authentication
+      const response = await fetch('/api/properties', {
+        headers: {
+          'x-admin-session': 'authenticated',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load properties');
+      }
+
+      const dbProperties = result.data;
+      console.log('Admin: Loaded properties from API:', dbProperties);
 
       // Convert to admin format
       const propertiesArray = Object.values(dbProperties).map((property: any) => ({
@@ -209,8 +225,10 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     loadProperties();
+  }, [loadProperties]);
 
-    // Only reload on visibility change if data is stale (5 minutes)
+  // Separate effect for visibility change handler to avoid dependency issues
+  useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const timeSinceLastRefresh = Date.now() - lastRefresh;
@@ -225,7 +243,7 @@ export default function PropertiesPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [loadProperties, lastRefresh]);
+  }, []);
 
   // Memoized filtered and paginated properties
   const filteredProperties = useMemo(() => {
@@ -273,8 +291,22 @@ export default function PropertiesPage() {
         p.id === id ? { ...p, featured: newFeaturedStatus } : p
       ));
 
-      // Update in database
-      await postMigrationDatabaseService.updatePropertyStatus(id, { featured: newFeaturedStatus });
+      // Update via API
+      const updateResponse = await fetch('/api/properties', {
+        method: 'PUT',
+        headers: {
+          'x-admin-session': 'authenticated',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id,
+          updates: { featured: newFeaturedStatus }
+        })
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update property status');
+      }
 
       console.log(`Admin: Updated property ${id} featured status to ${newFeaturedStatus}`);
     } catch (err) {
@@ -305,8 +337,22 @@ export default function PropertiesPage() {
         p.id === id ? { ...p, active: newActiveStatus } : p
       ));
 
-      // Update in database
-      await postMigrationDatabaseService.updatePropertyStatus(id, { active: newActiveStatus });
+      // Update via API
+      const updateResponse = await fetch('/api/properties', {
+        method: 'PUT',
+        headers: {
+          'x-admin-session': 'authenticated',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id,
+          updates: { active: newActiveStatus }
+        })
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update property status');
+      }
 
       console.log(`Admin: Updated property ${id} active status to ${newActiveStatus}`);
     } catch (err) {
