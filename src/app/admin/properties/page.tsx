@@ -33,7 +33,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// Memoized property row component for desktop
+// Simplified property row component for desktop - removed memo for mobile performance
 interface PropertyRowProps {
   property: any;
   onToggleFeatured: (id: string) => void;
@@ -41,7 +41,7 @@ interface PropertyRowProps {
   isUpdating: boolean;
 }
 
-const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onToggleActive, isUpdating }) => {
+const PropertyRow = ({ property, onToggleFeatured, onToggleActive, isUpdating }: PropertyRowProps) => {
   return (
     <tr className="hover:bg-[#fefdfb] transition-colors">
       <td className="px-4 py-4">
@@ -124,9 +124,9 @@ const PropertyRow = memo<PropertyRowProps>(({ property, onToggleFeatured, onTogg
       </td>
     </tr>
   );
-});
+};
 
-// Memoized property card component for mobile
+// Simplified property card component for mobile - removed memo for better mobile performance
 interface PropertyCardProps {
   property: any;
   onToggleFeatured: (id: string) => void;
@@ -134,7 +134,7 @@ interface PropertyCardProps {
   isUpdating: boolean;
 }
 
-const PropertyCard = memo<PropertyCardProps>(({ property, onToggleFeatured, onToggleActive, isUpdating }) => {
+const PropertyCard = ({ property, onToggleFeatured, onToggleActive, isUpdating }: PropertyCardProps) => {
   return (
     <div className="admin-card hover:shadow-lg transition-all duration-200">
       {/* Header */}
@@ -222,13 +222,12 @@ const PropertyCard = memo<PropertyCardProps>(({ property, onToggleFeatured, onTo
       </div>
     </div>
   );
-});
+};
 
-PropertyRow.displayName = 'PropertyRow';
-PropertyCard.displayName = 'PropertyCard';
+// Removed displayName assignments (not needed without memo)
 
-// Loading skeleton components
-const LoadingSkeleton = memo(() => (
+// Simplified loading skeleton - removed memo for mobile performance
+const LoadingSkeleton = () => (
   <>
     {Array.from({ length: 5 }, (_, i) => (
       <tr key={`loading-${i}`} className="animate-pulse">
@@ -260,9 +259,9 @@ const LoadingSkeleton = memo(() => (
       </tr>
     ))}
   </>
-));
+);
 
-const LoadingCards = memo(() => (
+const LoadingCards = () => (
   <>
     {Array.from({ length: 5 }, (_, i) => (
       <div key={`loading-card-${i}`} className="admin-card animate-pulse">
@@ -296,13 +295,13 @@ const LoadingCards = memo(() => (
       </div>
     ))}
   </>
-));
+);
 
-LoadingSkeleton.displayName = 'LoadingSkeleton';
-LoadingCards.displayName = 'LoadingCards';
+// Removed displayName assignments (not needed without memo)
 
-// Pagination constants
-const PROPERTIES_PER_PAGE = 10;
+// Pagination constants - mobile optimization
+const PROPERTIES_PER_PAGE_DESKTOP = 10;
+const PROPERTIES_PER_PAGE_MOBILE = 5;
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -312,6 +311,16 @@ export default function PropertiesPage() {
   const [error, setError] = useState<string | null>(null);
   const [updatingProperty, setUpdatingProperty] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
+
+  // Mobile performance optimization - detect mobile browsers
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Debounce search query to avoid excessive filtering
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -344,14 +353,16 @@ export default function PropertiesPage() {
       const dbProperties = result.data;
       console.log('Admin: Loaded properties from API:', dbProperties);
 
-      // Convert to admin format
+      // Convert to admin format - optimized for mobile
       const propertiesArray = Object.values(dbProperties).map((property: any) => ({
         id: property.id,
         name: property.name || property.title,
         location: property.location || '',
         featured: property.featured ?? false,
         active: property.active ?? true,
-        airbnbUrl: property.airbnbUrl || ''
+        airbnbUrl: property.airbnbUrl || '',
+        // Only store essential data, not heavy image arrays
+        imageCount: Array.isArray(property.images) ? property.images.length : 0
       }));
 
       setProperties(propertiesArray);
@@ -386,8 +397,8 @@ export default function PropertiesPage() {
     };
   }, []);
 
-  // Memoized filtered and paginated properties
-  const filteredProperties = useMemo(() => {
+  // Simplified filtering for mobile performance - removed heavy useMemo
+  const filteredProperties = (() => {
     if (!debouncedSearchQuery) return properties;
 
     const query = debouncedSearchQuery.toLowerCase();
@@ -395,28 +406,28 @@ export default function PropertiesPage() {
       p.name.toLowerCase().includes(query) ||
       p.location.toLowerCase().includes(query)
     );
-  }, [properties, debouncedSearchQuery]);
+  })();
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredProperties.length / PROPERTIES_PER_PAGE);
-  const startIndex = (currentPage - 1) * PROPERTIES_PER_PAGE;
-  const endIndex = startIndex + PROPERTIES_PER_PAGE;
-  const paginatedProperties = useMemo(() => {
-    return filteredProperties.slice(startIndex, endIndex);
-  }, [filteredProperties, startIndex, endIndex]);
+  // Pagination calculations - mobile optimization
+  const propertiesPerPage = isMobile ? PROPERTIES_PER_PAGE_MOBILE : PROPERTIES_PER_PAGE_DESKTOP;
+  const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
+  const startIndex = (currentPage - 1) * propertiesPerPage;
+  const endIndex = startIndex + propertiesPerPage;
+  // Simplified pagination - removed useMemo for mobile performance
+  const paginatedProperties = filteredProperties.slice(startIndex, endIndex);
 
   // Reset pagination when search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery]);
 
-  // Memoized stats calculations
-  const stats = useMemo(() => ({
+  // Simplified stats calculation - removed useMemo for mobile performance
+  const stats = {
     total: properties.length,
     active: properties.filter(p => p.active).length,
     featured: properties.filter(p => p.featured).length,
     inactive: properties.filter(p => !p.active).length
-  }), [properties]);
+  };
 
   const toggleFeatured = useCallback(async (id: string) => {
     const property = properties.find(p => p.id === id);
