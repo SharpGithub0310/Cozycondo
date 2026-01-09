@@ -8,8 +8,9 @@ Premium short-term rental marketing website for Cozy Condo properties in Iloilo 
 - 📝 **Blog System** - Share travel tips and local guides with rich content
 - 💬 **Contact Integration** - Facebook Messenger, phone, and email
 - 🔧 **Admin Panel** - Manage properties, blog posts, and site settings
-- 📱 **Responsive Design** - Beautiful on all devices
+- 📱 **Responsive Design** - Beautiful on all devices with mobile-optimized admin panel
 - ⚡ **Optimized Performance** - Fast loading with Next.js 16 and Turbopack
+- 📲 **Mobile-First Admin** - Touch-friendly interface with optimized mobile performance
 
 ## Tech Stack
 

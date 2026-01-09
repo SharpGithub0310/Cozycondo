@@ -222,6 +222,34 @@ preloadLink.fetchPriority = 'high';
 - Core Web Vitals tracking
 - Performance budgets in CI/CD
 
+### 8. Mobile-Specific Optimizations
+
+#### Admin Panel Mobile Performance
+- **Removed React.memo overhead** for mobile components to reduce memory pressure
+- **Simplified data structures** by storing only essential data (imageCount vs full arrays)
+- **Mobile-specific pagination** (5 items on mobile vs 10 on desktop)
+- **Hydration mismatch prevention** using proper initial state management
+- **Files**: `src/app/admin/properties/page.tsx`
+
+```tsx
+// Mobile detection without hydration mismatch
+const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
+useEffect(() => {
+  setIsMobile(window.innerWidth < 768);
+}, []);
+```
+
+#### Responsive Design Patterns
+- **Dual layout system**: Table for desktop, cards for mobile
+- **Touch-friendly targets**: Minimum 44px touch areas
+- **Optimized breakpoints**: xs, sm, md, lg, xl for fine-grained control
+- **Mobile-first CSS**: Using Tailwind's responsive utilities
+
+#### Mobile Bundle Optimization
+- **Code splitting** for mobile-specific components
+- **Lazy loading** of non-critical admin features
+- **Reduced JavaScript execution** by simplifying mobile interactions
+
 ---
 
 ## Summary
