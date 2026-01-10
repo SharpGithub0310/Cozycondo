@@ -158,9 +158,9 @@ export async function GET(
       areaUnit: 'sqm',
       location: property?.location || '',
       address: property?.address || '',
-      price: parseFloat(property?.price_per_night || '2500'),
+      price: parseFloat(property?.price_per_night || '0'),
       priceUnit: 'PHP/night',
-      pricePerNight: property?.price_per_night || '2500',
+      pricePerNight: property?.price_per_night || '',
       airbnbUrl: property?.airbnb_url || '',
       airbnbIcalUrl: property?.ical_url || '',
       icalUrl: property?.ical_url || '', // Legacy compatibility

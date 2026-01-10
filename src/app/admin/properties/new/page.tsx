@@ -47,7 +47,7 @@ export default function NewProperty() {
         area: parseFloat(property.size) || 45, // Map to size_sqm in database
         description: property.description,
         location: property.location,
-        pricePerNight: '2500', // Default price
+        pricePerNight: '', // Price required - no default
         amenities: property.amenities || [],
         photos: property.photos || [],
         featured: false,
