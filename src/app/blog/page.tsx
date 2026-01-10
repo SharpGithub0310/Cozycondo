@@ -214,7 +214,7 @@ export default function BlogPage() {
                 </div>
                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--color-accent-orange)] rounded-full animate-ping" />
               </div>
-              <h3 className="font-display text-2xl font-semibold text-[var(--color-warm-800)] mb-3">
+              <h3 className="font-display text-xl font-semibold text-[var(--color-warm-800)] mb-3">
                 Loading Stories
               </h3>
               <p className="text-[var(--color-warm-600)] text-lg">
@@ -251,7 +251,7 @@ export default function BlogPage() {
               <div className="flex items-center gap-3 mb-8">
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 text-[var(--color-accent-orange)]" />
-                  <h2 className="font-display text-3xl font-bold text-[var(--color-warm-900)]">Featured Stories</h2>
+                  <h2 className="section-title text-[var(--color-warm-900)]">Featured Stories</h2>
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-r from-[var(--color-warm-300)] to-transparent" />
               </div>
@@ -302,7 +302,7 @@ export default function BlogPage() {
                           </span>
                         </div>
 
-                        <h3 className="font-display text-2xl font-bold text-[var(--color-warm-900)] mb-3 group-hover:text-[var(--color-primary-600)] transition-colors duration-300 line-clamp-2">
+                        <h3 className="font-display text-xl font-semibold text-[var(--color-warm-900)] mb-3 group-hover:text-[var(--color-primary-600)] transition-colors duration-300 line-clamp-2">
                           {post.title}
                         </h3>
 
@@ -341,7 +341,7 @@ export default function BlogPage() {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <h2 className="font-display text-3xl font-bold text-[var(--color-warm-900)]">All Stories</h2>
+                  <h2 className="section-title text-[var(--color-warm-900)]">All Stories</h2>
                   <span className="px-3 py-1 bg-[var(--color-primary-100)] text-[var(--color-primary-700)] text-sm font-semibold rounded-full">
                     {regularPosts.length} {regularPosts.length === 1 ? 'Article' : 'Articles'}
                   </span>
@@ -459,7 +459,7 @@ export default function BlogPage() {
                                 </span>
                               </div>
 
-                              <h3 className="font-display text-2xl font-semibold text-[var(--color-warm-900)] mb-3 group-hover:text-[var(--color-primary-600)] transition-colors">
+                              <h3 className="font-display text-xl font-semibold text-[var(--color-warm-900)] mb-3 group-hover:text-[var(--color-primary-600)] transition-colors">
                                 {post.title}
                               </h3>
 
@@ -503,7 +503,7 @@ export default function BlogPage() {
                 <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-[var(--color-warm-200)] to-[var(--color-warm-300)] flex items-center justify-center">
                   <Search className="w-10 h-10 text-[var(--color-warm-600)]" />
                 </div>
-                <h3 className="font-display text-3xl font-bold text-[var(--color-warm-800)] mb-4">
+                <h3 className="section-title text-[var(--color-warm-800)] mb-4">
                   {searchQuery ? 'No Stories Found' : 'No Stories Yet'}
                 </h3>
                 <p className="text-[var(--color-warm-600)] text-lg max-w-md mx-auto mb-8">
@@ -538,7 +538,7 @@ export default function BlogPage() {
 
               {!searchQuery && (
                 <div className="bg-[var(--color-warm-50)] rounded-3xl p-8 max-w-2xl mx-auto">
-                  <h4 className="font-display text-xl font-semibold text-[var(--color-warm-800)] mb-3">
+                  <h4 className="font-display text-lg font-semibold text-[var(--color-warm-800)] mb-3">
                     Stay Updated
                   </h4>
                   <p className="text-[var(--color-warm-600)] mb-6">
@@ -576,7 +576,7 @@ export default function BlogPage() {
               <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-500)] flex items-center justify-center">
                 <TrendingUp className="w-8 h-8" />
               </div>
-              <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
+              <h2 className="section-title-lg text-white mb-6">
                 Never Miss a Story
               </h2>
               <p className="text-[var(--color-warm-300)] text-xl leading-relaxed max-w-2xl mx-auto">
@@ -589,21 +589,21 @@ export default function BlogPage() {
                 <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/10 flex items-center justify-center">
                   <MapPin className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold mb-2">Local Insights</h3>
+                <h3 className="font-display text-lg font-semibold mb-2">Local Insights</h3>
                 <p className="text-[var(--color-warm-300)] text-sm">Discover hidden gems and authentic experiences</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/10 flex items-center justify-center">
                   <User className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold mb-2">Guest Stories</h3>
+                <h3 className="font-display text-lg font-semibold mb-2">Guest Stories</h3>
                 <p className="text-[var(--color-warm-300)] text-sm">Real experiences from fellow travelers</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/10 flex items-center justify-center">
                   <Star className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold mb-2">Travel Tips</h3>
+                <h3 className="font-display text-lg font-semibold mb-2">Travel Tips</h3>
                 <p className="text-[var(--color-warm-300)] text-sm">Expert advice for your Iloilo adventure</p>
               </div>
             </div>

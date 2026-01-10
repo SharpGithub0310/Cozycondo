@@ -84,7 +84,7 @@ export default function TermsPage() {
             <div className="space-y-8">
               {sections.map((section, index) => (
                 <div key={index} className="card card-flat p-6">
-                  <h2 className="text-xl font-semibold text-[var(--color-warm-900)] mb-4">
+                  <h2 className="font-display text-xl font-semibold text-[var(--color-warm-900)] mb-4">
                     {index + 1}. {section.title}
                   </h2>
 
@@ -112,7 +112,7 @@ export default function TermsPage() {
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-[var(--color-warm-600)] mt-1" />
                 <div>
-                  <h3 className="font-semibold text-[var(--color-warm-900)] mb-2">
+                  <h3 className="font-display text-lg font-semibold text-[var(--color-warm-900)] mb-2">
                     Questions About Our Terms?
                   </h3>
                   <p className="text-[var(--color-warm-700)] mb-4">

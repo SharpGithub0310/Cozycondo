@@ -104,7 +104,7 @@ export default function BlogPostPage({ params }: PageProps) {
       <div className="pt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="font-display text-2xl font-semibold text-[#5f4a38] mb-4">
+            <h1 className="font-display text-xl font-semibold text-[#5f4a38] mb-4">
               {error === 'Post not found' ? 'Blog Post Not Found' : 'Blog Post Unavailable'}
             </h1>
             <p className="text-[#7d6349] mb-8">
@@ -141,7 +141,7 @@ export default function BlogPostPage({ params }: PageProps) {
         {/* Article Header */}
         <article className="prose prose-lg max-w-none">
           <header className="mb-8">
-            <h1 className="font-display text-4xl font-bold text-[#5f4a38] mb-4 leading-tight">
+            <h1 className="section-title text-[#5f4a38] mb-4 leading-tight">
               {post.title}
             </h1>
 
@@ -208,7 +208,7 @@ export default function BlogPostPage({ params }: PageProps) {
 
           {/* Social Sharing */}
           <div className="mt-8 pt-8 border-t border-[#f0e8d8]">
-            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+            <h3 className="card-title text-[#5f4a38] mb-4">
               Share this post
             </h3>
             <div className="flex gap-4">
