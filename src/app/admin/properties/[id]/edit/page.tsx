@@ -89,7 +89,7 @@ export default function EditProperty() {
           size: propertyData.size || '45',
           description: propertyData.description || '',
           location: propertyData.location || '',
-          pricePerNight: propertyData.pricePerNight || propertyData.price?.toString() || '2500',
+          pricePerNight: propertyData.pricePerNight || propertyData.price?.toString() || '',
           amenities: propertyData.amenities || [],  // Ensure amenities is always an array
           photos: propertyData.photos || [],
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
@@ -119,7 +119,7 @@ export default function EditProperty() {
         bathrooms: property.bathrooms,
         maxGuests: property.maxGuests,
         area: parseFloat(property.size) || 45, // Keep area field mapped to size_sqm
-        pricePerNight: property.pricePerNight || '2500', // Include price per night
+        pricePerNight: property.pricePerNight || '', // Price from database
         description: property.description,
         location: property.location,
         amenities: property.amenities || [],

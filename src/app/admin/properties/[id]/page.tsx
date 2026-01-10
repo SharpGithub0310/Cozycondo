@@ -50,7 +50,7 @@ export default function PropertyDetail() {
         bathrooms: propertyData.bathrooms || 1,
         maxGuests: propertyData.maxGuests || (propertyData as any).max_guests || 4,
         size: (propertyData.size || (propertyData as any).size_sqm || '45') + ' sq m',
-        pricePerNight: parseInt(propertyData.pricePerNight || (propertyData as any).price_per_night || (propertyData as any).price || '2500'),
+        pricePerNight: parseInt(propertyData.pricePerNight || (propertyData as any).price_per_night || (propertyData as any).price || '0'),
         location: propertyData.location || '',
         description: propertyData.description || propertyData.short_description || '',
         amenities: propertyData.amenities || [],
