@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Menu, X, Home, Building2, BookOpen, Phone, MessageCircle } from 'lucide-react';
 import type { WebsiteSettings, NavigationItem } from '@/lib/types';
@@ -53,13 +53,36 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [settings, setSettings] = useState<WebsiteSettings | null>(propSettings || null);
   const [loading, setLoading] = useState(!propSettings);
+  const lastScrollTime = useRef(0);
+  const scrollRAF = useRef<number | null>(null);
 
+  // Throttled scroll handler - updates at most every 100ms for better performance
   useEffect(() => {
     const handleScroll = () => {
+      const now = Date.now();
+      // Throttle: only update if 100ms has passed since last update
+      if (now - lastScrollTime.current < 100) {
+        // Schedule an update at the end of the throttle window if not already scheduled
+        if (scrollRAF.current === null) {
+          scrollRAF.current = requestAnimationFrame(() => {
+            setScrolled(window.scrollY > 20);
+            lastScrollTime.current = Date.now();
+            scrollRAF.current = null;
+          });
+        }
+        return;
+      }
+      lastScrollTime.current = now;
       setScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollRAF.current !== null) {
+        cancelAnimationFrame(scrollRAF.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
