@@ -239,7 +239,7 @@ export default function ContactPage() {
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                       <Icon className="w-12 h-12 text-white drop-shadow-md relative z-10" />
                     </div>
-                    <h3 className="card-title text-center mb-3 group-hover:text-[var(--color-primary-600)] transition-all duration-300 text-xl font-bold">
+                    <h3 className="card-title text-center mb-3 group-hover:text-[var(--color-primary-600)] transition-all duration-300">
                       {method.title}
                     </h3>
                     <p className="card-meta text-center mb-4 text-sm font-medium text-[var(--color-warm-600)]">{method.description}</p>
@@ -290,7 +290,7 @@ export default function ContactPage() {
               <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-primary-500)] to-[var(--color-primary-600)] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                 <Send className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-[var(--color-primary-800)] mb-6 font-display">Quick Contact Tips</h3>
+              <h3 className="font-display text-xl font-semibold text-[var(--color-primary-800)] mb-6">Quick Contact Tips</h3>
               <div className="grid md:grid-cols-2 gap-8 text-left max-w-5xl mx-auto">
                 <div className="space-y-6">
                   <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-[var(--color-primary-200)] hover:bg-white/70 transition-colors duration-300">
@@ -353,7 +353,7 @@ export default function ContactPage() {
                     <div className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
                       <MapPin className="w-12 h-12 drop-shadow-lg" />
                     </div>
-                    <h3 className="text-3xl font-display font-bold mb-3 drop-shadow-lg">Iloilo City</h3>
+                    <h3 className="font-display text-2xl font-bold mb-3 drop-shadow-lg">Iloilo City</h3>
                     <p className="text-white/90 mb-8 text-lg font-medium drop-shadow-md">Philippines</p>
                     <a
                       href="https://maps.google.com/?q=Iloilo+City+Philippines"
@@ -397,7 +397,7 @@ export default function ContactPage() {
                       <MapPin className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="card-title mb-3 text-xl">Prime Locations</h3>
+                      <h3 className="card-title mb-3">Prime Locations</h3>
                       <p className="card-description mb-4 text-base leading-relaxed">
                         Multiple premium properties across Iloilo City's best neighborhoods, each carefully selected for accessibility and convenience.
                       </p>
@@ -417,7 +417,7 @@ export default function ContactPage() {
                       <Clock className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="card-title mb-3 text-xl">Response Hours</h3>
+                      <h3 className="card-title mb-3">Response Hours</h3>
                       <p className="card-description mb-4 text-base leading-relaxed">
                         We're available to assist you daily with consistently quick response times across all communication channels.
                       </p>
@@ -439,7 +439,7 @@ export default function ContactPage() {
                       <MessageCircle className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-[var(--color-primary-800)] mb-3 text-xl font-display">Pro Tip</h3>
+                      <h3 className="font-display text-lg font-semibold text-[var(--color-primary-800)] mb-3">Pro Tip</h3>
                       <p className="text-[var(--color-primary-700)] text-base leading-relaxed">
                         For the fastest response, message us on Facebook Messenger. We typically reply within minutes during business hours and can provide instant assistance!
                       </p>
@@ -494,7 +494,7 @@ export default function ContactPage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary-25)] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   <div className="relative z-10">
-                    <h3 className="card-title text-[var(--color-primary-600)] mb-5 text-xl font-bold group-hover:text-[var(--color-primary-700)] transition-colors duration-300">
+                    <h3 className="card-title text-[var(--color-primary-600)] mb-5 group-hover:text-[var(--color-primary-700)] transition-colors duration-300">
                       {faq.question}
                     </h3>
                     <p className="text-[var(--color-warm-800)] leading-relaxed text-base font-medium">

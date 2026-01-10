@@ -193,7 +193,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
           <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
             <X className="w-12 h-12 text-red-500" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Property Not Found</h1>
+          <h1 className="font-display text-xl font-semibold text-gray-900 mb-2">Property Not Found</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <Link
             href="/properties"
@@ -386,7 +386,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
 
               {/* Amenities */}
               <div className="mt-12">
-                <h2 className="font-display text-2xl font-semibold text-[#5f4a38] mb-6">
+                <h2 className="font-display text-xl font-semibold text-[#5f4a38] mb-6">
                   Amenities
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -406,7 +406,7 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
 
               {/* Location */}
               <div className="mt-12">
-                <h2 className="font-display text-2xl font-semibold text-[#5f4a38] mb-6">
+                <h2 className="font-display text-xl font-semibold text-[#5f4a38] mb-6">
                   Location
                 </h2>
                 <div className="p-6 rounded-2xl bg-[#faf3e6]">
