@@ -904,6 +904,46 @@ select.form-input {
   }
 }
 
+/* Mobile performance optimizations - Disable heavy effects on mobile */
+@media (max-width: 768px) {
+  /* Disable floating animations on mobile for better performance */
+  .animate-float {
+    animation: none !important;
+  }
+
+  /* Reduce blur effects which are expensive on mobile GPUs */
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl {
+    backdrop-filter: blur(4px) !important;
+  }
+
+  /* Reduce blur-3xl and similar heavy effects */
+  .blur-3xl,
+  .blur-2xl {
+    filter: blur(20px) !important;
+  }
+
+  /* Reduce animation complexity */
+  .animate-shimmer {
+    animation: none !important;
+  }
+
+  /* Simplify gradients for radial-gradient heavy elements */
+  .hero-badge {
+    backdrop-filter: blur(4px) !important;
+  }
+
+  /* Reduce transition durations for snappier feel */
+  .transition-all,
+  .transition-colors,
+  .transition-opacity,
+  .transition-transform {
+    transition-duration: 150ms !important;
+  }
+}
+
 /* Small mobile devices (321px to 374px) */
 @media (min-width: 321px) and (max-width: 374px) {
   .container-xs {

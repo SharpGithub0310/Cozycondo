@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
     const { page, limit, active, featured, search, sort, order } = parseQueryParams(searchParams);
 
     // Build query with joins for photos, ensuring we get all necessary fields
+    // Include count in the main query to avoid separate count query (performance optimization)
     let query = adminClient
       .from('properties')
       .select(`
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
           is_primary,
           display_order
         )
-      `);
+      `, { count: 'exact' });
 
     // Apply filters
     if (active !== undefined) {
@@ -99,18 +100,14 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     query = query.range(offset, offset + limit - 1);
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       return handleDatabaseError(error);
     }
 
-    // Get total count for pagination metadata
-    const { count, error: countError } = await adminClient
-      .from('properties')
-      .select('*', { count: 'exact', head: true });
-
-    const totalCount = countError ? 0 : count || 0;
+    // Use count from the main query (performance optimization - no separate query needed)
+    const totalCount = count || 0;
 
     // Convert to the format expected by the frontend (keeping backward compatibility)
     const result: Record<string, any> = {};

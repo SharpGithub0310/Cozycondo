@@ -14,8 +14,9 @@ export const metadata: Metadata = {
   },
 };
 
-// Force dynamic rendering to ensure database access works
-export const dynamic = 'force-dynamic';
+// Use ISR with 5-minute revalidation for better performance
+// This caches the page and revalidates every 5 minutes
+export const revalidate = 300;
 
 // Server Component - runs on the server, faster initial page load
 export default async function PropertiesPage() {

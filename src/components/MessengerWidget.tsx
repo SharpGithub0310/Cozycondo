@@ -73,13 +73,13 @@ export default function MessengerWidget() {
         </div>
       </div>
 
-      {/* Main button */}
+      {/* Main button - animation only on initial render, stops on hover/interaction */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
           isOpen
             ? 'bg-[#5f4a38] rotate-0'
-            : 'bg-gradient-to-r from-[#0d9488] to-[#14b8a6] animate-pulse hover:animate-none'
+            : 'bg-gradient-to-r from-[#0d9488] to-[#14b8a6] hover:shadow-xl'
         }`}
         aria-label={isOpen ? 'Close contact panel' : 'Open contact panel'}
       >
