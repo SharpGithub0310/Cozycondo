@@ -231,6 +231,33 @@ export default function AdminCalendarPage() {
     });
   };
 
+  // Helper to format date as YYYY-MM-DD without timezone issues
+  const formatDateString = (year: number, month: number, day: number): string => {
+    const mm = String(month + 1).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    return `${year}-${mm}-${dd}`;
+  };
+
+  // Get today's date in Philippine timezone (Asia/Manila)
+  const getTodayPH = (): string => {
+    const now = new Date();
+    const phDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+    return formatDateString(phDate.getFullYear(), phDate.getMonth(), phDate.getDate());
+  };
+
+  // Format date for display in Philippine timezone
+  const formatDateForDisplay = (dateStr: string): string => {
+    // dateStr is YYYY-MM-DD, parse it directly to avoid timezone shift
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-PH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'Asia/Manila'
+    });
+  };
+
   // Generate calendar grid
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
@@ -244,11 +271,12 @@ export default function AdminCalendarPage() {
 
     // Previous month padding
     const prevMonth = new Date(year, month, 0);
+    const prevMonthYear = month === 0 ? year - 1 : year;
+    const prevMonthNum = month === 0 ? 11 : month - 1;
     for (let i = startPadding - 1; i >= 0; i--) {
       const day = prevMonth.getDate() - i;
-      const date = new Date(year, month - 1, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateString(prevMonthYear, prevMonthNum, day),
         day,
         isCurrentMonth: false,
       });
@@ -256,9 +284,8 @@ export default function AdminCalendarPage() {
 
     // Current month
     for (let day = 1; day <= totalDays; day++) {
-      const date = new Date(year, month, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateString(year, month, day),
         day,
         isCurrentMonth: true,
       });
@@ -266,10 +293,11 @@ export default function AdminCalendarPage() {
 
     // Next month padding
     const remaining = 42 - days.length; // 6 weeks
+    const nextMonthYear = month === 11 ? year + 1 : year;
+    const nextMonthNum = month === 11 ? 0 : month + 1;
     for (let day = 1; day <= remaining; day++) {
-      const date = new Date(year, month + 1, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateString(nextMonthYear, nextMonthNum, day),
         day,
         isCurrentMonth: false,
       });
@@ -344,7 +372,7 @@ export default function AdminCalendarPage() {
 
             {lastSync && (
               <span className="text-sm text-[#9a7d5e]">
-                Last synced: {new Date(lastSync).toLocaleString()}
+                Last synced: {new Date(lastSync).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
               </span>
             )}
           </div>
@@ -435,8 +463,9 @@ export default function AdminCalendarPage() {
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((dayInfo, index) => {
                   const event = getEventForDate(dayInfo.date);
-                  const isToday = dayInfo.date === new Date().toISOString().split('T')[0];
-                  const isPast = new Date(dayInfo.date) < new Date(new Date().toISOString().split('T')[0]);
+                  const todayPH = getTodayPH();
+                  const isToday = dayInfo.date === todayPH;
+                  const isPast = dayInfo.date < todayPH;
 
                   return (
                     <div
@@ -499,7 +528,7 @@ export default function AdminCalendarPage() {
                   <div>
                     <p className="text-[#5f4a38] font-medium">{event.title}</p>
                     <p className="text-sm text-[#7d6349]">
-                      {new Date(event.start_date).toLocaleDateString()} - {new Date(event.end_date).toLocaleDateString()}
+                      {formatDateForDisplay(event.start_date)} - {formatDateForDisplay(event.end_date)}
                     </p>
                   </div>
                 </div>
