@@ -29,6 +29,20 @@ function formatDateLocal(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// Normalize date string to YYYY-MM-DD format (handles various input formats)
+function normalizeDateStr(dateInput: string | Date): string {
+  if (typeof dateInput === 'string') {
+    // If already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+      return dateInput;
+    }
+    // Parse and format
+    const date = new Date(dateInput);
+    return formatDateLocal(date);
+  }
+  return formatDateLocal(dateInput);
+}
+
 export default function DatePicker({
   propertySlug,
   selectedDate,
@@ -75,24 +89,25 @@ export default function DatePicker({
     }
   }, [propertySlug]);
 
-  // Check if a date is blocked
+  // Check if a date is blocked (using string comparison for accuracy)
   const isDateBlocked = useCallback((dateStr: string): boolean => {
-    const date = new Date(dateStr);
+    const normalizedDate = normalizeDateStr(dateStr);
 
     for (const block of blockedDates) {
-      const blockStart = new Date(block.start_date);
-      const blockEnd = new Date(block.end_date);
+      const blockStart = normalizeDateStr(block.start_date);
+      const blockEnd = normalizeDateStr(block.end_date);
 
       // For check-in: blocked if date >= start AND date < end (checkout day is available for check-in)
-      // For check-out: blocked if date > start AND date <= end
+      // For check-out: blocked if date > start AND date < end
       if (isCheckOut) {
         // Check-out can be on checkout day but not during the stay
-        if (date > blockStart && date < blockEnd) {
+        if (normalizedDate > blockStart && normalizedDate < blockEnd) {
           return true;
         }
       } else {
         // Check-in cannot be on any day during the booking (including start, excluding end)
-        if (date >= blockStart && date < blockEnd) {
+        // Checkout day (blockEnd) is AVAILABLE for new check-in
+        if (normalizedDate >= blockStart && normalizedDate < blockEnd) {
           return true;
         }
       }
@@ -100,17 +115,43 @@ export default function DatePicker({
     return false;
   }, [blockedDates, isCheckOut]);
 
-  // Check if a date range would overlap with blocked dates
-  const wouldOverlapBlocked = useCallback((checkIn: string, checkOut: string): boolean => {
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
+  // Check if a date is a checkout day (end date of a booking) - these are AVAILABLE for new check-ins
+  const isCheckoutDay = useCallback((dateStr: string): boolean => {
+    const normalizedDate = normalizeDateStr(dateStr);
 
     for (const block of blockedDates) {
-      const blockStart = new Date(block.start_date);
-      const blockEnd = new Date(block.end_date);
+      const blockEnd = normalizeDateStr(block.end_date);
+      if (normalizedDate === blockEnd) {
+        return true;
+      }
+    }
+    return false;
+  }, [blockedDates]);
+
+  // Check if a date is a check-in day (start date of a booking) - blocked
+  const isCheckinDay = useCallback((dateStr: string): boolean => {
+    const normalizedDate = normalizeDateStr(dateStr);
+
+    for (const block of blockedDates) {
+      const blockStart = normalizeDateStr(block.start_date);
+      if (normalizedDate === blockStart) {
+        return true;
+      }
+    }
+    return false;
+  }, [blockedDates]);
+
+  // Check if a date range would overlap with blocked dates (using string comparison)
+  const wouldOverlapBlocked = useCallback((checkIn: string, checkOut: string): boolean => {
+    const startStr = normalizeDateStr(checkIn);
+    const endStr = normalizeDateStr(checkOut);
+
+    for (const block of blockedDates) {
+      const blockStart = normalizeDateStr(block.start_date);
+      const blockEnd = normalizeDateStr(block.end_date);
 
       // Check for overlap: start < blockEnd AND end > blockStart
-      if (start < blockEnd && end > blockStart) {
+      if (startStr < blockEnd && endStr > blockStart) {
         return true;
       }
     }
@@ -271,6 +312,8 @@ export default function DatePicker({
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((dayInfo, index) => {
               const isBlocked = isDateBlocked(dayInfo.date);
+              const isCheckout = isCheckoutDay(dayInfo.date);
+              const isCheckin = isCheckinDay(dayInfo.date);
               const isSelectable = isDateSelectable(dayInfo.date);
               const isSelected = dayInfo.date === selectedDate;
               const isToday = dayInfo.date === today;
@@ -288,15 +331,22 @@ export default function DatePicker({
                     ${!dayInfo.isCurrentMonth ? 'text-[#d4c4a8]' : ''}
                     ${isSelected ? 'bg-[#14b8a6] text-white font-medium' : ''}
                     ${isToday && !isSelected ? 'border-2 border-[#14b8a6]' : ''}
-                    ${isBlocked && dayInfo.isCurrentMonth ? 'bg-red-100 text-red-400 line-through cursor-not-allowed' : ''}
+                    ${isBlocked && dayInfo.isCurrentMonth && !isCheckout ? 'bg-red-100 text-red-400 line-through cursor-not-allowed' : ''}
+                    ${isCheckout && dayInfo.isCurrentMonth && !isSelected && !isPast ? 'bg-green-50 text-green-700 font-medium' : ''}
                     ${isPast && dayInfo.isCurrentMonth ? 'text-[#d4c4a8] cursor-not-allowed' : ''}
-                    ${isSelectable && !isSelected ? 'hover:bg-[#f0fdfb] cursor-pointer text-[#5f4a38]' : ''}
+                    ${isSelectable && !isSelected && !isCheckout ? 'hover:bg-[#f0fdfb] cursor-pointer text-[#5f4a38]' : ''}
+                    ${isSelectable && isCheckout && !isSelected ? 'hover:bg-green-100 cursor-pointer' : ''}
                     ${!isSelectable && !isBlocked && !isPast ? 'text-[#d4c4a8] cursor-not-allowed' : ''}
                     ${isInRange && !isSelected ? 'bg-[#f0fdfb]' : ''}
                   `}
                 >
                   {dayInfo.day}
-                  {isBlocked && dayInfo.isCurrentMonth && (
+                  {/* Green dot for checkout days (available for check-in) */}
+                  {isCheckout && dayInfo.isCurrentMonth && !isPast && !isSelected && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full" />
+                  )}
+                  {/* Red dot for blocked days */}
+                  {isBlocked && !isCheckout && dayInfo.isCurrentMonth && (
                     <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-400 rounded-full" />
                   )}
                 </button>
@@ -305,10 +355,14 @@ export default function DatePicker({
           </div>
 
           {/* Legend */}
-          <div className="mt-4 pt-3 border-t border-[#e8d4a8] flex items-center gap-4 text-xs text-[#7d6349]">
+          <div className="mt-4 pt-3 border-t border-[#e8d4a8] flex flex-wrap items-center gap-3 text-xs text-[#7d6349]">
             <div className="flex items-center gap-1">
               <span className="w-3 h-3 bg-red-100 rounded border border-red-200" />
-              <span>Unavailable</span>
+              <span>Booked</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-3 h-3 bg-green-50 rounded border border-green-200" />
+              <span>Open</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-3 h-3 bg-[#14b8a6] rounded" />
