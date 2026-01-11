@@ -401,44 +401,68 @@ export default function AdminCalendarPage() {
       {/* Property Selector & Sync */}
       <div className="admin-card">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="flex items-center gap-2">
-              <Home className="w-5 h-5 text-[#7d6349]" />
-              <select
-                value={selectedProperty}
-                onChange={(e) => setSelectedProperty(e.target.value)}
-                className="form-input min-w-[200px]"
-              >
-                <option value="">Select Property</option>
-                {properties.map((property) => (
-                  <option key={property.slug} value={property.slug}>
-                    {property.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {lastSync && (
-              <span className="text-sm text-[#9a7d5e]">
-                Last synced: {new Date(lastSync).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-              </span>
-            )}
+          <div className="flex items-center gap-2">
+            <Home className="w-5 h-5 text-[#7d6349]" />
+            <select
+              value={selectedProperty}
+              onChange={(e) => setSelectedProperty(e.target.value)}
+              className="form-input min-w-[200px]"
+            >
+              <option value="">Select Property</option>
+              {properties.map((property) => (
+                <option key={property.slug} value={property.slug}>
+                  {property.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <button
-            onClick={handleSync}
-            disabled={syncing || !selectedProperty || !selectedPropertyData?.airbnbIcalUrl}
-            className="btn-primary flex items-center gap-2 disabled:opacity-50"
-            title={!selectedPropertyData?.airbnbIcalUrl ? 'No Airbnb iCal URL configured' : ''}
-          >
-            {syncing ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <RefreshCw className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            {/* Last Sync Info */}
+            {selectedPropertyData?.airbnbIcalUrl && (
+              <div className="text-right">
+                {lastSync ? (
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-[#7d6349]">Last synced</span>
+                    <span className="text-sm font-medium text-[#5f4a38]">
+                      {new Date(lastSync).toLocaleString('en-PH', {
+                        timeZone: 'Asia/Manila',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-amber-600">Never synced</span>
+                )}
+              </div>
             )}
-            Sync from Airbnb
-          </button>
+
+            <button
+              onClick={handleSync}
+              disabled={syncing || !selectedProperty || !selectedPropertyData?.airbnbIcalUrl}
+              className="btn-primary flex items-center gap-2 disabled:opacity-50"
+              title={!selectedPropertyData?.airbnbIcalUrl ? 'No Airbnb iCal URL configured' : ''}
+            >
+              {syncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Sync Now
+            </button>
+          </div>
         </div>
+
+        {/* Auto-sync notice */}
+        {selectedPropertyData?.airbnbIcalUrl && (
+          <p className="mt-3 text-xs text-[#9a7d5e]">
+            Auto-syncs every hour from Airbnb calendar
+          </p>
+        )}
 
         {error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
