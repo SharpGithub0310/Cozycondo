@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
         map_url,
         airbnb_url,
         ical_url,
+        custom_reference,
         amenities,
         featured,
         active,
@@ -158,7 +159,8 @@ export async function GET(request: NextRequest) {
         slug: slug,
         displayOrder: prop.display_order || 0,
         createdAt: prop.created_at,
-        updatedAt: prop.updated_at
+        updatedAt: prop.updated_at,
+        customReference: prop.custom_reference || ''
       };
     });
 
@@ -256,6 +258,7 @@ export async function POST(request: NextRequest) {
             price_per_night: propertyData.pricePerNight || propertyData.price?.toString() || '',
             airbnb_url: propertyData.airbnbUrl || '',
             ical_url: propertyData.icalUrl || '',
+            custom_reference: propertyData.customReference || '',
             featured: propertyData.featured || false,
             active: propertyData.active !== false,
             amenities: propertyData.amenities || [],
@@ -289,6 +292,7 @@ export async function POST(request: NextRequest) {
             price_per_night: propertyData.pricePerNight || propertyData.price?.toString() || '',
             airbnb_url: propertyData.airbnbUrl || '',
             ical_url: propertyData.icalUrl || '',
+            custom_reference: propertyData.customReference || '',
             featured: propertyData.featured || false,
             active: propertyData.active !== false,
             amenities: propertyData.amenities || [],
@@ -413,6 +417,9 @@ export async function PUT(request: NextRequest) {
           case 'name':
           case 'title':
             dbUpdates.name = value;
+            break;
+          case 'customReference':
+            dbUpdates.custom_reference = value;
             break;
           default:
             dbUpdates[key] = value;
