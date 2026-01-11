@@ -79,7 +79,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const checkInParam = searchParams.get('checkIn') || '';
   const checkOutParam = searchParams.get('checkOut') || '';
   const guestsParam = parseInt(searchParams.get('guests') || '1', 10);
-  const parkingParam = searchParams.get('parking') === '1';
+  const parkingDaysParam = parseInt(searchParams.get('parkingDays') || '0', 10);
 
   // State
   const [propertySlug, setPropertySlug] = useState<string>('');
@@ -93,7 +93,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const [checkIn, setCheckIn] = useState(checkInParam);
   const [checkOut, setCheckOut] = useState(checkOutParam);
   const [guests, setGuests] = useState(guestsParam);
-  const [includeParking, setIncludeParking] = useState(parkingParam);
+  const [parkingDays, setParkingDays] = useState(parkingDaysParam);
   const [guestInfo, setGuestInfo] = useState<GuestInfo>({
     firstName: '',
     lastName: '',
@@ -152,7 +152,9 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const adminFeePercent = property?.adminFeePercent || 0;
   const subtotal = pricePerNight * nights;
   const adminFee = Math.round((subtotal * adminFeePercent) / 100);
-  const totalParkingFee = includeParking ? (parkingFee * nights) : 0;
+  // Ensure parkingDays doesn't exceed nights
+  const validParkingDays = Math.min(parkingDays, nights);
+  const totalParkingFee = parkingFee * validParkingDays;
   const total = subtotal + cleaningFee + totalParkingFee + adminFee;
 
   // Validation
@@ -222,7 +224,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
           checkIn,
           checkOut,
           numGuests: guests,
-          includeParking,
+          parkingDays: validParkingDays,
           guest: {
             firstName: guestInfo.firstName.trim(),
             lastName: guestInfo.lastName.trim(),
@@ -419,25 +421,25 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                     </select>
                   </div>
 
-                  {/* Parking Option (only show if parking fee is set) */}
-                  {parkingFee > 0 && (
+                  {/* Parking Option (only show if parking fee is set and nights selected) */}
+                  {parkingFee > 0 && nights > 0 && (
                     <div className="mb-6">
-                      <div className="flex items-center gap-3 p-4 rounded-xl border border-[#e8d4a8] bg-[#faf3e6]/30">
-                        <input
-                          type="checkbox"
-                          id="parking-option-form"
-                          checked={includeParking}
-                          onChange={(e) => setIncludeParking(e.target.checked)}
-                          className="w-5 h-5 rounded border-[#e8d4a8] text-[#14b8a6] focus:ring-[#14b8a6] cursor-pointer"
-                        />
-                        <label htmlFor="parking-option-form" className="flex-1 cursor-pointer">
-                          <div className="flex items-center gap-2 text-sm font-medium text-[#5f4a38]">
-                            <Car className="w-4 h-4 text-[#14b8a6]" />
-                            Include Parking
-                          </div>
-                          <p className="text-xs text-[#7d6349] mt-0.5">₱{parkingFee.toLocaleString()}/night {nights > 0 && `(₱${(parkingFee * nights).toLocaleString()} total)`}</p>
-                        </label>
-                      </div>
+                      <label className="block text-sm font-medium text-[#5f4a38] mb-2">
+                        <Car className="w-4 h-4 inline mr-2 text-[#14b8a6]" />
+                        Parking (₱{parkingFee.toLocaleString()}/day)
+                      </label>
+                      <select
+                        value={validParkingDays}
+                        onChange={(e) => setParkingDays(Number(e.target.value))}
+                        className="w-full px-4 py-3 rounded-xl border border-[#e8d4a8] bg-[#faf3e6]/50 text-[#5f4a38] focus:outline-none focus:ring-2 focus:ring-[#14b8a6] focus:border-transparent transition-all"
+                      >
+                        <option value={0}>No parking needed</option>
+                        {Array.from({ length: nights }, (_, i) => i + 1).map((day) => (
+                          <option key={day} value={day}>
+                            {day} {day === 1 ? 'day' : 'days'} - ₱{(parkingFee * day).toLocaleString()}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   )}
 
@@ -592,10 +594,10 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                         <span className="text-[#7d6349]">Email</span>
                         <span className="text-[#5f4a38]">{guestInfo.email}</span>
                       </div>
-                      {includeParking && parkingFee > 0 && (
+                      {validParkingDays > 0 && parkingFee > 0 && (
                         <div className="flex justify-between">
                           <span className="text-[#7d6349]">Parking</span>
-                          <span className="text-[#5f4a38]">₱{parkingFee.toLocaleString()}/night x {nights} = ₱{totalParkingFee.toLocaleString()}</span>
+                          <span className="text-[#5f4a38]">₱{parkingFee.toLocaleString()}/day x {validParkingDays} = ₱{totalParkingFee.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -713,9 +715,9 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                         <span className="text-[#5f4a38]">₱{cleaningFee.toLocaleString()}</span>
                       </div>
                     )}
-                    {includeParking && parkingFee > 0 && (
+                    {validParkingDays > 0 && parkingFee > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#7d6349]">Parking (₱{parkingFee.toLocaleString()} x {nights})</span>
+                        <span className="text-[#7d6349]">Parking (₱{parkingFee.toLocaleString()} x {validParkingDays} {validParkingDays === 1 ? 'day' : 'days'})</span>
                         <span className="text-[#5f4a38]">₱{totalParkingFee.toLocaleString()}</span>
                       </div>
                     )}

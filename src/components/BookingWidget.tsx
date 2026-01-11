@@ -30,7 +30,7 @@ export default function BookingWidget({
   const [checkIn, setCheckIn] = useState<string>('');
   const [checkOut, setCheckOut] = useState<string>('');
   const [guests, setGuests] = useState<number>(1);
-  const [includeParking, setIncludeParking] = useState<boolean>(false);
+  const [parkingDays, setParkingDays] = useState<number>(0);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,10 +73,10 @@ export default function BookingWidget({
 
   const nights = calculateNights();
 
-  // Calculate pricing (parking is optional, charged per night)
+  // Calculate pricing (parking is optional, charged per day selected)
   const subtotal = pricePerNight * nights;
   const adminFee = Math.round((subtotal * adminFeePercent) / 100);
-  const totalParkingFee = includeParking ? (parkingFee * nights) : 0;
+  const totalParkingFee = parkingFee * parkingDays;
   const total = subtotal + cleaningFee + totalParkingFee + adminFee;
 
   // Validation
@@ -164,7 +164,7 @@ export default function BookingWidget({
   };
 
   // Build booking URL with query parameters
-  const bookingUrl = `/book/${propertySlug}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&parking=${includeParking ? '1' : '0'}`;
+  const bookingUrl = `/book/${propertySlug}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&parkingDays=${parkingDays}`;
 
   // Show loading state while checking booking status
   if (!settingsLoaded) {
@@ -282,23 +282,30 @@ export default function BookingWidget({
           </select>
         </div>
 
-        {/* Parking Option (only show if parking fee is set) */}
-        {parkingFee > 0 && (
-          <div className="flex items-center gap-3 p-3 rounded-lg border border-[#e8d4a8] bg-[#faf3e6]/30">
-            <input
-              type="checkbox"
-              id="parking-option"
-              checked={includeParking}
-              onChange={(e) => setIncludeParking(e.target.checked)}
-              className="w-5 h-5 rounded border-[#e8d4a8] text-[#14b8a6] focus:ring-[#14b8a6] cursor-pointer"
-            />
-            <label htmlFor="parking-option" className="flex-1 cursor-pointer">
-              <div className="flex items-center gap-2 text-sm font-medium text-[#5f4a38]">
+        {/* Parking Option (only show if parking fee is set and nights selected) */}
+        {parkingFee > 0 && nights > 0 && (
+          <div className="p-3 rounded-lg border border-[#e8d4a8] bg-[#faf3e6]/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <Car className="w-4 h-4 text-[#14b8a6]" />
-                Include Parking
+                <div>
+                  <span className="text-sm font-medium text-[#5f4a38]">Parking</span>
+                  <p className="text-xs text-[#7d6349]">₱{parkingFee.toLocaleString()}/day</p>
+                </div>
               </div>
-              <p className="text-xs text-[#7d6349] mt-0.5">₱{parkingFee.toLocaleString()}/night</p>
-            </label>
+              <select
+                value={parkingDays}
+                onChange={(e) => setParkingDays(Number(e.target.value))}
+                className="px-3 py-1.5 rounded-lg border border-[#e8d4a8] bg-white text-[#5f4a38] text-sm focus:outline-none focus:ring-2 focus:ring-[#14b8a6]"
+              >
+                <option value={0}>No parking</option>
+                {Array.from({ length: nights }, (_, i) => i + 1).map((day) => (
+                  <option key={day} value={day}>
+                    {day} {day === 1 ? 'day' : 'days'} (₱{(parkingFee * day).toLocaleString()})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
 
@@ -368,9 +375,9 @@ export default function BookingWidget({
                 </div>
               )}
 
-              {includeParking && parkingFee > 0 && (
+              {parkingDays > 0 && parkingFee > 0 && (
                 <div className="flex justify-between text-[#7d6349]">
-                  <span>Parking (₱{parkingFee.toLocaleString()} x {nights} {nights === 1 ? 'night' : 'nights'})</span>
+                  <span>Parking (₱{parkingFee.toLocaleString()} x {parkingDays} {parkingDays === 1 ? 'day' : 'days'})</span>
                   <span>₱{totalParkingFee.toLocaleString()}</span>
                 </div>
               )}
