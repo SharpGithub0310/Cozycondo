@@ -15,24 +15,9 @@ interface ResourcePreloaderProps {
 
 export default function ResourcePreloader({ resources = [] }: ResourcePreloaderProps) {
   useEffect(() => {
-    // Default critical resources to preload
-    const defaultResources: PreloadResource[] = [
-      // Critical fonts (already handled in layout, but adding fallback)
-      {
-        href: 'https://fonts.gstatic.com/s/outfit/v11/QGYsz_wNahGiLawhBCJUJkMqgUUrbjJrG3Q.woff2',
-        as: 'font',
-        type: 'font/woff2',
-        crossOrigin: 'anonymous'
-      },
-      {
-        href: 'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFiD-vYSZviVYUb_rj3ij__anPXBYf9lWEe50PGUw.woff2',
-        as: 'font',
-        type: 'font/woff2',
-        crossOrigin: 'anonymous'
-      },
-      // Add any other critical resources
-      ...resources
-    ];
+    // Fonts are now self-hosted via next/font - no external preloading needed
+    // Only preload custom resources passed as props
+    const defaultResources: PreloadResource[] = [...resources];
 
     // Preload resources
     defaultResources.forEach((resource) => {
@@ -61,10 +46,8 @@ export default function ResourcePreloader({ resources = [] }: ResourcePreloaderP
       }
     });
 
-    // Preconnect to external domains
+    // Preconnect to external domains (only Supabase now - fonts are self-hosted)
     const domains = [
-      'https://fonts.googleapis.com',
-      'https://fonts.gstatic.com',
       'https://api.supabase.co'
     ];
 
@@ -74,9 +57,6 @@ export default function ResourcePreloader({ resources = [] }: ResourcePreloaderP
         const preconnectLink = document.createElement('link');
         preconnectLink.rel = 'preconnect';
         preconnectLink.href = domain;
-        if (domain.includes('fonts.gstatic.com')) {
-          preconnectLink.crossOrigin = 'anonymous';
-        }
         document.head.appendChild(preconnectLink);
       }
     });
