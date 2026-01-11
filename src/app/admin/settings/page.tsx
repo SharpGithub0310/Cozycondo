@@ -321,6 +321,47 @@ export default function AdminSettings() {
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
               Booking Settings
             </h3>
+
+            {/* Booking Enable/Disable Toggle */}
+            <div className="mb-6 p-4 bg-[#fefdfb] rounded-lg border border-[#faf3e6]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="font-medium text-[#5f4a38]">Online Booking</label>
+                  <p className="text-sm text-[#7d6349] mt-1">
+                    {settings.bookingEnabled !== false
+                      ? 'Guests can book properties directly on the website'
+                      : 'Booking is currently disabled for maintenance'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSettings({...settings, bookingEnabled: settings.bookingEnabled === false ? true : false})}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.bookingEnabled !== false ? 'bg-[#14b8a6]' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.bookingEnabled !== false ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {settings.bookingEnabled === false && (
+                <div className="mt-4">
+                  <label className="form-label">Message to Display</label>
+                  <input
+                    type="text"
+                    value={settings.bookingDisabledMessage || ''}
+                    onChange={(e) => setSettings({...settings, bookingDisabledMessage: e.target.value})}
+                    className="form-input"
+                    placeholder="e.g., Online booking is temporarily unavailable. Please contact us directly."
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="form-label flex items-center gap-2">

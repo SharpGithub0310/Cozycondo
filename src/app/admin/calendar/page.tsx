@@ -1,0 +1,588 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Loader2,
+  Home,
+  X,
+  Check,
+  AlertCircle
+} from 'lucide-react';
+
+interface Property {
+  id: string;
+  name: string;
+  slug: string;
+  airbnbIcalUrl?: string;
+  icalLastSync?: string;
+}
+
+interface CalendarEvent {
+  id: string;
+  property_id: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  source: 'airbnb' | 'manual' | 'booking';
+  booking_id?: string;
+  synced_at?: string;
+}
+
+export default function AdminCalendarPage() {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<string>('');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [blockEndDate, setBlockEndDate] = useState<string>('');
+  const [blockTitle, setBlockTitle] = useState('Blocked');
+  const [savingBlock, setSavingBlock] = useState(false);
+
+  // Fetch properties on mount
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await fetch('/api/properties');
+        if (response.ok) {
+          const data = await response.json();
+          const props = Object.values(data.data || {}) as Property[];
+          setProperties(props);
+          if (props.length > 0 && !selectedProperty) {
+            setSelectedProperty(props[0].slug);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch properties:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
+  }, []);
+
+  // Fetch events when property or month changes
+  useEffect(() => {
+    if (!selectedProperty) return;
+
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError(null);
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const startDate = new Date(year, month, 1).toISOString().split('T')[0];
+      const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+      try {
+        const response = await fetch(
+          `/api/calendar/events?propertyId=${selectedProperty}&startDate=${startDate}&endDate=${endDate}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setEvents(data.data || []);
+        } else {
+          setError('Failed to load calendar events');
+        }
+      } catch (err) {
+        setError('Failed to load calendar events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [selectedProperty, currentDate]);
+
+  // Update last sync when property changes
+  useEffect(() => {
+    const property = properties.find(p => p.slug === selectedProperty);
+    if (property?.icalLastSync) {
+      setLastSync(property.icalLastSync);
+    } else {
+      setLastSync(null);
+    }
+  }, [selectedProperty, properties]);
+
+  const handleSync = async () => {
+    if (!selectedProperty) return;
+
+    setSyncing(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-session': 'authenticated',
+        },
+        body: JSON.stringify({ propertyId: selectedProperty }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setLastSync(new Date().toISOString());
+        // Refresh events
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const startDate = new Date(year, month, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+        const eventsResponse = await fetch(
+          `/api/calendar/events?propertyId=${selectedProperty}&startDate=${startDate}&endDate=${endDate}`
+        );
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          setEvents(eventsData.data || []);
+        }
+      } else {
+        setError(data.error || 'Sync failed');
+      }
+    } catch (err) {
+      setError('Failed to sync calendar');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleDateClick = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    setBlockEndDate(dateStr);
+    setBlockTitle('Blocked');
+    setShowBlockModal(true);
+  };
+
+  const handleCreateBlock = async () => {
+    if (!selectedProperty || !selectedDate || !blockEndDate) return;
+
+    setSavingBlock(true);
+    try {
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-session': 'authenticated',
+        },
+        body: JSON.stringify({
+          propertyId: selectedProperty,
+          startDate: selectedDate,
+          endDate: blockEndDate,
+          title: blockTitle,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh events
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const startDate = new Date(year, month, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+        const eventsResponse = await fetch(
+          `/api/calendar/events?propertyId=${selectedProperty}&startDate=${startDate}&endDate=${endDate}`
+        );
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          setEvents(eventsData.data || []);
+        }
+        setShowBlockModal(false);
+      } else {
+        setError('Failed to create block');
+      }
+    } catch (err) {
+      setError('Failed to create block');
+    } finally {
+      setSavingBlock(false);
+    }
+  };
+
+  const handleDeleteBlock = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/calendar/events?id=${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-admin-session': 'authenticated',
+        },
+      });
+
+      if (response.ok) {
+        setEvents(events.filter(e => e.id !== eventId));
+      }
+    } catch (err) {
+      setError('Failed to delete block');
+    }
+  };
+
+  const navigateMonth = (direction: number) => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(newDate.getMonth() + direction);
+      return newDate;
+    });
+  };
+
+  // Generate calendar grid
+  const generateCalendarDays = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startPadding = firstDay.getDay();
+    const totalDays = lastDay.getDate();
+
+    const days: { date: string; day: number; isCurrentMonth: boolean }[] = [];
+
+    // Previous month padding
+    const prevMonth = new Date(year, month, 0);
+    for (let i = startPadding - 1; i >= 0; i--) {
+      const day = prevMonth.getDate() - i;
+      const date = new Date(year, month - 1, day);
+      days.push({
+        date: date.toISOString().split('T')[0],
+        day,
+        isCurrentMonth: false,
+      });
+    }
+
+    // Current month
+    for (let day = 1; day <= totalDays; day++) {
+      const date = new Date(year, month, day);
+      days.push({
+        date: date.toISOString().split('T')[0],
+        day,
+        isCurrentMonth: true,
+      });
+    }
+
+    // Next month padding
+    const remaining = 42 - days.length; // 6 weeks
+    for (let day = 1; day <= remaining; day++) {
+      const date = new Date(year, month + 1, day);
+      days.push({
+        date: date.toISOString().split('T')[0],
+        day,
+        isCurrentMonth: false,
+      });
+    }
+
+    return days;
+  };
+
+  const getEventForDate = (dateStr: string): CalendarEvent | null => {
+    return events.find(event => {
+      const start = event.start_date;
+      const end = event.end_date;
+      return dateStr >= start && dateStr < end;
+    }) || null;
+  };
+
+  const getEventColor = (source: string): string => {
+    switch (source) {
+      case 'booking':
+        return 'bg-green-500';
+      case 'airbnb':
+        return 'bg-blue-500';
+      case 'manual':
+        return 'bg-gray-500';
+      default:
+        return 'bg-gray-400';
+    }
+  };
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const calendarDays = generateCalendarDays();
+  const selectedPropertyData = properties.find(p => p.slug === selectedProperty);
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-[#5f4a38]">
+            Calendar Management
+          </h1>
+          <p className="text-[#7d6349] mt-1">
+            Manage property availability and sync with Airbnb
+          </p>
+        </div>
+      </div>
+
+      {/* Property Selector & Sync */}
+      <div className="admin-card">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="flex items-center gap-2">
+              <Home className="w-5 h-5 text-[#7d6349]" />
+              <select
+                value={selectedProperty}
+                onChange={(e) => setSelectedProperty(e.target.value)}
+                className="form-input min-w-[200px]"
+              >
+                <option value="">Select Property</option>
+                {properties.map((property) => (
+                  <option key={property.slug} value={property.slug}>
+                    {property.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {lastSync && (
+              <span className="text-sm text-[#9a7d5e]">
+                Last synced: {new Date(lastSync).toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          <button
+            onClick={handleSync}
+            disabled={syncing || !selectedProperty || !selectedPropertyData?.airbnbIcalUrl}
+            className="btn-primary flex items-center gap-2 disabled:opacity-50"
+            title={!selectedPropertyData?.airbnbIcalUrl ? 'No Airbnb iCal URL configured' : ''}
+          >
+            {syncing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            Sync from Airbnb
+          </button>
+        </div>
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Calendar */}
+      <div className="admin-card">
+        {/* Month Navigation */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigateMonth(-1)}
+            className="p-2 hover:bg-[#faf3e6] rounded-lg transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#5f4a38]" />
+          </button>
+
+          <h2 className="font-display text-xl font-semibold text-[#5f4a38]">
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h2>
+
+          <button
+            onClick={() => navigateMonth(1)}
+            className="p-2 hover:bg-[#faf3e6] rounded-lg transition-colors"
+          >
+            <ChevronRight className="w-5 h-5 text-[#5f4a38]" />
+          </button>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-4 mb-6 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-500"></div>
+            <span className="text-[#7d6349]">Booking</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-blue-500"></div>
+            <span className="text-[#7d6349]">Airbnb</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-gray-500"></div>
+            <span className="text-[#7d6349]">Manual Block</span>
+          </div>
+        </div>
+
+        {/* Calendar Grid */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-[#14b8a6]" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="min-w-[700px]">
+              {/* Day Headers */}
+              <div className="grid grid-cols-7 mb-2">
+                {dayNames.map((day) => (
+                  <div
+                    key={day}
+                    className="text-center text-sm font-medium text-[#7d6349] py-2"
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Days Grid */}
+              <div className="grid grid-cols-7 gap-1">
+                {calendarDays.map((dayInfo, index) => {
+                  const event = getEventForDate(dayInfo.date);
+                  const isToday = dayInfo.date === new Date().toISOString().split('T')[0];
+                  const isPast = new Date(dayInfo.date) < new Date(new Date().toISOString().split('T')[0]);
+
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        if (dayInfo.isCurrentMonth && !isPast && !event) {
+                          handleDateClick(dayInfo.date);
+                        }
+                      }}
+                      className={`
+                        relative aspect-square p-1 border rounded-lg
+                        ${dayInfo.isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
+                        ${isToday ? 'border-[#14b8a6] border-2' : 'border-[#faf3e6]'}
+                        ${dayInfo.isCurrentMonth && !isPast && !event ? 'cursor-pointer hover:bg-[#faf3e6]' : ''}
+                        ${isPast ? 'opacity-50' : ''}
+                      `}
+                    >
+                      <span
+                        className={`
+                          text-sm
+                          ${dayInfo.isCurrentMonth ? 'text-[#5f4a38]' : 'text-[#9a7d5e]'}
+                          ${isToday ? 'font-bold' : ''}
+                        `}
+                      >
+                        {dayInfo.day}
+                      </span>
+
+                      {event && (
+                        <div
+                          className={`
+                            absolute bottom-1 left-1 right-1 h-2 rounded
+                            ${getEventColor(event.source)}
+                          `}
+                          title={`${event.title} (${event.source})`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Events List */}
+      {events.length > 0 && (
+        <div className="admin-card">
+          <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+            Blocked Dates This Month
+          </h3>
+          <div className="space-y-2">
+            {events.map((event) => (
+              <div
+                key={event.id}
+                className="flex items-center justify-between p-3 bg-[#fefdfb] rounded-lg border border-[#faf3e6]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded ${getEventColor(event.source)}`} />
+                  <div>
+                    <p className="text-[#5f4a38] font-medium">{event.title}</p>
+                    <p className="text-sm text-[#7d6349]">
+                      {new Date(event.start_date).toLocaleDateString()} - {new Date(event.end_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                {event.source === 'manual' && (
+                  <button
+                    onClick={() => handleDeleteBlock(event.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete block"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Block Modal */}
+      {showBlockModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Block Dates
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="form-label">Start Date</label>
+                <input
+                  type="date"
+                  value={selectedDate || ''}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">End Date</label>
+                <input
+                  type="date"
+                  value={blockEndDate}
+                  onChange={(e) => setBlockEndDate(e.target.value)}
+                  min={selectedDate || ''}
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Reason (optional)</label>
+                <input
+                  type="text"
+                  value={blockTitle}
+                  onChange={(e) => setBlockTitle(e.target.value)}
+                  className="form-input"
+                  placeholder="e.g., Maintenance, Personal use"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowBlockModal(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateBlock}
+                disabled={savingBlock || !selectedDate || !blockEndDate}
+                className="btn-primary flex-1 flex items-center justify-center gap-2"
+              >
+                {savingBlock ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+                Block Dates
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -132,6 +132,9 @@ export interface WebsiteSettings {
   checkoutTime?: string;
   timezone?: string;
   currency?: string;
+  // Booking System
+  bookingEnabled?: boolean;
+  bookingDisabledMessage?: string;
   // Company/Site Information
   siteName?: string;
   siteTagline?: string;

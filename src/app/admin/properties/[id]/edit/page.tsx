@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Image, Trash2, Star } from 'lucide-react';
+import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Trash2, Star, DollarSign, Car, Percent, Calendar, Link, Hash, Tag } from 'lucide-react';
 // Using API endpoints instead of direct database calls
 
 export default function EditProperty() {
@@ -25,6 +25,16 @@ export default function EditProperty() {
     featuredPhotoIndex: 0,
     featured: false,
     active: true,
+    // New fields
+    propertyCode: '',
+    customReference: '',
+    cleaningFee: 0,
+    parkingFee: 0,
+    adminFeePercent: 0,
+    minNights: 1,
+    maxNights: 30,
+    airbnbUrl: '',
+    airbnbIcalUrl: '',
   });
 
   const [newAmenity, setNewAmenity] = useState('');
@@ -95,6 +105,16 @@ export default function EditProperty() {
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
           featured: propertyData.featured || false,
           active: propertyData.active !== false,
+          // New fields
+          propertyCode: propertyData.propertyCode || '',
+          customReference: propertyData.customReference || '',
+          cleaningFee: propertyData.cleaningFee || 0,
+          parkingFee: propertyData.parkingFee || 0,
+          adminFeePercent: propertyData.adminFeePercent || 0,
+          minNights: propertyData.minNights || 1,
+          maxNights: propertyData.maxNights || 30,
+          airbnbUrl: propertyData.airbnbUrl || '',
+          airbnbIcalUrl: propertyData.airbnbIcalUrl || '',
         });
       } catch (error) {
         console.error('Failed to load property:', error);
@@ -126,6 +146,15 @@ export default function EditProperty() {
         featuredPhotoIndex: property.featuredPhotoIndex,
         featured: property.featured || false,
         active: property.active !== false,
+        // New fields
+        customReference: property.customReference || '',
+        cleaningFee: property.cleaningFee || 0,
+        parkingFee: property.parkingFee || 0,
+        adminFeePercent: property.adminFeePercent || 0,
+        minNights: property.minNights || 1,
+        maxNights: property.maxNights || 30,
+        airbnbUrl: property.airbnbUrl || '',
+        airbnbIcalUrl: property.airbnbIcalUrl || '',
       };
 
       // Only include photos if they're changed (not empty or default)
@@ -217,6 +246,43 @@ export default function EditProperty() {
       {/* Property Form */}
       <div className="admin-card max-w-4xl">
         <form onSubmit={handleSave} className="space-y-8">
+          {/* Property ID */}
+          <div>
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Property ID
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Hash className="w-4 h-4" />
+                  Property ID
+                </label>
+                <input
+                  type="text"
+                  value={property.propertyCode || `PROP-${String(params.id).padStart(3, '0')}`}
+                  className="form-input bg-gray-50 cursor-not-allowed"
+                  disabled
+                  readOnly
+                />
+                <p className="text-xs text-[#9a7d5e] mt-1">Auto-generated property identifier</p>
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Custom Reference
+                </label>
+                <input
+                  type="text"
+                  value={property.customReference}
+                  onChange={(e) => setProperty({...property, customReference: e.target.value})}
+                  className="form-input"
+                  placeholder="e.g., Unit-A1, My Beach House"
+                />
+                <p className="text-xs text-[#9a7d5e] mt-1">Optional custom reference for your records</p>
+              </div>
+            </div>
+          </div>
+
           {/* Basic Information */}
           <div>
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
@@ -319,6 +385,101 @@ export default function EditProperty() {
                 />
               </div>
 
+            </div>
+          </div>
+
+          {/* Pricing & Fees */}
+          <div>
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Pricing & Fees
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Price per Night (₱)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={property.pricePerNight}
+                  onChange={(e) => setProperty({...property, pricePerNight: e.target.value})}
+                  className="form-input"
+                  placeholder="e.g., 2500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Cleaning Fee (₱)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={property.cleaningFee}
+                  onChange={(e) => setProperty({...property, cleaningFee: parseFloat(e.target.value) || 0})}
+                  className="form-input"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Car className="w-4 h-4" />
+                  Parking Fee (₱)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={property.parkingFee}
+                  onChange={(e) => setProperty({...property, parkingFee: parseFloat(e.target.value) || 0})}
+                  className="form-input"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Percent className="w-4 h-4" />
+                  Admin Fee (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={property.adminFeePercent}
+                  onChange={(e) => setProperty({...property, adminFeePercent: Math.min(100, parseFloat(e.target.value) || 0)})}
+                  className="form-input"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Min Nights
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={property.minNights}
+                  onChange={(e) => setProperty({...property, minNights: parseInt(e.target.value) || 1})}
+                  className="form-input"
+                  placeholder="1"
+                />
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Max Nights
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={property.maxNights}
+                  onChange={(e) => setProperty({...property, maxNights: parseInt(e.target.value) || 30})}
+                  className="form-input"
+                  placeholder="30"
+                />
+              </div>
             </div>
           </div>
 
@@ -571,6 +732,36 @@ export default function EditProperty() {
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
               External Links
             </h3>
+            <div className="grid md:grid-cols-1 gap-4">
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Link className="w-4 h-4" />
+                  Airbnb Listing URL
+                </label>
+                <input
+                  type="url"
+                  value={property.airbnbUrl}
+                  onChange={(e) => setProperty({...property, airbnbUrl: e.target.value})}
+                  className="form-input"
+                  placeholder="https://www.airbnb.com/rooms/..."
+                />
+                <p className="text-xs text-[#9a7d5e] mt-1">Optional - Link to your Airbnb listing</p>
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Airbnb iCal URL
+                </label>
+                <input
+                  type="url"
+                  value={property.airbnbIcalUrl}
+                  onChange={(e) => setProperty({...property, airbnbIcalUrl: e.target.value})}
+                  className="form-input"
+                  placeholder="https://www.airbnb.com/calendar/ical/..."
+                />
+                <p className="text-xs text-[#9a7d5e] mt-1">Optional - For syncing Airbnb calendar with this property</p>
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}

@@ -16,11 +16,17 @@ import {
   Globe,
   Bell,
   User,
+  TrendingUp,
+  CalendarDays,
+  ClipboardList,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Properties', href: '/admin/properties', icon: Building2 },
+  { name: 'Bookings', href: '/admin/bookings', icon: ClipboardList },
+  { name: 'Calendar', href: '/admin/calendar', icon: CalendarDays },
+  { name: 'Revenue', href: '/admin/revenue', icon: TrendingUp },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
