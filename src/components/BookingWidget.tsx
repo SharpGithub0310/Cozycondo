@@ -73,11 +73,11 @@ export default function BookingWidget({
 
   const nights = calculateNights();
 
-  // Calculate pricing (parking is optional)
+  // Calculate pricing (parking is optional, charged per night)
   const subtotal = pricePerNight * nights;
   const adminFee = Math.round((subtotal * adminFeePercent) / 100);
-  const actualParkingFee = includeParking ? parkingFee : 0;
-  const total = subtotal + cleaningFee + actualParkingFee + adminFee;
+  const totalParkingFee = includeParking ? (parkingFee * nights) : 0;
+  const total = subtotal + cleaningFee + totalParkingFee + adminFee;
 
   // Validation
   const isValidDateRange = nights >= minNights && nights <= maxNights;
@@ -297,7 +297,7 @@ export default function BookingWidget({
                 <Car className="w-4 h-4 text-[#14b8a6]" />
                 Include Parking
               </div>
-              <p className="text-xs text-[#7d6349] mt-0.5">+ ₱{parkingFee.toLocaleString()}</p>
+              <p className="text-xs text-[#7d6349] mt-0.5">₱{parkingFee.toLocaleString()}/night</p>
             </label>
           </div>
         )}
@@ -370,8 +370,8 @@ export default function BookingWidget({
 
               {includeParking && parkingFee > 0 && (
                 <div className="flex justify-between text-[#7d6349]">
-                  <span>Parking fee</span>
-                  <span>₱{parkingFee.toLocaleString()}</span>
+                  <span>Parking (₱{parkingFee.toLocaleString()} x {nights} {nights === 1 ? 'night' : 'nights'})</span>
+                  <span>₱{totalParkingFee.toLocaleString()}</span>
                 </div>
               )}
 

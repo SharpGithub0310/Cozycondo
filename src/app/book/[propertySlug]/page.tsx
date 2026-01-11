@@ -152,8 +152,8 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const adminFeePercent = property?.adminFeePercent || 0;
   const subtotal = pricePerNight * nights;
   const adminFee = Math.round((subtotal * adminFeePercent) / 100);
-  const actualParkingFee = includeParking ? parkingFee : 0;
-  const total = subtotal + cleaningFee + actualParkingFee + adminFee;
+  const totalParkingFee = includeParking ? (parkingFee * nights) : 0;
+  const total = subtotal + cleaningFee + totalParkingFee + adminFee;
 
   // Validation
   const validateGuestInfo = (): boolean => {
@@ -435,7 +435,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                             <Car className="w-4 h-4 text-[#14b8a6]" />
                             Include Parking
                           </div>
-                          <p className="text-xs text-[#7d6349] mt-0.5">+ ₱{parkingFee.toLocaleString()}</p>
+                          <p className="text-xs text-[#7d6349] mt-0.5">₱{parkingFee.toLocaleString()}/night {nights > 0 && `(₱${(parkingFee * nights).toLocaleString()} total)`}</p>
                         </label>
                       </div>
                     </div>
@@ -595,7 +595,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                       {includeParking && parkingFee > 0 && (
                         <div className="flex justify-between">
                           <span className="text-[#7d6349]">Parking</span>
-                          <span className="text-[#5f4a38]">Included (₱{parkingFee.toLocaleString()})</span>
+                          <span className="text-[#5f4a38]">₱{parkingFee.toLocaleString()}/night x {nights} = ₱{totalParkingFee.toLocaleString()}</span>
                         </div>
                       )}
                     </div>
@@ -715,8 +715,8 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                     )}
                     {includeParking && parkingFee > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#7d6349]">Parking fee</span>
-                        <span className="text-[#5f4a38]">₱{parkingFee.toLocaleString()}</span>
+                        <span className="text-[#7d6349]">Parking (₱{parkingFee.toLocaleString()} x {nights})</span>
+                        <span className="text-[#5f4a38]">₱{totalParkingFee.toLocaleString()}</span>
                       </div>
                     )}
                     {adminFee > 0 && (
