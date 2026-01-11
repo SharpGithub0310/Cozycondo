@@ -314,6 +314,46 @@ export default function AdminCalendarPage() {
     return days;
   };
 
+  // Determine what type of event day this is
+  type DayType = 'checkin' | 'middle' | 'checkout' | 'single' | null;
+
+  const getEventInfo = (dateStr: string): { event: CalendarEvent | null; dayType: DayType } => {
+    // Check if this is a checkout day (end_date of any event)
+    const checkoutEvent = events.find(event => event.end_date === dateStr);
+    if (checkoutEvent) {
+      return { event: checkoutEvent, dayType: 'checkout' };
+    }
+
+    // Check if this date falls within an event
+    const activeEvent = events.find(event => {
+      return dateStr >= event.start_date && dateStr < event.end_date;
+    });
+
+    if (!activeEvent) {
+      return { event: null, dayType: null };
+    }
+
+    // Check if it's a single night (start_date + 1 day = end_date)
+    const startParts = activeEvent.start_date.split('-').map(Number);
+    const startDate = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+    const nextDay = new Date(startDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const nextDayStr = formatDateString(nextDay.getFullYear(), nextDay.getMonth(), nextDay.getDate());
+
+    if (nextDayStr === activeEvent.end_date) {
+      // Single night booking
+      return { event: activeEvent, dayType: 'single' };
+    }
+
+    // Check if it's check-in day
+    if (dateStr === activeEvent.start_date) {
+      return { event: activeEvent, dayType: 'checkin' };
+    }
+
+    // It's a middle day
+    return { event: activeEvent, dayType: 'middle' };
+  };
+
   const getEventForDate = (dateStr: string): CalendarEvent | null => {
     return events.find(event => {
       const start = event.start_date;
@@ -445,6 +485,20 @@ export default function AdminCalendarPage() {
             <div className="w-4 h-4 rounded bg-gray-500"></div>
             <span className="text-[#7d6349]">Manual Block</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-4 h-4 rounded"
+              style={{ background: 'linear-gradient(135deg, transparent 50%, #3b82f6 50%)' }}
+            ></div>
+            <span className="text-[#7d6349]">Check-in</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-4 h-4 rounded"
+              style={{ background: 'linear-gradient(135deg, #3b82f6 50%, transparent 50%)' }}
+            ></div>
+            <span className="text-[#7d6349]">Check-out</span>
+          </div>
         </div>
 
         {/* Calendar Grid */}
@@ -470,32 +524,78 @@ export default function AdminCalendarPage() {
               {/* Days Grid */}
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((dayInfo, index) => {
-                  const event = getEventForDate(dayInfo.date);
+                  const { event, dayType } = getEventInfo(dayInfo.date);
                   const todayPH = getTodayPH();
                   const isToday = dayInfo.date === todayPH;
                   const isPast = dayInfo.date < todayPH;
+
+                  // Determine if day is available (checkout day is available for new booking)
+                  const isAvailable = !event || dayType === 'checkout';
+
+                  // Get the base color for the event
+                  const getColorHex = (source: string): string => {
+                    switch (source) {
+                      case 'booking': return '#22c55e'; // green-500
+                      case 'airbnb': return '#3b82f6';  // blue-500
+                      case 'manual': return '#6b7280';  // gray-500
+                      default: return '#9ca3af';        // gray-400
+                    }
+                  };
+
+                  // Get background style based on day type
+                  const getBackgroundStyle = (): React.CSSProperties | undefined => {
+                    if (!event || !dayType) return undefined;
+
+                    const color = getColorHex(event.source);
+
+                    switch (dayType) {
+                      case 'checkin':
+                        // Bottom-right filled (guest arrives)
+                        return { background: `linear-gradient(135deg, transparent 50%, ${color} 50%)` };
+                      case 'checkout':
+                        // Top-left filled (guest leaves, day available)
+                        return { background: `linear-gradient(135deg, ${color} 50%, transparent 50%)` };
+                      case 'middle':
+                        // Fully filled
+                        return { backgroundColor: color };
+                      case 'single':
+                        // Single night - show both diagonals
+                        return { backgroundColor: color };
+                      default:
+                        return undefined;
+                    }
+                  };
+
+                  const bgStyle = getBackgroundStyle();
 
                   return (
                     <div
                       key={index}
                       onClick={() => {
-                        if (dayInfo.isCurrentMonth && !isPast && !event) {
+                        if (dayInfo.isCurrentMonth && !isPast && isAvailable) {
                           handleDateClick(dayInfo.date);
                         }
                       }}
                       className={`
-                        relative aspect-square p-1 border rounded-lg
-                        ${dayInfo.isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
+                        relative aspect-square p-1 border rounded-lg overflow-hidden
+                        ${dayInfo.isCurrentMonth ? '' : 'bg-gray-50'}
                         ${isToday ? 'border-[#14b8a6] border-2' : 'border-[#faf3e6]'}
-                        ${dayInfo.isCurrentMonth && !isPast && !event ? 'cursor-pointer hover:bg-[#faf3e6]' : ''}
+                        ${dayInfo.isCurrentMonth && !isPast && isAvailable ? 'cursor-pointer hover:bg-[#faf3e6]' : ''}
                         ${isPast ? 'opacity-50' : ''}
                       `}
+                      style={bgStyle}
                     >
+                      {/* White background layer for days without events or partial days */}
+                      {dayInfo.isCurrentMonth && (!bgStyle || dayType === 'checkin' || dayType === 'checkout') && (
+                        <div className="absolute inset-0 bg-white -z-10" />
+                      )}
+
                       <span
                         className={`
-                          text-sm
+                          relative z-10 text-sm
                           ${dayInfo.isCurrentMonth ? 'text-[#5f4a38]' : 'text-[#9a7d5e]'}
                           ${isToday ? 'font-bold' : ''}
+                          ${dayType === 'middle' || dayType === 'single' ? 'text-white' : ''}
                         `}
                       >
                         {dayInfo.day}
@@ -503,12 +603,14 @@ export default function AdminCalendarPage() {
 
                       {event && (
                         <div
-                          className={`
-                            absolute bottom-1 left-1 right-1 h-2 rounded
-                            ${getEventColor(event.source)}
-                          `}
+                          className="absolute bottom-0 left-0 right-0 text-[8px] truncate px-0.5 text-center"
+                          style={{
+                            color: dayType === 'middle' || dayType === 'single' ? 'white' : getColorHex(event.source)
+                          }}
                           title={`${event.title} (${event.source})`}
-                        />
+                        >
+                          {dayType === 'checkin' ? 'IN' : dayType === 'checkout' ? 'OUT' : ''}
+                        </div>
                       )}
                     </div>
                   );
