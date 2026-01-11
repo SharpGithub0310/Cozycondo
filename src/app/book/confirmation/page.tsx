@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -33,7 +33,29 @@ interface BookingData {
   status: string;
 }
 
+// Loading fallback for Suspense
+function ConfirmationLoading() {
+  return (
+    <div className="min-h-screen bg-[#fefdfb] flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-12 h-12 text-[#14b8a6] animate-spin mx-auto mb-4" />
+        <p className="text-[#7d6349]">Loading your booking...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main page wrapper with Suspense
 export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<ConfirmationLoading />}>
+      <ConfirmationContent />
+    </Suspense>
+  );
+}
+
+// Inner component that uses useSearchParams
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const bookingNumber = searchParams.get('booking');
   const paymentStatus = searchParams.get('status');

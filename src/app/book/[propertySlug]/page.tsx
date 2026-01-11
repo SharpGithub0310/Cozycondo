@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -47,7 +47,29 @@ interface GuestInfo {
 
 type BookingStep = 'confirm' | 'guest' | 'requests' | 'payment';
 
+// Loading fallback for Suspense
+function BookingLoading() {
+  return (
+    <div className="min-h-screen bg-[#fefdfb] flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-12 h-12 text-[#14b8a6] animate-spin mx-auto mb-4" />
+        <p className="text-[#7d6349]">Loading booking...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main page wrapper with Suspense
 export default function BookingPage({ params }: { params: Promise<{ propertySlug: string }> }) {
+  return (
+    <Suspense fallback={<BookingLoading />}>
+      <BookingContent params={params} />
+    </Suspense>
+  );
+}
+
+// Inner component that uses useSearchParams
+function BookingContent({ params }: { params: Promise<{ propertySlug: string }> }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
