@@ -1,9 +1,25 @@
 import type { Metadata } from "next";
+import { Outfit, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import CriticalCSS from "@/components/CriticalCSS";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import ResourcePreloader from "@/components/ResourcePreloader";
+
+// Self-hosted fonts via next/font (no external requests)
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -41,20 +57,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`scroll-smooth ${outfit.variable} ${playfair.variable}`}>
       <head>
-        {/* Optimized font loading with display=swap and preload */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
-          as="style"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
-        />
         <link rel="dns-prefetch" href="https://api.supabase.co" />
         <link rel="dns-prefetch" href="https://www.facebook.com" />
       </head>

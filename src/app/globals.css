@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  /* Premium Font Stack */
-  --font-playfair: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-outfit: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  /* Font fallbacks (next/font handles primary fonts via CSS variables) */
+  --font-fallback-serif: Georgia, 'Times New Roman', serif;
+  --font-fallback-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Enhanced Color System */
   --color-primary-25: #f7fffe;
@@ -196,12 +196,13 @@ html {
 }
 
 /* Typography utilities */
-.font-display {
-  font-family: var(--font-playfair);
+.font-display,
+.font-heading {
+  font-family: var(--font-playfair), var(--font-fallback-serif);
 }
 
 .font-body {
-  font-family: var(--font-outfit);
+  font-family: var(--font-outfit), var(--font-fallback-sans);
 }
 
 /* Responsive typography utilities */
