@@ -21,6 +21,14 @@ interface DatePickerProps {
   checkInDate?: string;
 }
 
+// Format date as YYYY-MM-DD without timezone conversion
+function formatDateLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function DatePicker({
   propertySlug,
   selectedDate,
@@ -48,7 +56,7 @@ export default function DatePicker({
         endDate.setMonth(endDate.getMonth() + 6);
 
         const response = await fetch(
-          `/api/calendar/events?propertyId=${propertySlug}&startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`
+          `/api/calendar/events?propertyId=${propertySlug}&startDate=${formatDateLocal(startDate)}&endDate=${formatDateLocal(endDate)}`
         );
 
         if (response.ok) {
@@ -137,7 +145,7 @@ export default function DatePicker({
       const day = prevMonth.getDate() - i;
       const date = new Date(year, month - 1, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateLocal(date),
         day,
         isCurrentMonth: false,
       });
@@ -147,7 +155,7 @@ export default function DatePicker({
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateLocal(date),
         day,
         isCurrentMonth: true,
       });
@@ -158,7 +166,7 @@ export default function DatePicker({
     for (let day = 1; day <= remaining; day++) {
       const date = new Date(year, month + 1, day);
       days.push({
-        date: date.toISOString().split('T')[0],
+        date: formatDateLocal(date),
         day,
         isCurrentMonth: false,
       });
@@ -168,7 +176,7 @@ export default function DatePicker({
   };
 
   const calendarDays = getCalendarDays();
-  const today = new Date().toISOString().split('T')[0];
+  const today = formatDateLocal(new Date());
 
   // Check if date is selectable
   const isDateSelectable = (dateStr: string): boolean => {
