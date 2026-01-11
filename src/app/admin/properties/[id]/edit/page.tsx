@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Trash2, Star, DollarSign, Car, Percent, Calendar, Link, Hash, Tag } from 'lucide-react';
+import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Trash2, Star, DollarSign, Car, Percent, Calendar, Link, Hash } from 'lucide-react';
 // Using API endpoints instead of direct database calls
 
 export default function EditProperty() {
@@ -26,7 +26,6 @@ export default function EditProperty() {
     featured: false,
     active: true,
     // New fields
-    propertyCode: '',
     customReference: '',
     cleaningFee: 0,
     parkingFee: 0,
@@ -106,7 +105,6 @@ export default function EditProperty() {
           featured: propertyData.featured || false,
           active: propertyData.active !== false,
           // New fields
-          propertyCode: propertyData.propertyCode || '',
           customReference: propertyData.customReference || '',
           cleaningFee: propertyData.cleaningFee || 0,
           parkingFee: propertyData.parkingFee || 0,
@@ -259,26 +257,12 @@ export default function EditProperty() {
                 </label>
                 <input
                   type="text"
-                  value={property.propertyCode || `PROP-${String(params.id).padStart(3, '0')}`}
-                  className="form-input bg-gray-50 cursor-not-allowed"
-                  disabled
-                  readOnly
-                />
-                <p className="text-xs text-[#9a7d5e] mt-1">Auto-generated property identifier</p>
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  Custom Reference
-                </label>
-                <input
-                  type="text"
                   value={property.customReference}
                   onChange={(e) => setProperty({...property, customReference: e.target.value})}
                   className="form-input"
-                  placeholder="e.g., Unit-A1, My Beach House"
+                  placeholder="e.g., Unit-A1, PROP-001"
                 />
-                <p className="text-xs text-[#9a7d5e] mt-1">Optional custom reference for your records</p>
+                <p className="text-xs text-[#9a7d5e] mt-1">Your reference ID for this property</p>
               </div>
             </div>
           </div>

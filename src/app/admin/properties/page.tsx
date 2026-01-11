@@ -52,7 +52,7 @@ const PropertyRow = ({ property, onToggleFeatured, onToggleActive, isUpdating }:
           <div className="min-w-0 flex-1">
             <p className="font-medium text-[#5f4a38] truncate">{property.name}</p>
             {property.customReference && (
-              <p className="text-xs text-[#9a7d5e] truncate">Ref: {property.customReference}</p>
+              <p className="text-xs text-[#9a7d5e] truncate">ID: {property.customReference}</p>
             )}
           </div>
         </div>
@@ -148,7 +148,7 @@ const PropertyCard = ({ property, onToggleFeatured, onToggleActive, isUpdating }
           <div className="min-w-0 flex-1">
             <h3 className="font-medium text-[#5f4a38] truncate">{property.name}</h3>
             {property.customReference && (
-              <p className="text-xs text-[#9a7d5e] truncate">Ref: {property.customReference}</p>
+              <p className="text-xs text-[#9a7d5e] truncate">ID: {property.customReference}</p>
             )}
           </div>
         </div>

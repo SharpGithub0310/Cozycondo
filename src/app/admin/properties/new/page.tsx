@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Save, Upload, X, Plus, MapPin, Home, Users, Bed, Image, Trash2 } from 'lucide-react';
+import { Save, Upload, X, Plus, MapPin, Home, Users, Bed, Image, Trash2, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function NewProperty() {
@@ -18,6 +18,7 @@ export default function NewProperty() {
     location: '',
     amenities: [] as string[],
     photos: [] as string[],
+    customReference: '',
   });
 
   const [newAmenity, setNewAmenity] = useState('');
@@ -52,6 +53,7 @@ export default function NewProperty() {
         photos: property.photos || [],
         featured: false,
         active: true,
+        customReference: property.customReference || '',
       };
 
       // Create property via API POST endpoint
@@ -123,6 +125,29 @@ export default function NewProperty() {
       {/* Property Form */}
       <div className="admin-card max-w-4xl">
         <form onSubmit={handleSave} className="space-y-8">
+          {/* Property ID */}
+          <div>
+            <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
+              Property ID
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Hash className="w-4 h-4" />
+                  Property ID
+                </label>
+                <input
+                  type="text"
+                  value={property.customReference}
+                  onChange={(e) => setProperty({...property, customReference: e.target.value})}
+                  className="form-input"
+                  placeholder="e.g., Unit-A1, PROP-001"
+                />
+                <p className="text-xs text-[#9a7d5e] mt-1">Your reference ID for this property</p>
+              </div>
+            </div>
+          </div>
+
           {/* Basic Information */}
           <div>
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">

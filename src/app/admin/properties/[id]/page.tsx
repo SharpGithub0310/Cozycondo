@@ -14,7 +14,8 @@ import {
   Eye,
   Clock,
   Home,
-  Calendar
+  Calendar,
+  Hash
 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
 
@@ -63,6 +64,7 @@ export default function PropertyDetail() {
         status: propertyData.active !== false ? 'active' : 'inactive',
         featured: propertyData.featured || false,
         featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
+        customReference: propertyData.customReference || (propertyData as any).custom_reference || '',
       };
 
       setProperty(transformedProperty);
@@ -156,9 +158,15 @@ export default function PropertyDetail() {
                   <Home className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-display text-3xl font-bold text-[#5f4a38] mb-2">
+                  <h1 className="font-display text-3xl font-bold text-[#5f4a38] mb-1">
                     {property.name}
                   </h1>
+                  {property.customReference && (
+                    <p className="text-[#9a7d5e] flex items-center gap-1 text-sm mb-2">
+                      <Hash className="w-4 h-4" />
+                      ID: {property.customReference}
+                    </p>
+                  )}
                   <p className="text-[#7d6349] flex items-center gap-2 text-lg">
                     <MapPin className="w-5 h-5" />
                     {property.location}
