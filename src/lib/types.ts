@@ -41,6 +41,7 @@ export interface PropertyData {
   images?: string[]; // Alternative image field for compatibility
   featuredPhotoIndex: number;
   updatedAt?: string;
+  customReference?: string; // User-defined property ID
 }
 
 export interface PropertyPhoto {
