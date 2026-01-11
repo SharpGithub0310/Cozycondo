@@ -247,27 +247,51 @@ export async function PUT(
             dbUpdates.airbnb_url = value;
             break;
           case 'icalUrl':
+          case 'airbnbIcalUrl':
             dbUpdates.ical_url = value;
             break;
           case 'featuredPhotoIndex':
             dbUpdates.featured_photo_index = value;
             break;
           case 'size':
-          case 'area': // Map area field to size_sqm database column
+          case 'area':
             dbUpdates.size_sqm = value;
             break;
           case 'name':
           case 'title':
             dbUpdates.name = value;
             break;
+          case 'customReference':
+            dbUpdates.custom_reference = value;
+            break;
+          case 'cleaningFee':
+            dbUpdates.cleaning_fee = value;
+            break;
+          case 'parkingFee':
+            dbUpdates.parking_fee = value;
+            break;
+          case 'adminFeePercent':
+            dbUpdates.admin_fee_percent = value;
+            break;
+          case 'minNights':
+            dbUpdates.min_nights = value;
+            break;
+          case 'maxNights':
+            dbUpdates.max_nights = value;
+            break;
+          case 'propertyCode':
+            // Property code is auto-generated, skip manual updates
+            break;
           case 'images':
           case 'photos':
             // Handle photo updates separately
             break;
           case 'id':
+          case 'uuid':
           case 'areaUnit':
           case 'priceUnit':
           case 'updatedAt':
+          case 'createdAt':
             // Skip these fields - they don't need database updates
             break;
           default:
