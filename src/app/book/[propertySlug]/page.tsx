@@ -19,6 +19,7 @@ import {
   User,
   Car,
 } from 'lucide-react';
+import DatePicker from '@/components/DatePicker';
 
 interface PropertyData {
   id: string;
@@ -376,32 +377,28 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                   <h2 className="font-heading text-2xl text-[#5f4a38] mb-6">Confirm Your Dates</h2>
 
                   <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium text-[#5f4a38] mb-2">
-                        <Calendar className="w-4 h-4 inline mr-2 text-[#14b8a6]" />
-                        Check-in
-                      </label>
-                      <input
-                        type="date"
-                        value={checkIn}
-                        onChange={(e) => setCheckIn(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-4 py-3 rounded-xl border border-[#e8d4a8] bg-[#faf3e6]/50 text-[#5f4a38] focus:outline-none focus:ring-2 focus:ring-[#14b8a6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#5f4a38] mb-2">
-                        <Calendar className="w-4 h-4 inline mr-2 text-[#14b8a6]" />
-                        Check-out
-                      </label>
-                      <input
-                        type="date"
-                        value={checkOut}
-                        onChange={(e) => setCheckOut(e.target.value)}
-                        min={checkIn || new Date().toISOString().split('T')[0]}
-                        className="w-full px-4 py-3 rounded-xl border border-[#e8d4a8] bg-[#faf3e6]/50 text-[#5f4a38] focus:outline-none focus:ring-2 focus:ring-[#14b8a6] focus:border-transparent transition-all"
-                      />
-                    </div>
+                    <DatePicker
+                      propertySlug={propertySlug}
+                      selectedDate={checkIn}
+                      onDateSelect={(date) => {
+                        setCheckIn(date);
+                        // Reset checkout if it's before the new check-in
+                        if (checkOut && new Date(checkOut) <= new Date(date)) {
+                          setCheckOut('');
+                        }
+                      }}
+                      minDate={new Date().toISOString().split('T')[0]}
+                      label="Check-in"
+                    />
+                    <DatePicker
+                      propertySlug={propertySlug}
+                      selectedDate={checkOut}
+                      onDateSelect={(date) => setCheckOut(date)}
+                      minDate={checkIn || new Date().toISOString().split('T')[0]}
+                      label="Check-out"
+                      isCheckOut={true}
+                      checkInDate={checkIn}
+                    />
                   </div>
 
                   <div className="mb-6">

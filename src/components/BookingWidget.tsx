@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Calendar, Users, DollarSign, AlertCircle, CheckCircle, Loader2, MessageCircle, Car } from 'lucide-react';
+import DatePicker from './DatePicker';
 
 interface BookingWidgetProps {
   propertySlug: string;
@@ -226,39 +227,40 @@ export default function BookingWidget({
 
       {/* Form */}
       <div className="p-6 space-y-4">
-        {/* Date Inputs */}
+        {/* Date Inputs with Calendar showing blocked dates */}
         <div className="grid grid-cols-2 gap-3">
           {/* Check-in */}
-          <div>
-            <label className="block text-sm font-medium text-[#5f4a38] mb-1.5">
-              <Calendar className="w-4 h-4 inline mr-1.5 text-[#14b8a6]" />
-              Check-in
-            </label>
-            <input
-              type="date"
-              value={checkIn}
-              onChange={handleCheckInChange}
-              min={today}
-              className="w-full px-3 py-2.5 rounded-lg border border-[#e8d4a8] bg-[#faf3e6]/50 text-[#5f4a38] focus:outline-none focus:ring-2 focus:ring-[#14b8a6] focus:border-transparent transition-all text-sm"
-            />
-          </div>
+          <DatePicker
+            propertySlug={propertySlug}
+            selectedDate={checkIn}
+            onDateSelect={(date) => {
+              setCheckIn(date);
+              // Reset checkout if it's before the new check-in
+              if (checkOut && new Date(checkOut) <= new Date(date)) {
+                setCheckOut('');
+              }
+              setIsAvailable(null);
+              setError(null);
+            }}
+            minDate={today}
+            label="Check-in"
+          />
 
           {/* Check-out */}
-          <div>
-            <label className="block text-sm font-medium text-[#5f4a38] mb-1.5">
-              <Calendar className="w-4 h-4 inline mr-1.5 text-[#14b8a6]" />
-              Check-out
-            </label>
-            <input
-              type="date"
-              value={checkOut}
-              onChange={handleCheckOutChange}
-              min={getMinCheckoutDate()}
-              max={getMaxCheckoutDate()}
-              disabled={!checkIn}
-              className="w-full px-3 py-2.5 rounded-lg border border-[#e8d4a8] bg-[#faf3e6]/50 text-[#5f4a38] focus:outline-none focus:ring-2 focus:ring-[#14b8a6] focus:border-transparent transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
+          <DatePicker
+            propertySlug={propertySlug}
+            selectedDate={checkOut}
+            onDateSelect={(date) => {
+              setCheckOut(date);
+              setIsAvailable(null);
+              setError(null);
+            }}
+            minDate={getMinCheckoutDate()}
+            maxDate={getMaxCheckoutDate()}
+            label="Check-out"
+            isCheckOut={true}
+            checkInDate={checkIn}
+          />
         </div>
 
         {/* Guest Selector */}
