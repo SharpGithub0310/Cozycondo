@@ -51,7 +51,9 @@ const PropertyRow = ({ property, onToggleFeatured, onToggleActive, isUpdating }:
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-medium text-[#5f4a38] truncate">{property.name}</p>
-            <p className="text-xs text-[#9a7d5e] truncate">ID: {property.id}</p>
+            {property.customReference && (
+              <p className="text-xs text-[#9a7d5e] truncate">Ref: {property.customReference}</p>
+            )}
           </div>
         </div>
       </td>
@@ -145,7 +147,9 @@ const PropertyCard = ({ property, onToggleFeatured, onToggleActive, isUpdating }
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-medium text-[#5f4a38] truncate">{property.name}</h3>
-            <p className="text-xs text-[#9a7d5e] truncate">ID: {property.id}</p>
+            {property.customReference && (
+              <p className="text-xs text-[#9a7d5e] truncate">Ref: {property.customReference}</p>
+            )}
           </div>
         </div>
 
@@ -365,6 +369,7 @@ export default function PropertiesPage() {
         featured: property.featured ?? false,
         active: property.active ?? true,
         airbnbUrl: property.airbnbUrl || '',
+        customReference: property.customReference || '',
         // Only store essential data, not heavy image arrays
         imageCount: Array.isArray(property.images) ? property.images.length : 0
       }));
