@@ -59,10 +59,15 @@ export async function GET(request: NextRequest) {
         location,
         address,
         price_per_night,
+        cleaning_fee,
+        parking_fee,
+        admin_fee_percent,
+        min_nights,
+        max_nights,
+        custom_reference,
         map_url,
         airbnb_url,
         ical_url,
-        custom_reference,
         amenities,
         featured,
         active,
@@ -146,6 +151,12 @@ export async function GET(request: NextRequest) {
         price: parseFloat(prop.price_per_night || '0'),
         priceUnit: 'PHP/night',
         pricePerNight: prop.price_per_night || '',
+        cleaningFee: parseFloat(prop.cleaning_fee || '0'),
+        parkingFee: parseFloat(prop.parking_fee || '0'),
+        adminFeePercent: parseFloat(prop.admin_fee_percent || '0'),
+        minNights: prop.min_nights || 1,
+        maxNights: prop.max_nights || 30,
+        customReference: prop.custom_reference || '',
         airbnbUrl: prop.airbnb_url || '',
         airbnbIcalUrl: prop.ical_url || '',
         icalUrl: prop.ical_url || '', // Legacy compatibility
@@ -159,8 +170,7 @@ export async function GET(request: NextRequest) {
         slug: slug,
         displayOrder: prop.display_order || 0,
         createdAt: prop.created_at,
-        updatedAt: prop.updated_at,
-        customReference: prop.custom_reference || ''
+        updatedAt: prop.updated_at
       };
     });
 
