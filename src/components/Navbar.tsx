@@ -183,18 +183,27 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
               );
             })}
 
-            {/* Enhanced CTA Button */}
-            {settings.messengerUrl && (
-              <a
-                href={settings.messengerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+            {/* Enhanced CTA Button - respects booking toggle */}
+            {settings.bookingEnabled !== false ? (
+              // Booking is ON - link to properties page for booking
+              <Link
+                href="/properties"
                 className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span className="hidden lg:inline">Book Now</span>
                 <span className="lg:hidden">Book</span>
-              </a>
+              </Link>
+            ) : (
+              // Booking is OFF - link to contact page
+              <Link
+                href="/contact"
+                className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
+              >
+                <Phone className="w-4 h-4" />
+                <span className="hidden lg:inline">Contact Us</span>
+                <span className="lg:hidden">Contact</span>
+              </Link>
             )}
           </div>
 
@@ -260,19 +269,28 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
             })}
           </div>
 
-          {/* Enhanced mobile CTA */}
+          {/* Enhanced mobile CTA - respects booking toggle */}
           <div className="px-6 pb-6">
-            {settings.messengerUrl && (
-              <a
-                href={settings.messengerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+            {settings.bookingEnabled !== false ? (
+              // Booking is ON - link to properties page for booking
+              <Link
+                href="/properties"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center justify-center gap-3 btn btn-primary w-full py-4 hover:scale-[1.02] transition-all duration-300 shadow-lg"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span className="font-semibold">Book Your Stay Now</span>
-              </a>
+              </Link>
+            ) : (
+              // Booking is OFF - link to contact page
+              <Link
+                href="/contact"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-3 btn btn-primary w-full py-4 hover:scale-[1.02] transition-all duration-300 shadow-lg"
+              >
+                <Phone className="w-5 h-5" />
+                <span className="font-semibold">Contact Us</span>
+              </Link>
             )}
 
             {/* Quick stats */}

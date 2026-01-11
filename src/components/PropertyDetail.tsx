@@ -25,6 +25,7 @@ import {
   ZoomIn
 } from 'lucide-react';
 import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
+import BookingWidget from '@/components/BookingWidget';
 
 // Amenity icons mapping
 const amenityIcons: Record<string, React.ReactNode> = {
@@ -52,6 +53,25 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [loading, setLoading] = useState(!defaultProperty);
   const [error, setError] = useState<string | null>(null);
+  const [bookingEnabled, setBookingEnabled] = useState<boolean>(true);
+
+  // Fetch booking settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const result = await response.json();
+          setBookingEnabled(result.data?.bookingEnabled !== false);
+        }
+      } catch (err) {
+        console.error('Error fetching settings:', err);
+        // Default to enabled if we can't fetch
+        setBookingEnabled(true);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const openLightbox = (index: number) => {
     setCurrentPhotoIndex(index);
@@ -266,15 +286,23 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
                   <span>View on Airbnb</span>
                 </a>
               )}
-              <a
-                href="https://m.me/cozycondoiloilocity"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary btn-lg hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <MessageCircle className="w-5 h-5" />
-                <span>Book Now</span>
-              </a>
+              {bookingEnabled ? (
+                <Link
+                  href={`/book/${slug}`}
+                  className="btn btn-primary btn-lg hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  <Calendar className="w-5 h-5" />
+                  <span>Book Now</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/contact"
+                  className="btn btn-primary btn-lg hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span>Contact Us</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -435,38 +463,49 @@ export default function PropertyDetail({ slug, defaultProperty }: PropertyDetail
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
-                {/* Booking Card */}
-                <div className="p-6 rounded-2xl bg-white border border-[#faf3e6] shadow-lg">
-                  <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-4">
-                    Ready to Book?
-                  </h3>
-                  <p className="text-[#7d6349] text-sm mb-6">
-                    Contact us to check availability and make your reservation.
-                  </p>
+                {/* Booking Widget or Contact Card based on booking toggle */}
+                {bookingEnabled ? (
+                  <BookingWidget
+                    propertySlug={slug}
+                    pricePerNight={parseFloat(property.price_per_night) || parseFloat(property.pricePerNight) || 0}
+                    cleaningFee={parseFloat(property.cleaning_fee) || parseFloat(property.cleaningFee) || 0}
+                    parkingFee={parseFloat(property.parking_fee) || parseFloat(property.parkingFee) || 0}
+                    adminFeePercent={parseFloat(property.admin_fee_percent) || parseFloat(property.adminFeePercent) || 0}
+                    minNights={property.min_nights || property.minNights || 1}
+                    maxNights={property.max_nights || property.maxNights || 30}
+                    maxGuests={property.max_guests || property.maxGuests || 4}
+                  />
+                ) : (
+                  <div className="p-6 rounded-2xl bg-white border border-[#faf3e6] shadow-lg">
+                    <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-4">
+                      Interested in this property?
+                    </h3>
+                    <p className="text-[#7d6349] text-sm mb-6">
+                      Contact us to check availability and make your reservation.
+                    </p>
 
-                  <div className="space-y-3">
-                    {property.airbnb_url && (
-                      <a
-                        href={property.airbnb_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full btn-secondary justify-center"
+                    <div className="space-y-3">
+                      {property.airbnb_url && (
+                        <a
+                          href={property.airbnb_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full btn-secondary justify-center"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Book on Airbnb
+                        </a>
+                      )}
+                      <Link
+                        href="/contact"
+                        className="w-full btn-primary justify-center"
                       >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Book on Airbnb
-                      </a>
-                    )}
-                    <a
-                      href="https://m.me/cozycondoiloilocity"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full btn-primary justify-center"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Message Us
-                    </a>
+                        <Phone className="w-4 h-4 mr-2" />
+                        Contact Us
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Contact Card */}
                 <div className="p-6 rounded-2xl bg-[#faf3e6]">
