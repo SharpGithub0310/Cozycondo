@@ -258,6 +258,14 @@ export default function AdminCalendarPage() {
     });
   };
 
+  // Get the last blocked night (end_date is checkout day, so subtract 1)
+  const getLastBlockedNight = (endDateStr: string): string => {
+    const [year, month, day] = endDateStr.split('-').map(Number);
+    // Subtract 1 day to get last blocked night
+    const lastNight = new Date(year, month - 1, day - 1);
+    return formatDateString(lastNight.getFullYear(), lastNight.getMonth(), lastNight.getDate());
+  };
+
   // Generate calendar grid
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear();
@@ -528,7 +536,7 @@ export default function AdminCalendarPage() {
                   <div>
                     <p className="text-[#5f4a38] font-medium">{event.title}</p>
                     <p className="text-sm text-[#7d6349]">
-                      {formatDateForDisplay(event.start_date)} - {formatDateForDisplay(event.end_date)}
+                      {formatDateForDisplay(event.start_date)} - {formatDateForDisplay(getLastBlockedNight(event.end_date))}
                     </p>
                   </div>
                 </div>
