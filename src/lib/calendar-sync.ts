@@ -39,7 +39,7 @@ interface PropertyWithIcal {
   id: string;
   name: string;
   slug: string;
-  airbnb_ical_url: string | null;
+  ical_url: string | null;
 }
 
 // =============================================
@@ -82,7 +82,7 @@ export async function syncPropertyCalendar(propertyId: string): Promise<SyncResu
     // Get property from database
     const { data: property, error: propertyError } = await client
       .from('properties')
-      .select('id, name, slug, airbnb_ical_url')
+      .select('id, name, slug, ical_url')
       .eq('slug', propertyId)
       .single();
 
@@ -90,7 +90,7 @@ export async function syncPropertyCalendar(propertyId: string): Promise<SyncResu
       // Try by UUID if slug lookup fails
       const { data: propertyById, error: idError } = await client
         .from('properties')
-        .select('id, name, slug, airbnb_ical_url')
+        .select('id, name, slug, ical_url')
         .eq('id', propertyId)
         .single();
 
@@ -130,10 +130,10 @@ async function syncPropertyWithData(
   syncedAt: Date,
   client: ReturnType<typeof createAdminClient>
 ): Promise<SyncResult> {
-  const { id: dbId, name, slug, airbnb_ical_url } = property;
+  const { id: dbId, name, slug, ical_url } = property;
 
   // If no iCal URL, return early
-  if (!airbnb_ical_url) {
+  if (!ical_url) {
     return {
       propertyId: slug || dbId,
       propertyName: name,
@@ -145,7 +145,7 @@ async function syncPropertyWithData(
   }
 
   // Fetch and parse iCal feed
-  const parseResult = await fetchAndParseICalFeed(airbnb_ical_url);
+  const parseResult = await fetchAndParseICalFeed(ical_url);
 
   if (!parseResult.success) {
     return {
@@ -238,12 +238,12 @@ export async function syncAllProperties(): Promise<SyncResult[]> {
   const syncedAt = new Date();
 
   try {
-    // Get all properties with airbnb_ical_url set
+    // Get all properties with ical_url set
     const { data: properties, error } = await client
       .from('properties')
-      .select('id, name, slug, airbnb_ical_url')
-      .not('airbnb_ical_url', 'is', null)
-      .neq('airbnb_ical_url', '');
+      .select('id, name, slug, ical_url')
+      .not('ical_url', 'is', null)
+      .neq('ical_url', '');
 
     if (error) {
       return [{
