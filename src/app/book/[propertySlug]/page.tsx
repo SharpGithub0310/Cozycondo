@@ -17,6 +17,7 @@ import {
   CreditCard,
   MessageSquare,
   User,
+  Car,
 } from 'lucide-react';
 
 interface PropertyData {
@@ -77,6 +78,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const checkInParam = searchParams.get('checkIn') || '';
   const checkOutParam = searchParams.get('checkOut') || '';
   const guestsParam = parseInt(searchParams.get('guests') || '1', 10);
+  const parkingParam = searchParams.get('parking') === '1';
 
   // State
   const [propertySlug, setPropertySlug] = useState<string>('');
@@ -90,6 +92,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const [checkIn, setCheckIn] = useState(checkInParam);
   const [checkOut, setCheckOut] = useState(checkOutParam);
   const [guests, setGuests] = useState(guestsParam);
+  const [includeParking, setIncludeParking] = useState(parkingParam);
   const [guestInfo, setGuestInfo] = useState<GuestInfo>({
     firstName: '',
     lastName: '',
@@ -143,12 +146,13 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
 
   const nights = calculateNights();
   const pricePerNight = property ? parseFloat(String(property.pricePerNight)) : 0;
-  const cleaningFee = property?.cleaningFee || 500;
+  const cleaningFee = property?.cleaningFee || 0;
   const parkingFee = property?.parkingFee || 0;
-  const adminFeePercent = property?.adminFeePercent || 5;
+  const adminFeePercent = property?.adminFeePercent || 0;
   const subtotal = pricePerNight * nights;
   const adminFee = Math.round((subtotal * adminFeePercent) / 100);
-  const total = subtotal + cleaningFee + parkingFee + adminFee;
+  const actualParkingFee = includeParking ? parkingFee : 0;
+  const total = subtotal + cleaningFee + actualParkingFee + adminFee;
 
   // Validation
   const validateGuestInfo = (): boolean => {
@@ -217,6 +221,7 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
           checkIn,
           checkOut,
           numGuests: guests,
+          includeParking,
           guest: {
             firstName: guestInfo.firstName.trim(),
             lastName: guestInfo.lastName.trim(),
@@ -417,6 +422,28 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                     </select>
                   </div>
 
+                  {/* Parking Option (only show if parking fee is set) */}
+                  {parkingFee > 0 && (
+                    <div className="mb-6">
+                      <div className="flex items-center gap-3 p-4 rounded-xl border border-[#e8d4a8] bg-[#faf3e6]/30">
+                        <input
+                          type="checkbox"
+                          id="parking-option-form"
+                          checked={includeParking}
+                          onChange={(e) => setIncludeParking(e.target.checked)}
+                          className="w-5 h-5 rounded border-[#e8d4a8] text-[#14b8a6] focus:ring-[#14b8a6] cursor-pointer"
+                        />
+                        <label htmlFor="parking-option-form" className="flex-1 cursor-pointer">
+                          <div className="flex items-center gap-2 text-sm font-medium text-[#5f4a38]">
+                            <Car className="w-4 h-4 text-[#14b8a6]" />
+                            Include Parking
+                          </div>
+                          <p className="text-xs text-[#7d6349] mt-0.5">+ ₱{parkingFee.toLocaleString()}</p>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
                   {nights > 0 && (
                     <div className="bg-[#f0fdfb] rounded-xl p-4 flex items-center gap-3">
                       <CheckCircle className="w-5 h-5 text-[#0f766e]" />
@@ -568,6 +595,12 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                         <span className="text-[#7d6349]">Email</span>
                         <span className="text-[#5f4a38]">{guestInfo.email}</span>
                       </div>
+                      {includeParking && parkingFee > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-[#7d6349]">Parking</span>
+                          <span className="text-[#5f4a38]">Included (₱{parkingFee.toLocaleString()})</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -673,27 +706,31 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
                   <div className="border-t border-[#e8d4a8] pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-[#7d6349]">
-                        PHP {pricePerNight.toLocaleString()} x {nights} {nights === 1 ? 'night' : 'nights'}
+                        ₱{pricePerNight.toLocaleString()} x {nights} {nights === 1 ? 'night' : 'nights'}
                       </span>
-                      <span className="text-[#5f4a38]">PHP {subtotal.toLocaleString()}</span>
+                      <span className="text-[#5f4a38]">₱{subtotal.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#7d6349]">Cleaning fee</span>
-                      <span className="text-[#5f4a38]">PHP {cleaningFee.toLocaleString()}</span>
-                    </div>
-                    {parkingFee > 0 && (
+                    {cleaningFee > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-[#7d6349]">Parking fee</span>
-                        <span className="text-[#5f4a38]">PHP {parkingFee.toLocaleString()}</span>
+                        <span className="text-[#7d6349]">Cleaning fee</span>
+                        <span className="text-[#5f4a38]">₱{cleaningFee.toLocaleString()}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#7d6349]">Admin fee ({adminFeePercent}%)</span>
-                      <span className="text-[#5f4a38]">PHP {adminFee.toLocaleString()}</span>
-                    </div>
+                    {includeParking && parkingFee > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#7d6349]">Parking fee</span>
+                        <span className="text-[#5f4a38]">₱{parkingFee.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {adminFee > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#7d6349]">Admin fee ({adminFeePercent}%)</span>
+                        <span className="text-[#5f4a38]">₱{adminFee.toLocaleString()}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between font-bold text-[#5f4a38] pt-2 border-t border-[#e8d4a8]">
                       <span>Total</span>
-                      <span>PHP {total.toLocaleString()}</span>
+                      <span>₱{total.toLocaleString()}</span>
                     </div>
                   </div>
                 )}

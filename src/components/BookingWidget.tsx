@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Calendar, Users, DollarSign, AlertCircle, CheckCircle, Loader2, MessageCircle } from 'lucide-react';
+import { Calendar, Users, DollarSign, AlertCircle, CheckCircle, Loader2, MessageCircle, Car } from 'lucide-react';
 
 interface BookingWidgetProps {
   propertySlug: string;
@@ -29,6 +29,7 @@ export default function BookingWidget({
   const [checkIn, setCheckIn] = useState<string>('');
   const [checkOut, setCheckOut] = useState<string>('');
   const [guests, setGuests] = useState<number>(1);
+  const [includeParking, setIncludeParking] = useState<boolean>(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,10 +72,11 @@ export default function BookingWidget({
 
   const nights = calculateNights();
 
-  // Calculate pricing
+  // Calculate pricing (parking is optional)
   const subtotal = pricePerNight * nights;
   const adminFee = Math.round((subtotal * adminFeePercent) / 100);
-  const total = subtotal + cleaningFee + parkingFee + adminFee;
+  const actualParkingFee = includeParking ? parkingFee : 0;
+  const total = subtotal + cleaningFee + actualParkingFee + adminFee;
 
   // Validation
   const isValidDateRange = nights >= minNights && nights <= maxNights;
@@ -161,7 +163,7 @@ export default function BookingWidget({
   };
 
   // Build booking URL with query parameters
-  const bookingUrl = `/book/${propertySlug}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`;
+  const bookingUrl = `/book/${propertySlug}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&parking=${includeParking ? '1' : '0'}`;
 
   // Show loading state while checking booking status
   if (!settingsLoaded) {
@@ -278,6 +280,26 @@ export default function BookingWidget({
           </select>
         </div>
 
+        {/* Parking Option (only show if parking fee is set) */}
+        {parkingFee > 0 && (
+          <div className="flex items-center gap-3 p-3 rounded-lg border border-[#e8d4a8] bg-[#faf3e6]/30">
+            <input
+              type="checkbox"
+              id="parking-option"
+              checked={includeParking}
+              onChange={(e) => setIncludeParking(e.target.checked)}
+              className="w-5 h-5 rounded border-[#e8d4a8] text-[#14b8a6] focus:ring-[#14b8a6] cursor-pointer"
+            />
+            <label htmlFor="parking-option" className="flex-1 cursor-pointer">
+              <div className="flex items-center gap-2 text-sm font-medium text-[#5f4a38]">
+                <Car className="w-4 h-4 text-[#14b8a6]" />
+                Include Parking
+              </div>
+              <p className="text-xs text-[#7d6349] mt-0.5">+ ₱{parkingFee.toLocaleString()}</p>
+            </label>
+          </div>
+        )}
+
         {/* Stay Requirements */}
         <div className="text-xs text-[#7d6349] bg-[#faf3e6] rounded-lg p-3">
           <p>Min stay: {minNights} {minNights === 1 ? 'night' : 'nights'} | Max stay: {maxNights} nights</p>
@@ -333,28 +355,30 @@ export default function BookingWidget({
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-[#7d6349]">
-                <span>${pricePerNight} x {nights} {nights === 1 ? 'night' : 'nights'}</span>
-                <span>${subtotal}</span>
+                <span>₱{pricePerNight.toLocaleString()} x {nights} {nights === 1 ? 'night' : 'nights'}</span>
+                <span>₱{subtotal.toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between text-[#7d6349]">
                 <span>Cleaning fee</span>
-                <span>${cleaningFee}</span>
+                <span>₱{cleaningFee.toLocaleString()}</span>
               </div>
 
-              <div className="flex justify-between text-[#7d6349]">
-                <span>Parking fee</span>
-                <span>${parkingFee}</span>
-              </div>
+              {includeParking && parkingFee > 0 && (
+                <div className="flex justify-between text-[#7d6349]">
+                  <span>Parking fee</span>
+                  <span>₱{parkingFee.toLocaleString()}</span>
+                </div>
+              )}
 
               <div className="flex justify-between text-[#7d6349]">
                 <span>Admin fee ({adminFeePercent}%)</span>
-                <span>${adminFee}</span>
+                <span>₱{adminFee.toLocaleString()}</span>
               </div>
 
               <div className="flex justify-between font-bold text-[#5f4a38] pt-2 border-t border-[#e8d4a8]">
                 <span>Total</span>
-                <span>${total}</span>
+                <span>₱{total.toLocaleString()}</span>
               </div>
             </div>
           </div>
