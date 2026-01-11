@@ -343,7 +343,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { propertyId, checkIn, checkOut, numGuests, guest, specialRequests, source } = body as BookingCreateRequest;
+    const { propertyId, checkIn, checkOut, numGuests, guest, specialRequests, source, includeParking } = body as BookingCreateRequest & { includeParking?: boolean };
 
     // Step 1: Fetch property and validate
     const { data: property, error: propertyError } = await adminClient
@@ -450,11 +450,11 @@ export async function POST(request: NextRequest) {
       return errorResponse('Failed to generate booking number', 500);
     }
 
-    // Step 6: Calculate pricing
+    // Step 6: Calculate pricing (parking is optional)
     const nightlyRate = parseFloat(property.price_per_night) || 0;
     const subtotal = nightlyRate * numNights;
     const cleaningFee = parseFloat(property.cleaning_fee) || 0;
-    const parkingFee = parseFloat(property.parking_fee) || 0;
+    const parkingFee = includeParking ? (parseFloat(property.parking_fee) || 0) : 0;
     const adminFeePercent = parseFloat(property.admin_fee_percent) || 0;
     const adminFee = subtotal * (adminFeePercent / 100);
     const totalAmount = subtotal + cleaningFee + parkingFee + adminFee;

@@ -359,10 +359,12 @@ export default function BookingWidget({
                 <span>₱{subtotal.toLocaleString()}</span>
               </div>
 
-              <div className="flex justify-between text-[#7d6349]">
-                <span>Cleaning fee</span>
-                <span>₱{cleaningFee.toLocaleString()}</span>
-              </div>
+              {cleaningFee > 0 && (
+                <div className="flex justify-between text-[#7d6349]">
+                  <span>Cleaning fee</span>
+                  <span>₱{cleaningFee.toLocaleString()}</span>
+                </div>
+              )}
 
               {includeParking && parkingFee > 0 && (
                 <div className="flex justify-between text-[#7d6349]">
@@ -371,10 +373,12 @@ export default function BookingWidget({
                 </div>
               )}
 
-              <div className="flex justify-between text-[#7d6349]">
-                <span>Admin fee ({adminFeePercent}%)</span>
-                <span>₱{adminFee.toLocaleString()}</span>
-              </div>
+              {adminFee > 0 && (
+                <div className="flex justify-between text-[#7d6349]">
+                  <span>Admin fee ({adminFeePercent}%)</span>
+                  <span>₱{adminFee.toLocaleString()}</span>
+                </div>
+              )}
 
               <div className="flex justify-between font-bold text-[#5f4a38] pt-2 border-t border-[#e8d4a8]">
                 <span>Total</span>
