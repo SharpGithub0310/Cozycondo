@@ -208,14 +208,9 @@ Configured in `vercel.json`:
 
 - Build lock file conflict (resolved by removing `.next/lock`)
 
-### Known Bug (To Fix Next Session)
+### Bugs Fixed This Session
 
-**Booking toggle not fully blocking bookings** - When the booking toggle switch is OFF in admin settings, bookings can still be made. The toggle should:
-1. Disable the "Book Now" button on property pages
-2. Block the `/book/[propertySlug]` page from loading
-3. Return error from `/api/bookings` POST endpoint
-
-Files to investigate:
-- `src/components/BookingWidget.tsx` - checks `bookingEnabled` from settings
-- `src/app/book/[propertySlug]/page.tsx` - may need to check setting on load
-- `src/app/api/bookings/route.ts` - has check at line 327 but may not be working
+**Booking toggle now properly blocks bookings** (Fixed Jan 12, 2026)
+- Settings API now returns `bookingEnabled` and `bookingDisabledMessage`
+- Bookings API query fixed to use row-based `setting_key`/`setting_value` structure
+- Booking page now checks setting and shows disabled message when off
