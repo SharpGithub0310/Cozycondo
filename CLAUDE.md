@@ -169,6 +169,48 @@ Configured in `vercel.json`:
 
 ---
 
+## Session Log: January 13, 2026
+
+### Accomplished Today
+
+1. **Fixed Vercel Cron Authorization** - Cron wasn't triggering because authorization check was wrong
+   - Updated `/api/cron/sync-calendars` to check for Vercel's `x-vercel-cron` header
+   - Now accepts both Vercel cron header OR CRON_SECRET for manual testing
+
+2. **Festival Pricing Endpoint** - Created `/api/admin/festival-pricing` for batch price updates
+   - POST: Set multiplied prices for date range across all properties
+   - DELETE: Remove price overrides for date range
+   - Ready for Dinagyang festival (Jan 16-25, x2 prices)
+
+3. **Claude Code Commands & Skills** - Added 23 slash commands and 11 skills to `.claude/`
+   - Commands: `/commit`, `/code-review`, `/review-pr`, `/feature-dev`, etc.
+   - Skills: `frontend-design`, `stripe-best-practices`, `writing-rules`, etc.
+
+### Current Status
+
+- All changes committed and pushed to GitHub
+- Cron should now work after next Vercel deployment
+- Festival pricing endpoint ready to use
+
+### Next Steps / Pending
+
+- Deploy to Vercel and verify cron triggers hourly
+- Set Dinagyang x2 pricing via festival-pricing endpoint:
+  ```javascript
+  fetch('/api/admin/festival-pricing', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-password': 'PASSWORD' },
+    body: JSON.stringify({ startDate: '2026-01-16', endDate: '2026-01-25', multiplier: 2 })
+  })
+  ```
+- Test PayMongo payment flow in production
+
+### Issues Encountered
+
+- Contact page redirect to government site (bmd.cicc.gov.ph) - NOT a code issue, likely device malware or ISP redirect on desktop. Works fine on mobile.
+
+---
+
 ## Session Log: January 12, 2026
 
 ### Accomplished Today
