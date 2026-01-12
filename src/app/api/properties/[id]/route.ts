@@ -224,7 +224,7 @@ export async function PUT(
 ) {
   try {
     // Apply rate limiting for admin operations
-    const rateLimitResult = rateLimit(request, 20, 15 * 60 * 1000); // 20 requests per 15 minutes
+    const rateLimitResult = rateLimit(request, 60, 15 * 60 * 1000); // 60 requests per 15 minutes
     if (!rateLimitResult.allowed) {
       return errorResponse(
         'Rate limit exceeded. Please try again later.',
