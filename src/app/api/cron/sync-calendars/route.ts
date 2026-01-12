@@ -8,14 +8,18 @@ import { syncAllProperties } from '@/lib/calendar-sync';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret (Vercel sets this automatically for cron jobs)
+    // Verify this is a legitimate cron request
+    // Vercel automatically sends 'x-vercel-cron' header for cron invocations
+    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
 
-    // In production, verify the secret
-    if (process.env.NODE_ENV === 'production' && cronSecret) {
-      if (authHeader !== `Bearer ${cronSecret}`) {
-        console.log('Cron: Unauthorized request');
+    // In production, verify the request is from Vercel Cron or has valid secret
+    if (process.env.NODE_ENV === 'production') {
+      const hasValidSecret = cronSecret && authHeader === `Bearer ${cronSecret}`;
+
+      if (!isVercelCron && !hasValidSecret) {
+        console.log('Cron: Unauthorized request - not from Vercel Cron and no valid secret');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
