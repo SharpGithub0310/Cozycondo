@@ -9,6 +9,7 @@ export default function EditProperty() {
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [property, setProperty] = useState({
     name: '',
@@ -48,6 +49,7 @@ export default function EditProperty() {
 
   useEffect(() => {
     const loadProperty = async () => {
+      setLoadError(null);
       try {
         // Load property from database
         let propertyData;
@@ -62,33 +64,27 @@ export default function EditProperty() {
             propertyData = apiResponse.data; // Extract the data object from API response
             console.log('Property data loaded from API:', propertyData);
           } else {
-            const errorText = await response.text();
-            console.error('API Error:', response.status, errorText);
+            const errorData = await response.json().catch(() => ({}));
+            console.error('API Error:', response.status, errorData);
+            if (response.status === 429) {
+              setLoadError('Rate limit exceeded. Please wait a moment and try again.');
+            } else if (response.status === 404) {
+              setLoadError('Property not found.');
+            } else {
+              setLoadError(errorData.error || 'Failed to load property data.');
+            }
             propertyData = null;
           }
         } catch (error) {
           console.error('Failed to load property from API:', error);
+          setLoadError('Network error. Please check your connection.');
           propertyData = null;
         }
 
-        // If no data found, create default property structure
+        // If no data found, don't overwrite with empty defaults - show error instead
         if (!propertyData) {
-          propertyData = {
-            id: params.id as string,
-            name: '',
-            type: 'apartment',
-            bedrooms: 1,
-            bathrooms: 1,
-            maxGuests: 2,
-            size: '45',
-            description: '',
-            location: '',
-            amenities: [],
-            photos: [],
-            featuredPhotoIndex: 0,
-            featured: false,
-            active: true,
-          };
+          setLoading(false);
+          return;
         }
 
         setProperty({
@@ -226,6 +222,34 @@ export default function EditProperty() {
             <span className="text-white font-display text-xl font-bold">CC</span>
           </div>
           <p className="text-[#7d6349]">Loading property...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center max-w-md">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-red-100 flex items-center justify-center">
+            <X className="w-6 h-6 text-red-500" />
+          </div>
+          <h2 className="font-display text-xl font-semibold text-[#5f4a38] mb-2">Failed to Load Property</h2>
+          <p className="text-[#7d6349] mb-4">{loadError}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="btn btn-primary"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => router.push('/admin/properties')}
+              className="btn btn-secondary"
+            >
+              Back to Properties
+            </button>
+          </div>
         </div>
       </div>
     );
