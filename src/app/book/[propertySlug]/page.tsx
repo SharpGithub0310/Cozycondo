@@ -105,9 +105,15 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const [specialRequests, setSpecialRequests] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Resolve params
+  // Resolve params with error handling
   useEffect(() => {
-    params.then((p) => setPropertySlug(p.propertySlug));
+    params
+      .then((p) => setPropertySlug(p.propertySlug))
+      .catch((err) => {
+        console.error('Error resolving params:', err);
+        setError('Unable to load property. Please try refreshing the page.');
+        setLoading(false);
+      });
   }, [params]);
 
   // Check if booking is enabled

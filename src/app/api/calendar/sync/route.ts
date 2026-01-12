@@ -9,8 +9,8 @@ import { syncPropertyCalendar, syncAllProperties } from '@/lib/calendar-sync';
  */
 export async function POST(request: NextRequest) {
   return await requireAuth(request, async () => {
-    // Rate limit: 10 requests per 15 minutes
-    const rateLimitResult = rateLimit(request, 10, 15 * 60 * 1000);
+    // Rate limit: 30 requests per 15 minutes (more generous for manual syncs)
+    const rateLimitResult = rateLimit(request, 30, 15 * 60 * 1000);
     if (!rateLimitResult.allowed) {
       return errorResponse('Rate limit exceeded', 429, {
         resetTime: rateLimitResult.resetTime,
