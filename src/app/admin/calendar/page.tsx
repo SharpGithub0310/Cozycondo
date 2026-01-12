@@ -846,7 +846,7 @@ export default function AdminCalendarPage() {
 
                       <span
                         className={`
-                          relative z-10 text-sm
+                          relative z-10 text-lg font-semibold
                           ${dayInfo.isCurrentMonth ? 'text-[#5f4a38]' : 'text-[#9a7d5e]'}
                           ${isToday ? 'font-bold' : ''}
                           ${dayType === 'middle' || dayType === 'single' ? 'text-white' : ''}
@@ -859,18 +859,18 @@ export default function AdminCalendarPage() {
                       {dayInfo.isCurrentMonth && (
                         <div
                           className={`
-                            absolute bottom-0.5 left-0 right-0 text-[9px] text-center truncate px-0.5
+                            absolute bottom-1 left-0 right-0 text-xs text-center truncate px-0.5
                             ${dayType === 'middle' || dayType === 'single' ? 'text-white/90' : ''}
-                            ${hasOverride && !event ? 'text-[#14b8a6] font-medium' : 'text-[#9a7d5e]'}
+                            ${hasOverride && !event ? 'text-[#14b8a6] font-semibold' : 'text-[#7d6349]'}
                           `}
                         >
-                          {dayPrice >= 1000 ? `${(dayPrice / 1000).toFixed(1)}k` : dayPrice}
+                          ₱{dayPrice.toLocaleString()}
                         </div>
                       )}
 
                       {event && (
                         <div
-                          className="absolute top-4 left-0 right-0 text-[8px] truncate px-0.5 text-center"
+                          className="absolute top-5 left-0 right-0 text-[10px] font-medium truncate px-0.5 text-center"
                           style={{
                             color: dayType === 'middle' || dayType === 'single' ? 'white' : getColorHex(event.source)
                           }}
