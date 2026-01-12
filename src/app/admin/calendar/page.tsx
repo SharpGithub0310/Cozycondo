@@ -10,7 +10,9 @@ import {
   Home,
   X,
   Check,
-  AlertCircle
+  AlertCircle,
+  DollarSign,
+  RotateCcw
 } from 'lucide-react';
 
 interface Property {
@@ -52,6 +54,12 @@ export default function AdminCalendarPage() {
   const [editingPrice, setEditingPrice] = useState(false);
   const [priceInput, setPriceInput] = useState('');
   const [savingPrice, setSavingPrice] = useState(false);
+  // Dynamic pricing state
+  const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
+  const [showPriceSidebar, setShowPriceSidebar] = useState(false);
+  const [selectedDayForPrice, setSelectedDayForPrice] = useState<string | null>(null);
+  const [dayPriceInput, setDayPriceInput] = useState('');
+  const [savingDayPrice, setSavingDayPrice] = useState(false);
 
   // Fetch properties on mount
   useEffect(() => {
@@ -106,6 +114,32 @@ export default function AdminCalendarPage() {
     };
 
     fetchEvents();
+  }, [selectedProperty, currentDate]);
+
+  // Fetch price overrides when property or month changes
+  useEffect(() => {
+    if (!selectedProperty) return;
+
+    const fetchPriceOverrides = async () => {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const startDate = new Date(year, month, 1).toISOString().split('T')[0];
+      const endDate = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+      try {
+        const response = await fetch(
+          `/api/calendar/prices?propertyId=${selectedProperty}&startDate=${startDate}&endDate=${endDate}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setPriceOverrides(data.data?.overrides || {});
+        }
+      } catch (err) {
+        console.error('Failed to fetch price overrides:', err);
+      }
+    };
+
+    fetchPriceOverrides();
   }, [selectedProperty, currentDate]);
 
   // Update last sync when property changes
@@ -271,6 +305,100 @@ export default function AdminCalendarPage() {
       setError('Failed to update price');
     } finally {
       setSavingPrice(false);
+    }
+  };
+
+  // Handle clicking on a day to edit its price
+  const handleDayPriceClick = (dateStr: string) => {
+    const basePrice = parseFloat(selectedPropertyData?.pricePerNight || '0');
+    const currentPrice = priceOverrides[dateStr] || basePrice;
+    setSelectedDayForPrice(dateStr);
+    setDayPriceInput(String(currentPrice));
+    setShowPriceSidebar(true);
+  };
+
+  // Save price override for selected day
+  const handleSaveDayPrice = async () => {
+    if (!selectedProperty || !selectedDayForPrice) return;
+
+    const basePrice = parseFloat(selectedPropertyData?.pricePerNight || '0');
+    const newPrice = parseFloat(dayPriceInput);
+
+    if (isNaN(newPrice) || newPrice < basePrice) {
+      setError(`Price cannot be lower than base price (₱${basePrice.toLocaleString()})`);
+      return;
+    }
+
+    setSavingDayPrice(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/calendar/prices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-session': 'authenticated',
+        },
+        body: JSON.stringify({
+          propertyId: selectedProperty,
+          date: selectedDayForPrice,
+          price: newPrice,
+        }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setPriceOverrides(prev => ({
+          ...prev,
+          [selectedDayForPrice]: newPrice,
+        }));
+        setShowPriceSidebar(false);
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to save price');
+      }
+    } catch (err) {
+      setError('Failed to save price');
+    } finally {
+      setSavingDayPrice(false);
+    }
+  };
+
+  // Reset price to base (delete override)
+  const handleResetDayPrice = async () => {
+    if (!selectedProperty || !selectedDayForPrice) return;
+
+    setSavingDayPrice(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/calendar/prices?propertyId=${selectedProperty}&date=${selectedDayForPrice}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'x-admin-session': 'authenticated',
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Remove from local state
+        setPriceOverrides(prev => {
+          const newOverrides = { ...prev };
+          delete newOverrides[selectedDayForPrice];
+          return newOverrides;
+        });
+        // Update input to show base price
+        setDayPriceInput(selectedPropertyData?.pricePerNight || '0');
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to reset price');
+      }
+    } catch (err) {
+      setError('Failed to reset price');
+    } finally {
+      setSavingDayPrice(false);
     }
   };
 
@@ -688,20 +816,26 @@ export default function AdminCalendarPage() {
 
                   const bgStyle = getBackgroundStyle();
 
+                  // Get price for this day
+                  const basePrice = parseFloat(selectedPropertyData?.pricePerNight || '0');
+                  const dayPrice = priceOverrides[dayInfo.date] || basePrice;
+                  const hasOverride = dayInfo.date in priceOverrides;
+
                   return (
                     <div
                       key={index}
                       onClick={() => {
-                        if (dayInfo.isCurrentMonth && !isPast && isAvailable) {
-                          handleDateClick(dayInfo.date);
+                        if (dayInfo.isCurrentMonth) {
+                          handleDayPriceClick(dayInfo.date);
                         }
                       }}
                       className={`
                         relative aspect-square p-1 border rounded-lg overflow-hidden
                         ${dayInfo.isCurrentMonth ? '' : 'bg-gray-50'}
                         ${isToday ? 'border-[#14b8a6] border-2' : 'border-[#faf3e6]'}
-                        ${dayInfo.isCurrentMonth && !isPast && isAvailable ? 'cursor-pointer hover:bg-[#faf3e6]' : ''}
+                        ${dayInfo.isCurrentMonth ? 'cursor-pointer hover:bg-[#faf3e6]/50' : ''}
                         ${isPast ? 'opacity-50' : ''}
+                        ${selectedDayForPrice === dayInfo.date ? 'ring-2 ring-[#14b8a6]' : ''}
                       `}
                       style={bgStyle}
                     >
@@ -721,9 +855,22 @@ export default function AdminCalendarPage() {
                         {dayInfo.day}
                       </span>
 
+                      {/* Price display */}
+                      {dayInfo.isCurrentMonth && (
+                        <div
+                          className={`
+                            absolute bottom-0.5 left-0 right-0 text-[9px] text-center truncate px-0.5
+                            ${dayType === 'middle' || dayType === 'single' ? 'text-white/90' : ''}
+                            ${hasOverride && !event ? 'text-[#14b8a6] font-medium' : 'text-[#9a7d5e]'}
+                          `}
+                        >
+                          {dayPrice >= 1000 ? `${(dayPrice / 1000).toFixed(1)}k` : dayPrice}
+                        </div>
+                      )}
+
                       {event && (
                         <div
-                          className="absolute bottom-0 left-0 right-0 text-[8px] truncate px-0.5 text-center"
+                          className="absolute top-4 left-0 right-0 text-[8px] truncate px-0.5 text-center"
                           style={{
                             color: dayType === 'middle' || dayType === 'single' ? 'white' : getColorHex(event.source)
                           }}
@@ -838,6 +985,115 @@ export default function AdminCalendarPage() {
                 )}
                 Block Dates
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Price Sidebar */}
+      {showPriceSidebar && selectedDayForPrice && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-end z-50">
+          <div className="bg-white h-full w-full max-w-sm p-6 shadow-xl overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-display text-lg font-semibold text-[#5f4a38]">
+                Set Price
+              </h3>
+              <button
+                onClick={() => setShowPriceSidebar(false)}
+                className="p-2 hover:bg-[#faf3e6] rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-[#7d6349]" />
+              </button>
+            </div>
+
+            {/* Selected Date */}
+            <div className="mb-6">
+              <p className="text-sm text-[#7d6349]">Date</p>
+              <p className="text-xl font-semibold text-[#5f4a38]">
+                {(() => {
+                  const [year, month, day] = selectedDayForPrice.split('-').map(Number);
+                  const date = new Date(year, month - 1, day);
+                  return date.toLocaleDateString('en-PH', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  });
+                })()}
+              </p>
+            </div>
+
+            {/* Base Price Info */}
+            <div className="mb-6 p-4 bg-[#faf3e6] rounded-lg">
+              <p className="text-sm text-[#7d6349]">Base Price</p>
+              <p className="text-lg font-medium text-[#5f4a38]">
+                ₱{parseFloat(selectedPropertyData?.pricePerNight || '0').toLocaleString()}/night
+              </p>
+              <p className="text-xs text-[#9a7d5e] mt-1">
+                Minimum allowed price
+              </p>
+            </div>
+
+            {/* Price Input */}
+            <div className="mb-6">
+              <label className="form-label">Price for this night</label>
+              <div className="flex items-center gap-2">
+                <span className="text-lg text-[#7d6349]">₱</span>
+                <input
+                  type="number"
+                  value={dayPriceInput}
+                  onChange={(e) => setDayPriceInput(e.target.value)}
+                  className="form-input text-lg flex-1"
+                  placeholder="0"
+                  min={selectedPropertyData?.pricePerNight || '0'}
+                />
+              </div>
+              {selectedDayForPrice in priceOverrides && (
+                <p className="text-xs text-[#14b8a6] mt-2 flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" />
+                  Custom price set for this date
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={handleSaveDayPrice}
+                disabled={savingDayPrice}
+                className="btn-primary w-full flex items-center justify-center gap-2"
+              >
+                {savingDayPrice ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+                Save Price
+              </button>
+
+              {selectedDayForPrice in priceOverrides && (
+                <button
+                  onClick={handleResetDayPrice}
+                  disabled={savingDayPrice}
+                  className="btn-secondary w-full flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset to Base Price
+                </button>
+              )}
+
+              {/* Quick access to block dates */}
+              <div className="pt-4 border-t border-[#faf3e6]">
+                <button
+                  onClick={() => {
+                    setShowPriceSidebar(false);
+                    handleDateClick(selectedDayForPrice);
+                  }}
+                  className="text-sm text-[#7d6349] hover:text-[#5f4a38] underline"
+                >
+                  Block this date instead
+                </button>
+              </div>
             </div>
           </div>
         </div>

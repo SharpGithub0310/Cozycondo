@@ -457,9 +457,39 @@ export async function POST(request: NextRequest) {
       return errorResponse('Failed to generate booking number', 500);
     }
 
-    // Step 6: Calculate pricing (parking is optional, charged per day selected)
-    const nightlyRate = parseFloat(property.price_per_night) || 0;
-    const subtotal = nightlyRate * numNights;
+    // Step 6: Calculate pricing with dynamic pricing support
+    const baseNightlyRate = parseFloat(property.price_per_night) || 0;
+
+    // Fetch price overrides for the booking date range
+    const { data: priceOverrides } = await adminClient
+      .from('price_overrides')
+      .select('date, price')
+      .eq('property_id', propertyId)
+      .gte('date', checkIn)
+      .lt('date', checkOut);
+
+    // Build a map of date -> price
+    const priceMap: Record<string, number> = {};
+    (priceOverrides || []).forEach((row: { date: string; price: number }) => {
+      priceMap[row.date] = parseFloat(String(row.price));
+    });
+
+    // Calculate subtotal by looping through each night
+    let subtotal = 0;
+    const startDateForPricing = new Date(checkIn + 'T00:00:00');
+    const endDateForPricing = new Date(checkOut + 'T00:00:00');
+    let currentPricingDate = new Date(startDateForPricing);
+
+    while (currentPricingDate < endDateForPricing) {
+      const dateStr = currentPricingDate.toISOString().split('T')[0];
+      const dayPrice = priceMap[dateStr] || baseNightlyRate;
+      subtotal += dayPrice;
+      currentPricingDate.setDate(currentPricingDate.getDate() + 1);
+    }
+
+    // For nightly_rate field, use average rate or base rate
+    const nightlyRate = numNights > 0 ? subtotal / numNights : baseNightlyRate;
+
     const cleaningFee = parseFloat(property.cleaning_fee) || 0;
     const parkingFeePerDay = parseFloat(property.parking_fee) || 0;
     // Ensure parkingDays doesn't exceed numNights

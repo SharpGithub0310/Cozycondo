@@ -226,9 +226,37 @@ export async function GET(request: NextRequest) {
       conflictingDates = Array.from(dates).sort();
     }
 
-    // Calculate pricing
-    const nightlyRate = parseFloat(property.price_per_night) || 0;
-    const subtotal = nightlyRate * numNights;
+    // Calculate pricing with dynamic pricing support
+    const baseNightlyRate = parseFloat(property.price_per_night) || 0;
+
+    // Fetch price overrides for the date range
+    const { data: priceOverrides } = await adminClient
+      .from('price_overrides')
+      .select('date, price')
+      .eq('property_id', propertyId)
+      .gte('date', checkIn)
+      .lt('date', checkOut);
+
+    // Build a map of date -> price
+    const priceMap: Record<string, number> = {};
+    (priceOverrides || []).forEach((row: { date: string; price: number }) => {
+      priceMap[row.date] = parseFloat(String(row.price));
+    });
+
+    // Calculate subtotal by looping through each night
+    let subtotal = 0;
+    let currentDate = new Date(checkInDate);
+
+    while (currentDate < checkOutDate) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const dayPrice = priceMap[dateStr] || baseNightlyRate;
+      subtotal += dayPrice;
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // For display, use average rate or base rate
+    const nightlyRate = numNights > 0 ? subtotal / numNights : baseNightlyRate;
+
     const cleaningFee = parseFloat(property.cleaning_fee) || 0;
     const parkingFee = parseFloat(property.parking_fee) || 0;
     const adminFeePercent = parseFloat(property.admin_fee_percent) || 0;
