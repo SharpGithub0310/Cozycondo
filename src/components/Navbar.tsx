@@ -183,28 +183,6 @@ export default function Navbar({ settings: propSettings }: NavbarProps = {}) {
               );
             })}
 
-            {/* Enhanced CTA Button - respects booking toggle */}
-            {settings.bookingEnabled !== false ? (
-              // Booking is ON - link to properties page for booking
-              <Link
-                href="/properties"
-                className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="hidden lg:inline">Book Now</span>
-                <span className="lg:hidden">Book</span>
-              </Link>
-            ) : (
-              // Booking is OFF - link to contact page
-              <Link
-                href="/contact"
-                className="ml-4 btn btn-primary btn-sm hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 touch-target"
-              >
-                <Phone className="w-4 h-4" />
-                <span className="hidden lg:inline">Contact Us</span>
-                <span className="lg:hidden">Contact</span>
-              </Link>
-            )}
           </div>
 
           {/* Enhanced Mobile menu button */}
