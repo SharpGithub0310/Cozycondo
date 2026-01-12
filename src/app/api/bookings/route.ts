@@ -318,15 +318,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if booking is enabled (defense in depth)
-    const { data: settings } = await adminClient
+    const { data: bookingEnabledSetting } = await adminClient
       .from('website_settings')
-      .select('settings')
+      .select('setting_value')
+      .eq('setting_key', 'booking_enabled')
       .single();
 
-    const websiteSettings = settings?.settings || {};
-    if (websiteSettings.bookingEnabled === false) {
+    const { data: bookingDisabledMsgSetting } = await adminClient
+      .from('website_settings')
+      .select('setting_value')
+      .eq('setting_key', 'booking_disabled_message')
+      .single();
+
+    // Check if booking is disabled (setting_value is stored as string)
+    if (bookingEnabledSetting?.setting_value === 'false') {
       return errorResponse(
-        websiteSettings.bookingDisabledMessage || 'Online booking is temporarily unavailable. Please contact us directly.',
+        bookingDisabledMsgSetting?.setting_value || 'Online booking is temporarily unavailable. Please contact us directly.',
         503
       );
     }

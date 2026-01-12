@@ -88,6 +88,8 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<BookingStep>('confirm');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingEnabled, setBookingEnabled] = useState<boolean | null>(null);
+  const [bookingDisabledMessage, setBookingDisabledMessage] = useState<string>('');
 
   // Form state
   const [checkIn, setCheckIn] = useState(checkInParam);
@@ -107,6 +109,28 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   useEffect(() => {
     params.then((p) => setPropertySlug(p.propertySlug));
   }, [params]);
+
+  // Check if booking is enabled
+  useEffect(() => {
+    const checkBookingStatus = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const result = await response.json();
+          const settings = result.data;
+          setBookingEnabled(settings.bookingEnabled !== false);
+          setBookingDisabledMessage(settings.bookingDisabledMessage || 'Online booking is temporarily unavailable. Please contact us directly.');
+        } else {
+          // Default to enabled if we can't fetch settings
+          setBookingEnabled(true);
+        }
+      } catch (err) {
+        console.error('Error checking booking status:', err);
+        setBookingEnabled(true);
+      }
+    };
+    checkBookingStatus();
+  }, []);
 
   // Fetch property data
   useEffect(() => {
@@ -286,12 +310,43 @@ function BookingContent({ params }: { params: Promise<{ propertySlug: string }> 
   // Get property image
   const propertyImage = property?.photos?.[0] || property?.images?.[0] || '/placeholder-property.jpg';
 
-  if (loading) {
+  if (loading || bookingEnabled === null) {
     return (
       <div className="min-h-screen bg-[#fefdfb] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-[#14b8a6] animate-spin mx-auto mb-4" />
           <p className="text-[#7d6349]">Loading booking details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show disabled message if booking is turned off
+  if (bookingEnabled === false) {
+    return (
+      <div className="min-h-screen bg-[#fefdfb] flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+          <h1 className="font-heading text-2xl text-[#5f4a38] mb-2">Booking Unavailable</h1>
+          <p className="text-[#7d6349] mb-6">{bookingDisabledMessage}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/properties"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#faf3e6] text-[#5f4a38] rounded-xl hover:bg-[#f5e6d3] transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              Browse Properties
+            </Link>
+            <a
+              href="https://m.me/cozycondoiloilocity"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#14b8a6] text-white rounded-xl hover:bg-[#0d9488] transition-colors"
+            >
+              <MessageSquare className="w-5 h-5" />
+              Contact Us
+            </a>
+          </div>
         </div>
       </div>
     );

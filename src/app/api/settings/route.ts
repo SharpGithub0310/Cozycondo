@@ -124,6 +124,9 @@ export async function GET(request: NextRequest) {
       timezone: settingsObj.timezone || '',
       currency: settingsObj.currency || '',
       faqs: faqs,
+      // Booking toggle settings (default to enabled)
+      bookingEnabled: settingsObj.bookingEnabled === 'false' ? false : true,
+      bookingDisabledMessage: settingsObj.bookingDisabledMessage || 'Online booking is temporarily unavailable. Please contact us directly.',
       updatedAt: new Date().toISOString()
     };
 
