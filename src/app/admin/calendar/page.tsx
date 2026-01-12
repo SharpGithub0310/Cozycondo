@@ -15,10 +15,13 @@ import {
 
 interface Property {
   id: string;
+  uuid?: string;
   name: string;
   slug: string;
   airbnbIcalUrl?: string;
   icalLastSync?: string;
+  customReference?: string;
+  pricePerNight?: string;
 }
 
 interface CalendarEvent {
@@ -46,6 +49,9 @@ export default function AdminCalendarPage() {
   const [blockEndDate, setBlockEndDate] = useState<string>('');
   const [blockTitle, setBlockTitle] = useState('Blocked');
   const [savingBlock, setSavingBlock] = useState(false);
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [priceInput, setPriceInput] = useState('');
+  const [savingPrice, setSavingPrice] = useState(false);
 
   // Fetch properties on mount
   useEffect(() => {
@@ -220,6 +226,51 @@ export default function AdminCalendarPage() {
       }
     } catch (err) {
       setError('Failed to delete block');
+    }
+  };
+
+  const handleEditPrice = () => {
+    const property = properties.find(p => p.slug === selectedProperty);
+    setPriceInput(property?.pricePerNight || '');
+    setEditingPrice(true);
+  };
+
+  const handleSavePrice = async () => {
+    if (!selectedProperty) return;
+
+    const property = properties.find(p => p.slug === selectedProperty);
+    if (!property?.uuid) {
+      setError('Property UUID not found');
+      return;
+    }
+
+    setSavingPrice(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/properties/${property.uuid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-session': 'authenticated',
+        },
+        body: JSON.stringify({ pricePerNight: priceInput }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setProperties(prev => prev.map(p =>
+          p.slug === selectedProperty ? { ...p, pricePerNight: priceInput } : p
+        ));
+        setEditingPrice(false);
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to update price');
+      }
+    } catch (err) {
+      setError('Failed to update price');
+    } finally {
+      setSavingPrice(false);
     }
   };
 
@@ -411,11 +462,56 @@ export default function AdminCalendarPage() {
               <option value="">Select Property</option>
               {properties.map((property) => (
                 <option key={property.slug} value={property.slug}>
-                  {property.name}
+                  {property.name}{property.customReference ? ` - ${property.customReference}` : ''}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* Price Display/Edit */}
+          {selectedPropertyData && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#7d6349]">Price:</span>
+              {editingPrice ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-[#7d6349]">₱</span>
+                  <input
+                    type="number"
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
+                    className="form-input w-24 text-sm"
+                    placeholder="0"
+                  />
+                  <span className="text-sm text-[#7d6349]">/night</span>
+                  <button
+                    onClick={handleSavePrice}
+                    disabled={savingPrice}
+                    className="btn-primary text-xs px-2 py-1"
+                  >
+                    {savingPrice ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                  </button>
+                  <button
+                    onClick={() => setEditingPrice(false)}
+                    className="btn-secondary text-xs px-2 py-1"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[#5f4a38]">
+                    ₱{parseFloat(selectedPropertyData.pricePerNight || '0').toLocaleString()}/night
+                  </span>
+                  <button
+                    onClick={handleEditPrice}
+                    className="text-xs text-[#14b8a6] hover:text-[#0d9488] underline"
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-3">
             {/* Last Sync Info */}

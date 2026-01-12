@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. Please every step of the way just give me a high level explanation of what changes you made.
 4. Make every task and code change you do as simple as possible. Every change should impact as little code as possible. Everything is about simplicity.
 5. Never speculate about code you have not opened. Always read relevant files BEFORE answering questions about the codebase.
+6. Use agents specialized for the job whenever needed or required. 
 
 ## Commands
 

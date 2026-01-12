@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
         map_url,
         airbnb_url,
         ical_url,
+        ical_last_sync,
         amenities,
         featured,
         active,
@@ -160,6 +161,7 @@ export async function GET(request: NextRequest) {
         airbnbUrl: prop.airbnb_url || '',
         airbnbIcalUrl: prop.ical_url || '',
         icalUrl: prop.ical_url || '', // Legacy compatibility
+        icalLastSync: prop.ical_last_sync || null,
         mapUrl: prop.map_url || '',
         featured: prop.featured === true,
         active: prop.active === true,
