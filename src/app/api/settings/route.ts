@@ -182,9 +182,16 @@ export async function POST(request: NextRequest) {
 
         // Upsert setting
         const settingType = type || detectSettingType(value);
-        const settingValue = (settingType === 'array' || settingType === 'object')
-          ? JSON.stringify(value)
-          : String(value || '');
+
+        // Handle different types properly - especially booleans
+        let settingValue: string;
+        if (settingType === 'array' || settingType === 'object') {
+          settingValue = JSON.stringify(value);
+        } else if (settingType === 'boolean') {
+          settingValue = value ? 'true' : 'false';
+        } else {
+          settingValue = String(value ?? '');
+        }
 
         const { error } = await adminClient
           .from('website_settings')
@@ -221,9 +228,16 @@ export async function POST(request: NextRequest) {
         const settingsArray = Object.entries(settings).map(([key, value]) => {
           const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
           const settingType = detectSettingType(value);
-          const settingValue = (settingType === 'array' || settingType === 'object')
-            ? JSON.stringify(value)
-            : String(value || '');
+
+          // Handle different types properly - especially booleans
+          let settingValue: string;
+          if (settingType === 'array' || settingType === 'object') {
+            settingValue = JSON.stringify(value);
+          } else if (settingType === 'boolean') {
+            settingValue = value ? 'true' : 'false';
+          } else {
+            settingValue = String(value ?? '');
+          }
 
           return {
             setting_key: snakeKey,
