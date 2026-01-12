@@ -42,6 +42,7 @@ export interface BookingResponse {
   subtotal: number;
   cleaningFee: number;
   parkingFee: number;
+  extraPersonFee: number;
   adminFee: number;
   totalAmount: number;
   currency: string;
@@ -149,6 +150,7 @@ function formatBookingResponse(booking: any, property: any, guest: any): Booking
     subtotal: parseFloat(booking.subtotal),
     cleaningFee: parseFloat(booking.cleaning_fee || 0),
     parkingFee: parseFloat(booking.parking_fee || 0),
+    extraPersonFee: parseFloat(booking.extra_person_fee || 0),
     adminFee: parseFloat(booking.admin_fee || 0),
     totalAmount: parseFloat(booking.total_amount),
     currency: booking.currency,
@@ -355,7 +357,7 @@ export async function POST(request: NextRequest) {
     // Step 1: Fetch property and validate
     const { data: property, error: propertyError } = await adminClient
       .from('properties')
-      .select('id, name, price_per_night, cleaning_fee, parking_fee, admin_fee_percent, min_nights, max_nights, max_guests, active')
+      .select('id, name, price_per_night, cleaning_fee, parking_fee, admin_fee_percent, min_nights, max_nights, max_guests, base_occupancy, extra_person_fee, active')
       .eq('id', propertyId)
       .single();
 
@@ -480,8 +482,16 @@ export async function POST(request: NextRequest) {
     const endDateForPricing = new Date(checkOut + 'T00:00:00');
     let currentPricingDate = new Date(startDateForPricing);
 
+    // Helper to format date in local timezone (avoids UTC conversion bug)
+    const formatDateLocal = (d: Date): string => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     while (currentPricingDate < endDateForPricing) {
-      const dateStr = currentPricingDate.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(currentPricingDate);
       const dayPrice = priceMap[dateStr] || baseNightlyRate;
       subtotal += dayPrice;
       currentPricingDate.setDate(currentPricingDate.getDate() + 1);
@@ -495,9 +505,16 @@ export async function POST(request: NextRequest) {
     // Ensure parkingDays doesn't exceed numNights
     const validParkingDays = Math.min(Math.max(parkingDays || 0, 0), numNights);
     const totalParkingFee = parkingFeePerDay * validParkingDays;
+
+    // Calculate extra person fee
+    const baseOccupancy = property.base_occupancy || 2;
+    const extraPersonFeePerNight = parseFloat(property.extra_person_fee) || 0;
+    const extraGuests = Math.max(0, numGuests - baseOccupancy);
+    const totalExtraPersonFee = extraGuests * extraPersonFeePerNight * numNights;
+
     const adminFeePercent = parseFloat(property.admin_fee_percent) || 0;
     const adminFee = subtotal * (adminFeePercent / 100);
-    const totalAmount = subtotal + cleaningFee + totalParkingFee + adminFee;
+    const totalAmount = subtotal + cleaningFee + totalParkingFee + totalExtraPersonFee + adminFee;
 
     // Step 7: Create booking
     const { data: booking, error: bookingError } = await adminClient
@@ -509,10 +526,12 @@ export async function POST(request: NextRequest) {
         check_in: checkIn,
         check_out: checkOut,
         num_guests: numGuests,
+        num_nights: numNights,
         nightly_rate: nightlyRate,
         subtotal: subtotal,
         cleaning_fee: cleaningFee,
         parking_fee: totalParkingFee,
+        extra_person_fee: totalExtraPersonFee,
         admin_fee: adminFee,
         total_amount: totalAmount,
         currency: 'PHP',

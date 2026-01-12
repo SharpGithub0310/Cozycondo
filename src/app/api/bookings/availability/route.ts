@@ -22,6 +22,7 @@ export interface AvailabilityResponse {
     subtotal: number;
     cleaningFee: number;
     parkingFee: number;
+    extraPersonFee: number;
     adminFee: number;
     totalAmount: number;
     currency: string;
@@ -31,6 +32,8 @@ export interface AvailabilityResponse {
     maxGuests: number;
     minNights: number;
     maxNights: number;
+    baseOccupancy: number;
+    extraPersonFeePerNight: number;
   };
 }
 
@@ -111,7 +114,7 @@ export async function GET(request: NextRequest) {
     // Fetch property details
     const { data: property, error: propertyError } = await adminClient
       .from('properties')
-      .select('id, name, price_per_night, cleaning_fee, parking_fee, admin_fee_percent, min_nights, max_nights, max_guests, active')
+      .select('id, name, price_per_night, cleaning_fee, parking_fee, admin_fee_percent, min_nights, max_nights, max_guests, base_occupancy, extra_person_fee, active')
       .eq('id', propertyId)
       .single();
 
@@ -134,6 +137,9 @@ export async function GET(request: NextRequest) {
     const minNights = property.min_nights || 1;
     const maxNights = property.max_nights || 365;
 
+    const baseOccupancy = property.base_occupancy || 2;
+    const extraPersonFeePerNight = parseFloat(property.extra_person_fee) || 0;
+
     if (numNights < minNights) {
       return successResponse<AvailabilityResponse>(
         {
@@ -148,6 +154,8 @@ export async function GET(request: NextRequest) {
             maxGuests: property.max_guests || 4,
             minNights,
             maxNights,
+            baseOccupancy,
+            extraPersonFeePerNight,
           },
         },
         `Minimum stay is ${minNights} nights`
@@ -168,6 +176,8 @@ export async function GET(request: NextRequest) {
             maxGuests: property.max_guests || 4,
             minNights,
             maxNights,
+            baseOccupancy,
+            extraPersonFeePerNight,
           },
         },
         `Maximum stay is ${maxNights} nights`
@@ -259,6 +269,8 @@ export async function GET(request: NextRequest) {
 
     const cleaningFee = parseFloat(property.cleaning_fee) || 0;
     const parkingFee = parseFloat(property.parking_fee) || 0;
+    // Note: Extra person fee is not calculated here as we don't know guest count yet
+    // Frontend will calculate based on property.extraPersonFeePerNight * extra guests * nights
     const adminFeePercent = parseFloat(property.admin_fee_percent) || 0;
     const adminFee = subtotal * (adminFeePercent / 100);
     const totalAmount = subtotal + cleaningFee + parkingFee + adminFee;
@@ -275,6 +287,7 @@ export async function GET(request: NextRequest) {
         subtotal,
         cleaningFee,
         parkingFee,
+        extraPersonFee: 0, // Calculated on frontend based on guest count
         adminFee,
         totalAmount,
         currency: 'PHP',
@@ -284,6 +297,8 @@ export async function GET(request: NextRequest) {
         maxGuests: property.max_guests || 4,
         minNights,
         maxNights,
+        baseOccupancy,
+        extraPersonFeePerNight,
       },
     };
 

@@ -62,6 +62,8 @@ export async function GET(
         admin_fee_percent,
         min_nights,
         max_nights,
+        base_occupancy,
+        extra_person_fee,
         custom_reference,
         map_url,
         airbnb_url,
@@ -107,6 +109,8 @@ export async function GET(
           admin_fee_percent,
           min_nights,
           max_nights,
+          base_occupancy,
+          extra_person_fee,
           custom_reference,
           map_url,
           airbnb_url,
@@ -178,6 +182,8 @@ export async function GET(
       adminFeePercent: parseFloat(property?.admin_fee_percent || '0'),
       minNights: property?.min_nights || 1,
       maxNights: property?.max_nights || 30,
+      baseOccupancy: property?.base_occupancy || 2,
+      extraPersonFee: parseFloat(property?.extra_person_fee || '0'),
       customReference: property?.custom_reference || '',
       airbnbUrl: property?.airbnb_url || '',
       airbnbIcalUrl: property?.ical_url || '',
@@ -296,6 +302,12 @@ export async function PUT(
             break;
           case 'maxNights':
             dbUpdates.max_nights = value;
+            break;
+          case 'baseOccupancy':
+            dbUpdates.base_occupancy = value;
+            break;
+          case 'extraPersonFee':
+            dbUpdates.extra_person_fee = value;
             break;
           case 'propertyCode':
             // Property code is auto-generated, skip manual updates

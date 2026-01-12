@@ -32,6 +32,8 @@ export default function EditProperty() {
     adminFeePercent: 0,
     minNights: 1,
     maxNights: 30,
+    baseOccupancy: 2,
+    extraPersonFee: 0,
     airbnbUrl: '',
     airbnbIcalUrl: '',
   });
@@ -111,6 +113,8 @@ export default function EditProperty() {
           adminFeePercent: propertyData.adminFeePercent || 0,
           minNights: propertyData.minNights || 1,
           maxNights: propertyData.maxNights || 30,
+          baseOccupancy: propertyData.baseOccupancy || 2,
+          extraPersonFee: propertyData.extraPersonFee || 0,
           airbnbUrl: propertyData.airbnbUrl || '',
           airbnbIcalUrl: propertyData.airbnbIcalUrl || '',
         });
@@ -151,6 +155,8 @@ export default function EditProperty() {
         adminFeePercent: property.adminFeePercent || 0,
         minNights: property.minNights || 1,
         maxNights: property.maxNights || 30,
+        baseOccupancy: property.baseOccupancy || 2,
+        extraPersonFee: property.extraPersonFee || 0,
         airbnbUrl: property.airbnbUrl || '',
         airbnbIcalUrl: property.airbnbIcalUrl || '',
       };
@@ -463,6 +469,38 @@ export default function EditProperty() {
                   className="form-input"
                   placeholder="30"
                 />
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Base Occupancy
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max={property.maxGuests || 10}
+                  value={property.baseOccupancy}
+                  onChange={(e) => setProperty({...property, baseOccupancy: parseInt(e.target.value) || 2})}
+                  className="form-input"
+                  placeholder="2"
+                />
+                <p className="text-xs text-[#7d6349] mt-1">Guests included in base price</p>
+              </div>
+              <div>
+                <label className="form-label flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Extra Person Fee
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={property.extraPersonFee}
+                  onChange={(e) => setProperty({...property, extraPersonFee: parseFloat(e.target.value) || 0})}
+                  className="form-input"
+                  placeholder="0"
+                />
+                <p className="text-xs text-[#7d6349] mt-1">Per extra person per night (PHP)</p>
               </div>
             </div>
           </div>
