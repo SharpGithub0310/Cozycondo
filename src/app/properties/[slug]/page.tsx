@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import PropertyDetail from '@/components/PropertyDetail';
-
-// Import database service for server-side data fetching
 import { databaseService } from '@/lib/database-service';
+import { getTestimonialsServer } from '@/lib/testimonials-server';
+import type { Testimonial } from '@/lib/types';
 
 // Generate static params for all properties with multiple slug variations
 export async function generateStaticParams() {
@@ -38,7 +38,6 @@ export async function generateStaticParams() {
   };
 
   try {
-    // Try to fetch properties from database
     const properties = await databaseService.getProperties();
     const allSlugs: string[] = [];
 
@@ -47,28 +46,20 @@ export async function generateStaticParams() {
       allSlugs.push(...slugVariations);
     });
 
-    const params = allSlugs.map(slug => ({ slug }));
-    console.log('Generated static params from database:', params.map(p => p.slug));
-    return params;
+    return allSlugs.map(slug => ({ slug }));
   } catch (error) {
     console.error('Error generating static params for properties:', error);
-    // Return empty array if database is not available during build
     return [];
   }
 }
 
-// Enable dynamic rendering for paths not in generateStaticParams
 export const dynamicParams = true;
-
-// Force dynamic rendering to ensure property data is always fresh
 export const dynamic = 'force-dynamic';
 
-// Generate metadata
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
   try {
-    // Try to fetch property from database with fallback
     const property = await databaseService.getProperty(slug);
 
     if (property) {
@@ -81,7 +72,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     console.error('Error generating metadata for property:', error);
   }
 
-
   return {
     title: 'Property Not Found',
     description: 'The requested property could not be found.',
@@ -91,37 +81,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  console.log('PropertyPage: Looking for property with slug:', slug);
-
-  // Helper function to match property by various slug strategies
   const findPropertyBySlug = (properties: any[], searchSlug: string) => {
-    // Strategy 1: Direct slug match
-    let property = properties.find((p: any) =>
-      (p.slug || p.id) === searchSlug
-    );
+    let property = properties.find((p: any) => (p.slug || p.id) === searchSlug);
+    if (property) return property;
 
-    if (property) {
-      console.log('PropertyPage: Found by direct slug match');
-      return property;
-    }
-
-    // Strategy 2: Name-to-slug conversion
     property = properties.find((p: any) => {
       if (!p.name) return false;
       const generatedSlug = p.name.toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-        .replace(/\s+/g, '-') // Replace spaces with hyphens
-        .replace(/-+/g, '-') // Replace multiple hyphens
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
         .trim();
       return generatedSlug === searchSlug;
     });
+    if (property) return property;
 
-    if (property) {
-      console.log('PropertyPage: Found by name-to-slug conversion');
-      return property;
-    }
-
-    // Strategy 3: Title-to-slug conversion (for legacy compatibility)
     property = properties.find((p: any) => {
       if (!p.title) return false;
       const generatedSlug = p.title.toLowerCase()
@@ -131,49 +105,30 @@ export default async function PropertyPage({ params }: { params: Promise<{ slug:
         .trim();
       return generatedSlug === searchSlug;
     });
+    if (property) return property;
 
-    if (property) {
-      console.log('PropertyPage: Found by title-to-slug conversion');
-      return property;
-    }
-
-    // Strategy 4: Direct ID match
     property = properties.find((p: any) => p.id === searchSlug);
+    if (property) return property;
 
-    if (property) {
-      console.log('PropertyPage: Found by direct ID match');
-      return property;
-    }
-
-    // Strategy 5: Case-insensitive search
-    property = properties.find((p: any) =>
+    return properties.find((p: any) =>
       (p.slug || p.id || '').toLowerCase() === searchSlug.toLowerCase()
-    );
-
-    if (property) {
-      console.log('PropertyPage: Found by case-insensitive match');
-      return property;
-    }
-
-    return null;
+    ) || null;
   };
 
   try {
-    // Try to fetch property from database with fallback
     const allProperties = await databaseService.getProperties();
     const propertiesArray = Object.values(allProperties);
-
     const property = findPropertyBySlug(propertiesArray, slug);
 
     if (property) {
-      console.log('PropertyPage: Found property in database:', property.name || (property as any).title);
-      return <PropertyDetail slug={slug} defaultProperty={property} />;
+      const testimonials: Testimonial[] = await getTestimonialsServer({
+        propertyId: property.id,
+      });
+      return <PropertyDetail property={property} testimonials={testimonials} />;
     }
   } catch (error) {
     console.error('PropertyPage: Error fetching property from database:', error);
   }
 
-  console.log('PropertyPage: No property found for slug:', slug);
-  // If no property found in database, show not found
   notFound();
 }

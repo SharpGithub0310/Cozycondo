@@ -1,626 +1,171 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import {
-  MapPin,
-  ArrowLeft,
-  ExternalLink,
-  MessageCircle,
-  Phone,
-  Wifi,
-  Wind,
-  Car,
-  Tv,
-  UtensilsCrossed,
-  Building2,
-  Shield,
-  Dumbbell,
-  Coffee,
-  WashingMachine,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  ZoomIn
-} from 'lucide-react';
-import { postMigrationDatabaseService } from '@/lib/post-migration-database-service';
-import BookingWidget from '@/components/BookingWidget';
+import { useState, useMemo } from 'react';
+import { MessageCircle, Star } from 'lucide-react';
+import PhotoLightbox from './PhotoLightbox';
+import Testimonials from './Testimonials';
+import MobileContactBar from './MobileContactBar';
+import type { Testimonial } from '@/lib/types';
 
-// Amenity icons mapping
-const amenityIcons: Record<string, React.ReactNode> = {
-  'wifi': <Wifi className="w-5 h-5" />,
-  'air conditioning': <Wind className="w-5 h-5" />,
-  'parking': <Car className="w-5 h-5" />,
-  'smart tv': <Tv className="w-5 h-5" />,
-  'kitchen': <UtensilsCrossed className="w-5 h-5" />,
-  'city view': <Building2 className="w-5 h-5" />,
-  '24/7 security': <Shield className="w-5 h-5" />,
-  'gym access': <Dumbbell className="w-5 h-5" />,
-  'workspace': <Coffee className="w-5 h-5" />,
-  'washer': <WashingMachine className="w-5 h-5" />,
-};
-
-interface PropertyDetailProps {
-  slug: string;
-  defaultProperty: any;
+interface Props {
+  property: any;
+  testimonials?: Testimonial[];
 }
 
-export default function PropertyDetail({ slug, defaultProperty }: PropertyDetailProps) {
-  const [property, setProperty] = useState(defaultProperty);
-  const [displayPhotos, setDisplayPhotos] = useState<string[]>([]);
-  const [showLightbox, setShowLightbox] = useState(false);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [loading, setLoading] = useState(!defaultProperty);
-  const [error, setError] = useState<string | null>(null);
-  const [bookingEnabled, setBookingEnabled] = useState<boolean>(true);
+type NormPhoto = { id: string; url: string; alt_text?: string | null };
 
-  // Fetch booking settings
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await fetch('/api/settings');
-        if (response.ok) {
-          const result = await response.json();
-          setBookingEnabled(result.data?.bookingEnabled !== false);
-        }
-      } catch (err) {
-        console.error('Error fetching settings:', err);
-        // Default to enabled if we can't fetch
-        setBookingEnabled(true);
-      }
+function normalizePhotos(raw: any): NormPhoto[] {
+  const arr = raw?.photos || [];
+  if (!Array.isArray(arr) || arr.length === 0) return [];
+  return arr.map((p: any, i: number) => {
+    if (typeof p === 'string') return { id: `p${i}`, url: p, alt_text: null };
+    return {
+      id: p.id || `p${i}`,
+      url: p.url || '',
+      alt_text: p.alt_text ?? null,
     };
-    fetchSettings();
-  }, []);
+  }).filter((p: NormPhoto) => !!p.url);
+}
 
-  const openLightbox = (index: number) => {
-    setCurrentPhotoIndex(index);
-    setShowLightbox(true);
-  };
+export default function PropertyDetail({ property, testimonials = [] }: Props) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const photos = useMemo(() => normalizePhotos(property), [property]);
+  const firstFive = photos.slice(0, 5);
 
-  const nextPhoto = () => {
-    setCurrentPhotoIndex((prev) => (prev + 1) % displayPhotos.length);
-  };
-
-  const prevPhoto = () => {
-    setCurrentPhotoIndex((prev) => (prev - 1 + displayPhotos.length) % displayPhotos.length);
-  };
-
-  useEffect(() => {
-    // If we already have the property from server-side, set up photos and we're done
-    if (defaultProperty && !loading) {
-      setupPhotos(defaultProperty);
-      return;
-    }
-
-    // Load property data from database using slug
-    const loadProperty = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        console.log('PropertyDetail: Loading property with slug:', slug);
-
-        // Use the slug from props, not the property.id which might be outdated
-        const dbProperty = await postMigrationDatabaseService.getProperty(slug);
-
-        if (dbProperty) {
-          console.log('PropertyDetail: Successfully loaded property from database');
-          // Update property data with database information
-          const updatedProperty = {
-            ...defaultProperty,
-            ...dbProperty,
-            name: dbProperty.name || defaultProperty?.name || 'Property',
-            description: dbProperty.description || defaultProperty?.description || '',
-            location: dbProperty.location || defaultProperty?.location || '',
-            amenities: dbProperty.amenities || defaultProperty?.amenities || [],
-          };
-          setProperty(updatedProperty);
-          setupPhotos(updatedProperty);
-        } else if (defaultProperty) {
-          console.log('PropertyDetail: Using default property data');
-          setupPhotos(defaultProperty);
-        } else {
-          setError('Property not found');
-          setDisplayPhotos(getDefaultPhotos());
-        }
-      } catch (error) {
-        console.error('PropertyDetail: Error loading property from database:', error);
-        setError('Failed to load property details');
-        // Use fallback data if available
-        if (defaultProperty) {
-          setupPhotos(defaultProperty);
-        } else {
-          setDisplayPhotos(getDefaultPhotos());
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProperty();
-  }, [slug, defaultProperty]);
-
-  const getDefaultPhotos = () => [];
-
-  const setupPhotos = (propertyData: any) => {
-    if (propertyData.photos && propertyData.photos.length > 0) {
-      const photos = [...propertyData.photos];
-      const featuredIndex = propertyData.featuredPhotoIndex || 0;
-
-      // Move featured photo to first position if it's not already there
-      if (featuredIndex > 0 && featuredIndex < photos.length) {
-        const featuredPhoto = photos[featuredIndex];
-        photos.splice(featuredIndex, 1);
-        photos.unshift(featuredPhoto);
-      }
-
-      setDisplayPhotos(photos);
-    } else {
-      setDisplayPhotos(getDefaultPhotos());
-    }
-  };
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="pt-20">
-        <div className="bg-[#faf3e6] py-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Link
-              href="/properties"
-              className="inline-flex items-center gap-2 text-[#7d6349] hover:text-[#0d9488] transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Properties</span>
-            </Link>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="aspect-[4/3] bg-gray-200 rounded-lg"></div>
-              <div className="space-y-4">
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error && !property) {
-    return (
-      <div className="pt-20">
-        <div className="bg-[#faf3e6] py-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Link
-              href="/properties"
-              className="inline-flex items-center gap-2 text-[#7d6349] hover:text-[#0d9488] transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Properties</span>
-            </Link>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
-            <X className="w-12 h-12 text-red-500" />
-          </div>
-          <h1 className="font-display text-xl font-semibold text-gray-900 mb-2">Property Not Found</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Link
-            href="/properties"
-            className="btn-primary"
-          >
-            Browse All Properties
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || '#';
+  const fbPage    = process.env.NEXT_PUBLIC_FACEBOOK_PAGE_URL || '#';
+  const price     = property.pricePerNight;
 
   return (
-    <div className="pt-20">
-      {/* Enhanced Back navigation */}
-      <div className="bg-gradient-to-r from-[var(--color-warm-100)] to-[var(--color-warm-50)] py-6">
-        <div className="container-xl">
-          <Link
-            href="/properties"
-            className="inline-flex items-center gap-3 px-4 py-2.5 bg-white/80 backdrop-blur-sm rounded-xl text-[var(--color-warm-700)] hover:text-[var(--color-primary-600)] hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md group"
-          >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            <span className="font-medium">Back to Properties</span>
-          </Link>
+    <main className="pt-24 pb-24">
+      {/* Header */}
+      <header className="container-xl mb-10">
+        <div className="label-tiny mb-3">
+          PROPERTIES <span className="text-stone-300 mx-1">/</span> {(property.title || property.name || '').toUpperCase()}
         </div>
-      </div>
-
-      {/* Enhanced Property Header */}
-      <section className="relative bg-gradient-to-br from-[var(--color-warm-50)] via-[var(--color-warm-100)] to-[var(--color-warm-200)] py-12 lg:py-16">
-        {/* Background decorations */}
-        <div className="absolute inset-0 opacity-20">
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `
-                radial-gradient(ellipse 200% 100% at 50% 0%, var(--color-primary-100) 0%, transparent 50%),
-                radial-gradient(ellipse 200% 100% at 80% 100%, var(--color-accent-orange-light) 0%, transparent 50%)
-              `
-            }}
-          />
+        <h1 className="text-[36px] md:text-[46px] font-medium tracking-[-1.2px] leading-[1.05] mb-3">
+          {property.title || property.name}
+        </h1>
+        <div className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-stone-600">
+          {property.location && <span>{property.location}</span>}
+          {property.propertyType && <><span className="text-stone-300">·</span><span>{property.propertyType}</span></>}
         </div>
-        <div className="relative container-xl">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              {property.featured && (
-                <div className="inline-flex items-center gap-1 px-3 py-1.5 mb-4 text-xs font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 rounded-full shadow-sm">
-                  <span>★</span>
-                  Featured
-                </div>
-              )}
-              <h1 className="hero-title text-[var(--color-warm-900)] mb-4">
-                {property.name}
-              </h1>
-              <div className="flex items-center gap-3 text-[var(--color-warm-700)] mb-6">
-                <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-100)] flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-[var(--color-primary-600)]" />
-                </div>
-                <span className="text-lg font-medium">{property.location}</span>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {property.airbnb_url && (
-                <a
-                  href={property.airbnb_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-secondary btn-lg hover:scale-105"
-                >
-                  <ExternalLink className="w-5 h-5" />
-                  <span>View on Airbnb</span>
-                </a>
-              )}
-              {bookingEnabled ? (
-                <Link
-                  href={`/book/${slug}`}
-                  className="btn btn-primary btn-lg hover:scale-105 shadow-lg hover:shadow-xl"
-                >
-                  <Calendar className="w-5 h-5" />
-                  <span>Book Now</span>
-                </Link>
-              ) : (
-                <Link
-                  href="/contact"
-                  className="btn btn-primary btn-lg hover:scale-105 shadow-lg hover:shadow-xl"
-                >
-                  <Phone className="w-5 h-5" />
-                  <span>Contact Us</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      </header>
 
-      {/* Enhanced Photo Gallery */}
-      <section className="section bg-white">
-        <div className="container-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Main photo */}
-            <div
-              className="aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer relative group"
-              onClick={() => openLightbox(0)}
-            >
-              {displayPhotos.length > 0 ? (
-                <>
-                  <img
-                    src={displayPhotos[0]}
-                    alt={`${property.name} main photo`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <ZoomIn className="w-10 h-10 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </>
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#d4b896] to-[#b89b7a] flex items-center justify-center">
-                  <div className="text-center text-white/80">
-                    <div className="w-20 h-20 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="font-display text-3xl font-bold">CC</span>
-                    </div>
-                    <p className="text-lg font-medium">Photos Coming Soon</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Thumbnail grid */}
-            <div className="grid grid-cols-2 gap-4 relative">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-[4/3] rounded-xl overflow-hidden cursor-pointer relative group"
-                  onClick={() => displayPhotos[i] && openLightbox(i)}
-                >
-                  {displayPhotos[i] ? (
-                    <>
-                      <img
-                        src={displayPhotos[i]}
-                        alt={`${property.name} photo ${i + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      {/* Show "View all" button on the last visible thumbnail if there are more photos */}
-                      {i === 3 && displayPhotos.length > 5 && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <span className="text-2xl font-bold">+{displayPhotos.length - 5}</span>
-                            <p className="text-sm mt-1">View all photos</p>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#e8d4a8] to-[#d4b896] flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                        <span className="font-display text-lg font-bold text-white/60">CC</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-          {displayPhotos.length > 5 && (
+      {/* Gallery grid */}
+      <section className="container-xl mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-2.5 md:h-[520px]">
+          {firstFive.map((p, i) => (
             <button
-              onClick={() => openLightbox(0)}
-              className="mt-4 mx-auto flex items-center gap-2 px-4 py-2 bg-[#14b8a6] text-white rounded-lg hover:bg-[#0d9488] transition-colors"
+              key={p.id}
+              onClick={() => setLightboxOpen(true)}
+              className={`relative rounded-lg overflow-hidden ${
+                i === 0 ? 'md:row-span-2 h-64 md:h-auto' : 'h-32 md:h-auto'
+              }`}
             >
-              <ZoomIn className="w-4 h-4" />
-              View all {displayPhotos.length} photos
+              <div
+                className="absolute inset-0 bg-cover bg-center hover:opacity-90 transition-opacity bg-stone-200"
+                style={{ backgroundImage: `url('${p.url}')` }}
+              />
+              {i === 4 && photos.length > 5 && (
+                <span className="absolute bottom-3 right-3 bg-white/90 text-stone-900 text-[11px] font-medium px-3 py-1.5 rounded-full">
+                  View all {photos.length} photos →
+                </span>
+              )}
             </button>
-          )}
+          ))}
         </div>
       </section>
 
-      {/* Enhanced Property Details */}
-      <section className="section bg-gradient-to-br from-[var(--color-warm-50)] to-white">
-        <div className="container-xl">
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Main content */}
-            <div className="lg:col-span-2">
-              <h2 className="section-title mb-8">
-                About This Property
-              </h2>
-              <div className="prose prose-lg text-[#7d6349] max-w-none">
-                {property.description.split('\n\n').map((paragraph: string, i: number) => (
-                  <p key={i} className="mb-4">{paragraph}</p>
+      {/* Body: 2 columns */}
+      <section className="container-xl grid md:grid-cols-[1.6fr_1fr] gap-16">
+        {/* Left column */}
+        <div>
+          {/* Specs */}
+          <div className="grid grid-cols-4 gap-5 py-6 border-y border-stone-200 mb-10">
+            <div><div className="text-[22px] font-medium">{property.maxGuests || '—'}</div><div className="text-[11px] text-stone-500 tracking-wider uppercase">Guests</div></div>
+            <div><div className="text-[22px] font-medium">{property.bedrooms || '—'}</div><div className="text-[11px] text-stone-500 tracking-wider uppercase">Bedroom{property.bedrooms === 1 ? '' : 's'}</div></div>
+            <div><div className="text-[22px] font-medium">{property.bathrooms || '—'}</div><div className="text-[11px] text-stone-500 tracking-wider uppercase">Bathroom{property.bathrooms === 1 ? '' : 's'}</div></div>
+            <div><div className="text-[22px] font-medium">{property.size || '—'}</div><div className="text-[11px] text-stone-500 tracking-wider uppercase">Sqm</div></div>
+          </div>
+
+          {/* About */}
+          <section className="mb-12">
+            <h3 className="text-[22px] font-medium mb-3">About this unit</h3>
+            <p className="text-[15px] leading-[1.75] text-stone-700 whitespace-pre-line">
+              {property.description || ''}
+            </p>
+          </section>
+
+          {/* Amenities */}
+          {Array.isArray(property.amenities) && property.amenities.length > 0 && (
+            <section className="mb-12 pt-10 border-t border-stone-200">
+              <h3 className="text-[22px] font-medium mb-4">What&apos;s included</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-7 text-[14px] text-stone-700">
+                {property.amenities.map((a: string) => (
+                  <div key={a} className="flex items-start gap-2">
+                    <span className="text-stone-400">·</span> {a}
+                  </div>
                 ))}
               </div>
+            </section>
+          )}
+        </div>
 
-              {/* Amenities */}
-              <div className="mt-12">
-                <h2 className="font-display text-xl font-semibold text-[#5f4a38] mb-6">
-                  Amenities
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {property.amenities.map((amenity: string, i: number) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 p-4 rounded-xl bg-[#faf3e6]"
-                    >
-                      <div className="text-[#14b8a6]">
-                        {amenityIcons[amenity.toLowerCase()] || <Building2 className="w-5 h-5" />}
-                      </div>
-                      <span className="text-[#5f4a38] font-medium">{amenity}</span>
-                    </div>
-                  ))}
+        {/* Right column: sticky contact card */}
+        <aside>
+          <div className="sticky top-28 bg-white border border-stone-200 rounded-xl p-7">
+            {price && (
+              <>
+                <div className="text-[11px] text-stone-500 uppercase tracking-wider">From</div>
+                <div>
+                  <span className="text-[30px] font-medium tracking-tight">
+                    ₱{Number(price).toLocaleString()}
+                  </span>
+                  <span className="text-[13px] text-stone-500"> / night</span>
                 </div>
-              </div>
-
-              {/* Location */}
-              <div className="mt-12">
-                <h2 className="font-display text-xl font-semibold text-[#5f4a38] mb-6">
-                  Location
-                </h2>
-                <div className="p-6 rounded-2xl bg-[#faf3e6]">
-                  <div className="flex items-start gap-3 mb-4">
-                    <MapPin className="w-5 h-5 text-[#14b8a6] flex-shrink-0 mt-1" />
-                    <div>
-                      <p className="text-[#5f4a38] font-medium">{property.location}</p>
-                      <p className="text-[#7d6349] text-sm">{property.address}</p>
-                    </div>
-                  </div>
-                  {property.map_url && (
-                    <a
-                      href={property.map_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-[#0d9488] font-medium text-sm hover:underline"
-                    >
-                      <span>View on Google Maps</span>
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
+              </>
+            )}
+            <div className="text-[12px] text-stone-500 mt-1">
+              <Star className="inline w-3.5 h-3.5 text-amber-400 mr-0.5" /> Ask us about current availability
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
-                {/* Booking Widget or Contact Card based on booking toggle */}
-                {bookingEnabled ? (
-                  <BookingWidget
-                    propertySlug={slug}
-                    pricePerNight={parseFloat(property.price_per_night) || parseFloat(property.pricePerNight) || 0}
-                    cleaningFee={parseFloat(property.cleaning_fee) || parseFloat(property.cleaningFee) || 0}
-                    parkingFee={parseFloat(property.parking_fee) || parseFloat(property.parkingFee) || 0}
-                    adminFeePercent={parseFloat(property.admin_fee_percent) || parseFloat(property.adminFeePercent) || 0}
-                    minNights={property.min_nights || property.minNights || 1}
-                    maxNights={property.max_nights || property.maxNights || 30}
-                    maxGuests={property.max_guests || property.maxGuests || 4}
-                  />
-                ) : (
-                  <div className="p-6 rounded-2xl bg-white border border-[#faf3e6] shadow-lg">
-                    <h3 className="font-display text-xl font-semibold text-[#5f4a38] mb-4">
-                      Interested in this property?
-                    </h3>
-                    <p className="text-[#7d6349] text-sm mb-6">
-                      Contact us to check availability and make your reservation.
-                    </p>
+            <hr className="border-stone-200 my-5" />
 
-                    <div className="space-y-3">
-                      {property.airbnb_url && (
-                        <a
-                          href={property.airbnb_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full btn-secondary justify-center"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Book on Airbnb
-                        </a>
-                      )}
-                      <Link
-                        href="/contact"
-                        className="w-full btn-primary justify-center"
-                      >
-                        <Phone className="w-4 h-4 mr-2" />
-                        Contact Us
-                      </Link>
-                    </div>
-                  </div>
-                )}
+            <h4 className="text-[14px] font-medium mb-2">Interested in this unit?</h4>
+            <p className="text-[12px] text-stone-600 leading-[1.6] mb-5">
+              Send us a message on Facebook and we&apos;ll get back to you within the hour during the day. No forms, no booking fees — just a quick chat.
+            </p>
 
-                {/* Contact Card */}
-                <div className="p-6 rounded-2xl bg-[#faf3e6]">
-                  <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
-                    Questions?
-                  </h3>
-                  <div className="space-y-3">
-                    <a
-                      href="tel:+639778870724"
-                      className="flex items-center gap-3 text-[#7d6349] hover:text-[#0d9488] transition-colors"
-                    >
-                      <Phone className="w-5 h-5" />
-                      <span>+63 977 887 0724</span>
-                    </a>
-                    <a
-                      href="mailto:admin@cozycondo.net"
-                      className="flex items-center gap-3 text-[#7d6349] hover:text-[#0d9488] transition-colors"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      <span>admin@cozycondo.net</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Availability Note */}
-                <div className="p-6 rounded-2xl border border-[#14b8a6]/20 bg-[#f0fdfb]">
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-[#14b8a6] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-[#0f766e] mb-1">Check Availability</h4>
-                      <p className="text-sm text-[#115e59]">
-                        Message us to get real-time availability and special rates for extended stays.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <a href={messenger} target="_blank" rel="noopener noreferrer"
+               className="flex items-center justify-center gap-2 bg-[#1877f2] text-white rounded-lg py-3.5 text-[14px] font-medium mb-2.5">
+              <MessageCircle className="w-4 h-4" /> Message us on Facebook
+            </a>
+            <a href={fbPage} target="_blank" rel="noopener noreferrer"
+               className="flex items-center justify-center bg-white text-stone-900 border border-stone-300 rounded-lg py-3.5 text-[14px] font-medium">
+              Visit our Facebook Page
+            </a>
+            <div className="text-[11px] text-stone-500 text-center mt-4 tracking-wide">
+              — Typically replies within 1 hour —
             </div>
           </div>
-        </div>
+        </aside>
       </section>
 
-      {/* Photo Lightbox Modal */}
-      {showLightbox && displayPhotos.length > 0 && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
-          {/* Close button */}
-          <button
-            onClick={() => setShowLightbox(false)}
-            className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          {/* Previous button */}
-          {displayPhotos.length > 1 && (
-            <button
-              onClick={prevPhoto}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
-            >
-              <ChevronLeft className="w-8 h-8" />
-            </button>
-          )}
-
-          {/* Photo display */}
-          <div className="max-w-7xl max-h-[90vh] mx-auto px-4 relative">
-            <img
-              src={displayPhotos[currentPhotoIndex]}
-              alt={`${property.name} photo ${currentPhotoIndex + 1}`}
-              className="max-w-full max-h-[90vh] object-contain"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-
-            {/* Photo counter */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-lg">
-              {currentPhotoIndex + 1} / {displayPhotos.length}
-            </div>
-          </div>
-
-          {/* Next button */}
-          {displayPhotos.length > 1 && (
-            <button
-              onClick={nextPhoto}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
-            >
-              <ChevronRight className="w-8 h-8" />
-            </button>
-          )}
-
-          {/* Thumbnail strip at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4 overflow-x-auto">
-            <div className="flex gap-2 justify-center">
-              {displayPhotos.map((photo, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPhotoIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                    index === currentPhotoIndex ? 'border-white' : 'border-transparent opacity-50 hover:opacity-75'
-                  }`}
-                >
-                  <img
-                    src={photo}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Per-unit testimonials */}
+      {testimonials.length > 0 && (
+        <div className="mt-24">
+          <Testimonials
+            testimonials={testimonials}
+            label={`STAYS AT ${(property.title || property.name || '').toUpperCase()}`}
+            title="What guests said about this unit"
+            variant="dark"
+          />
         </div>
       )}
-    </div>
+
+      <PhotoLightbox photos={photos} open={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+      <MobileContactBar />
+    </main>
   );
 }
