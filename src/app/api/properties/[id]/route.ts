@@ -73,6 +73,7 @@ export async function GET(
         active,
         display_order,
         featured_photo_index,
+        cover_photo_id,
         created_at,
         updated_at,
         property_photos (
@@ -120,6 +121,7 @@ export async function GET(
           active,
           display_order,
           featured_photo_index,
+          cover_photo_id,
           created_at,
           updated_at,
           property_photos (
@@ -197,6 +199,7 @@ export async function GET(
       featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
       slug: slug,
       displayOrder: property?.display_order || 0,
+      coverPhotoId: (property as any)?.cover_photo_id || null,
       createdAt: property?.created_at,
       updatedAt: property?.updated_at
     };
@@ -308,6 +311,9 @@ export async function PUT(
             break;
           case 'extraPersonFee':
             dbUpdates.extra_person_fee = value;
+            break;
+          case 'coverPhotoId':
+            dbUpdates.cover_photo_id = value || null;
             break;
           case 'propertyCode':
             // Property code is auto-generated, skip manual updates

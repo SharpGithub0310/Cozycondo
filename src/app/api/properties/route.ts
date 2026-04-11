@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
         active,
         display_order,
         featured_photo_index,
+        cover_photo_id,
         created_at,
         updated_at,
         property_photos (
@@ -175,6 +176,7 @@ export async function GET(request: NextRequest) {
         featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
         slug: slug,
         displayOrder: prop.display_order || 0,
+        coverPhotoId: (prop as any).cover_photo_id || null,
         createdAt: prop.created_at,
         updatedAt: prop.updated_at
       };

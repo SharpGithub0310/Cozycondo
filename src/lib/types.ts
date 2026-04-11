@@ -14,6 +14,7 @@ export interface Property {
   active: boolean;
   display_order: number;
   featuredPhotoIndex?: number;
+  cover_photo_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export interface PropertyData {
   photos: string[];
   images?: string[]; // Alternative image field for compatibility
   featuredPhotoIndex: number;
+  coverPhotoId?: string | null;
   updatedAt?: string;
   customReference?: string; // User-defined property ID
 }
