@@ -176,6 +176,52 @@ export interface FAQ {
   order?: number;
 }
 
+// ===== Testimonials (Showcase Redesign 2026-04-11) =====
+
+export type TestimonialSource = 'airbnb' | 'facebook' | 'google' | 'direct';
+
+export interface Testimonial {
+  id: string;
+  guestName: string;
+  reviewText: string;
+  rating: number; // 1-5
+  source: TestimonialSource;
+  stayMonth: string | null;
+  propertyId: string | null;
+  displayOrder: number;
+  published: boolean;
+  createdAt: string;
+}
+
+// Shape returned directly from Supabase (snake_case)
+export interface TestimonialRow {
+  id: string;
+  guest_name: string;
+  review_text: string;
+  rating: number;
+  source: TestimonialSource;
+  stay_month: string | null;
+  property_id: string | null;
+  display_order: number;
+  published: boolean;
+  created_at: string;
+}
+
+export function mapTestimonialRow(row: TestimonialRow): Testimonial {
+  return {
+    id: row.id,
+    guestName: row.guest_name,
+    reviewText: row.review_text,
+    rating: row.rating,
+    source: row.source,
+    stayMonth: row.stay_month,
+    propertyId: row.property_id,
+    displayOrder: row.display_order,
+    published: row.published,
+    createdAt: row.created_at,
+  };
+}
+
 // Amenity icon mapping
 export const amenityIcons: Record<string, string> = {
   'wifi': 'Wifi',
