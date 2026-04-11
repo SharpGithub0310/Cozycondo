@@ -16,19 +16,18 @@ import {
   Globe,
   Bell,
   User,
-  TrendingUp,
-  CalendarDays,
-  ClipboardList,
+  MessageSquareQuote,
 } from 'lucide-react';
 
+// Showcase Redesign 2026-04-11 — Bookings/Calendar/Revenue pages still exist
+// in the repo (accessible by direct URL) but are delinked from the sidebar
+// since the site no longer accepts on-site bookings.
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Properties', href: '/admin/properties', icon: Building2 },
-  { name: 'Bookings', href: '/admin/bookings', icon: ClipboardList },
-  { name: 'Calendar', href: '/admin/calendar', icon: CalendarDays },
-  { name: 'Revenue', href: '/admin/revenue', icon: TrendingUp },
-  { name: 'Blog', href: '/admin/blog', icon: FileText },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Dashboard',    href: '/admin',              icon: LayoutDashboard },
+  { name: 'Properties',   href: '/admin/properties',   icon: Building2 },
+  { name: 'Testimonials', href: '/admin/testimonials', icon: MessageSquareQuote },
+  { name: 'Stories',      href: '/admin/blog',         icon: FileText },
+  { name: 'Settings',     href: '/admin/settings',     icon: Settings },
 ];
 
 export default function AdminLayout({
