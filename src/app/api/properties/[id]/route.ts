@@ -150,10 +150,10 @@ export async function GET(
     const slug = property?.slug || property?.id || property?.name?.toLowerCase().replace(/\s+/g, '-') || 'property-' + Date.now();
 
     // Sort photos properly
-    const sortedPhotos = (property?.property_photos || [])
+    const sortedPhotoRecords = (property?.property_photos || [])
       .filter((photo: any) => photo.url) // Only include photos with URLs
-      .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-      .map((photo: any) => photo.url);
+      .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
+    const sortedPhotos = sortedPhotoRecords.map((photo: any) => photo.url);
 
     // Find featured photo index
     const featuredPhotoIndex = (property?.property_photos || [])
@@ -196,6 +196,13 @@ export async function GET(
       amenities: Array.isArray(property?.amenities) ? property?.amenities : [],
       images: sortedPhotos, // Legacy compatibility
       photos: sortedPhotos,
+      photoRecords: sortedPhotoRecords.map((p: any) => ({
+        id: p.id,
+        url: p.url,
+        alt_text: p.alt_text || null,
+        display_order: p.display_order || 0,
+        is_primary: !!p.is_primary,
+      })),
       featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
       slug: slug,
       displayOrder: property?.display_order || 0,

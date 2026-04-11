@@ -23,6 +23,8 @@ export default function EditProperty() {
     pricePerNight: '',
     amenities: [] as string[],
     photos: [] as string[],
+    photoRecords: [] as { id: string; url: string; alt_text: string | null; display_order: number; is_primary: boolean }[],
+    coverPhotoId: null as string | null,
     featuredPhotoIndex: 0,
     featured: false,
     active: true,
@@ -99,6 +101,8 @@ export default function EditProperty() {
           pricePerNight: propertyData.pricePerNight || propertyData.price?.toString() || '',
           amenities: propertyData.amenities || [],  // Ensure amenities is always an array
           photos: propertyData.photos || [],
+          photoRecords: propertyData.photoRecords || [],
+          coverPhotoId: propertyData.coverPhotoId || null,
           featuredPhotoIndex: propertyData.featuredPhotoIndex || 0,
           featured: propertyData.featured || false,
           active: propertyData.active !== false,
@@ -142,6 +146,7 @@ export default function EditProperty() {
         location: property.location,
         amenities: property.amenities || [],
         featuredPhotoIndex: property.featuredPhotoIndex,
+        coverPhotoId: property.coverPhotoId,
         featured: property.featured || false,
         active: property.active !== false,
         // New fields
@@ -769,6 +774,48 @@ export default function EditProperty() {
                 <p className="text-xs text-[#9a7d5e] mt-2">
                   Tip: Click on any photo to set it as the featured image. The featured photo will be displayed first on the property listing.
                 </p>
+              </div>
+            )}
+
+            {/* Card Cover Photo Selector (Showcase Redesign 2026-04-11) */}
+            {(property.photoRecords || []).length > 0 && (
+              <div className="mt-8 pt-6 border-t border-[#faf3e6]">
+                <h4 className="font-medium text-[#5f4a38] mb-1">Card cover photo</h4>
+                <p className="text-xs text-[#9a7d5e] mb-4">
+                  Pick which photo appears on the homepage grid and the properties listing.
+                  Falls back to the featured photo if unset.
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {property.photoRecords.map((rec) => {
+                    const selected = property.coverPhotoId === rec.id;
+                    return (
+                      <button
+                        key={rec.id}
+                        type="button"
+                        onClick={() => setProperty(prev => ({ ...prev, coverPhotoId: rec.id }))}
+                        className={`aspect-[4/3] rounded-lg overflow-hidden border-4 transition ${
+                          selected ? 'border-[#1c1917]' : 'border-transparent hover:border-[#d6d3d1]'
+                        }`}
+                        title={selected ? 'This is the card cover' : 'Click to set as card cover'}
+                      >
+                        <img
+                          src={rec.url}
+                          alt={rec.alt_text || ''}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+                {property.coverPhotoId && (
+                  <button
+                    type="button"
+                    onClick={() => setProperty(prev => ({ ...prev, coverPhotoId: null }))}
+                    className="mt-3 text-xs underline text-[#9a7d5e]"
+                  >
+                    Clear selection (use featured photo instead)
+                  </button>
+                )}
               </div>
             )}
           </div>
