@@ -179,6 +179,52 @@ Configured in `vercel.json`:
 
 ---
 
+## Session Log: April 11, 2026 (PM) — Phase 2 shipped
+
+### Accomplished Today
+
+**Phase 2 shipped (15 commits).** Public visual rewrite complete. The site is now a photo-forward showcase using the new monochrome theme. Booking flow preserved in the backend but fully delinked from the public pages.
+
+1. **globals.css rewrite** — replaced teal/orange theme (~2100 lines) with minimal monochrome (~140 lines). Kept legacy CSS vars mapped to the new ink color so untouched pages (admin, terms, privacy, sitemap) don't explode during mid-migration.
+2. **New components** — `Testimonials`, `PhotoLightbox` (scrollable grid, not carousel), `MobileContactBar` (sticky Messenger CTA on mobile).
+3. **Navbar rewrite** — transparent over home hero, solid-white elsewhere, FB Messenger CTA. Kept optional `settings` prop (unused) so `ConditionalLayout` still compiles without code churn.
+4. **Footer rewrite** — minimal dark footer with FB + Messenger icons. Same `settings` compat shim as Navbar.
+5. **Hero rewrite** — full-bleed photo with dark-gradient overlay, label-tiny + 2 CTAs (View properties / Message us). `heroPhotoUrl` is optional with fallback.
+6. **Homepage rewrite** — hero → intro (settings-driven) → featured-5 grid (first card big) → testimonials (general pool) → CTA → footer.
+7. **PropertyCard rewrite** — minimal card with From ₱ price + METADATA line. Handles photos as either `string[]` or `{id,url}[]`.
+8. **Properties gallery rewrite** — sort toolbar (Featured / Price ↓ / Newest), 3-col grid, uses new PropertyCard.
+9. **PropertyDetail rewrite** — 5-photo grid + "view all" lightbox, 2-column body with sticky contact card (Messenger + FB page), per-unit testimonials section, mobile contact bar. Normalizes photos internally to handle the current `string[]` shape from `databaseService`.
+10. **Detail route** (`/properties/[slug]/page.tsx`) — now fetches per-property testimonials server-side via `getTestimonialsServer({ propertyId })` and passes them to `PropertyDetail`.
+11. **Blog (Stories) rewrite** — list page has featured-post + 3-col grid; detail page is editorial-column layout with `prose prose-stone`. Data-loading logic preserved (`getPublishedBlogPosts()` / `fetch('/api/blog/slug/...')`).
+12. **Contact rewrite** — two minimal cards (Messenger / FB Page) + response hours footer. No more phone/email/forms.
+13. **Delink booking UI** — grep confirmed no remaining `/book` or `Book Now` references in public pages/components. All booking flow code (`src/app/book/*`, `BookingWidget`, `/api/bookings`, PayMongo) preserved untouched.
+
+### Current Status
+
+- **Type-check clean** ✅
+- **Build clean** ✅ (all 30+ routes compile, including preserved `/book/*` routes)
+- **Lint: 192 pre-existing errors** ⚠️ — almost entirely `@typescript-eslint/no-explicit-any` across API routes, admin pages, BookingWidget, PayMongo, database-service, etc. These pre-date Phase 2. A handful also exist in the Phase 2 files (PropertyCard, PropertyDetail, homepage) because the plan's own code specifies `any` for the property shape. Not fixed: doing so would require typing the full `PropertyData` shape plus touching preserved PayMongo/booking code.
+- All 15 Phase 2 commits on `main`
+- DB migration already applied in Phase 1; no new DB work this session
+
+### Next Steps / Pending
+
+- **Manual data entry** (between sessions):
+  - Fill in real testimonials via `/admin/testimonials`
+  - Set the homepage Hero Photo URL via `/admin/settings` → Hero photo URL
+  - Pick a Card cover photo for each featured property via `/admin/properties/[id]/edit`
+- **Vercel env vars** — set `NEXT_PUBLIC_FACEBOOK_PAGE_URL` and `NEXT_PUBLIC_MESSENGER_URL` in the Vercel project settings before next deploy
+- **Optional cleanup** (future session):
+  - Codebase-wide lint sweep (192 pre-existing errors, mostly `any` usage)
+  - Remove legacy `--color-warm-*` / `--color-primary-*` CSS vars once terms/privacy/sitemap/admin pages are visually migrated
+  - Consider deleting `src/app/book/*` and `BookingWidget.tsx` if the pivot is permanent
+
+### What Stays Untouched (still preserved)
+
+PayMongo, calendar sync, bookings API, admin bookings/revenue, Vercel cron, `/book/*` pages — all still functional, just invisible from the public site.
+
+---
+
 ## Session Log: April 11, 2026
 
 ### Accomplished Today
