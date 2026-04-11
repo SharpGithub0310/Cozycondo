@@ -179,6 +179,31 @@ Configured in `vercel.json`:
 
 ---
 
+## Session Log: April 11, 2026 (late PM) — Cleanup + project move
+
+### Accomplished
+
+1. **Project moved** from `/mnt/m/ai/cozy-condo` → **`/mnt/m/projects/cozy-condo`** (alongside `hostiq` and other active projects). Git history, remote, env vars, and 2nd-brain sync all preserved.
+2. **Git post-commit hook** at `.git/hooks/post-commit` updated to the new path — 2nd-brain auto-sync verified working at `/mnt/m/2nd-brain/raw/cozy-condo/`.
+3. **Claude Code memory** migrated to the new path hash (`~/.claude/projects/-mnt-m-projects-cozy-condo/memory/`) so future sessions retain all project context (Dokploy deployment platform, orphan Swarm service reminder, etc.).
+4. **Root-level cruft removed** — 29 files (`git rm`'d, committed, pushed as `79c9111`):
+   - 8 stray screenshots/PNGs from the project root
+   - 9 one-time Python setup/verification scripts (DB schema setup, long-since done)
+   - 8 stale docs superseded by CLAUDE.md (PERFORMANCE_OPTIMIZATIONS, PROJECT_STATUS, API_ENDPOINTS, LOCALSTORAGE_TO_SUPABASE_MIGRATION, TYPESCRIPT_DEVELOPMENT_GUIDE, etc.)
+   - `cookies.txt`, `deploy.txt`, `dev.log`, `vercel.json` (we're on Dokploy, not Vercel)
+5. **Build cache** (`node_modules`, `.next`, `.nixpacks`, `tsconfig.tsbuildinfo`) deleted and fresh `npm install` run in the new location. `npm run type-check` and `npm run build` both clean.
+
+### Still pending (from earlier in the session)
+
+- **Kill the orphan Swarm service** `cozy-condo-website-backend-8sbvp7` on the Dokploy host (Hetzner `91.99.229.160`) — this is what's still serving the old photo-gallery app at `cozycondo.net`. One command: `docker service rm cozy-condo-website-backend-8sbvp7`. See `memory/orphan-swarm-service.md` for full context.
+- **Supabase FK embed fix** in `database-service.ts::getProperties()` — non-fatal but affects SSG.
+
+### Note on the old folder
+
+The old `/mnt/m/ai/cozy-condo` directory couldn't be deleted from this Claude Code session because Claude's own process holds it as CWD. After closing Claude Code, delete it manually via Windows Explorer (`M:\ai\cozy-condo`) — everything it contains is already copied to the new location.
+
+---
+
 ## Session Log: April 11, 2026 (PM) — Phase 2 shipped
 
 ### Accomplished Today
