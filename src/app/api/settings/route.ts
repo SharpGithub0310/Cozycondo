@@ -127,6 +127,10 @@ export async function GET(request: NextRequest) {
       // Booking toggle settings (default to enabled)
       bookingEnabled: settingsObj.bookingEnabled === 'false' ? false : true,
       bookingDisabledMessage: settingsObj.bookingDisabledMessage || 'Online booking is temporarily unavailable. Please contact us directly.',
+      // Showcase Redesign 2026-04-11
+      heroPhotoUrl: settingsObj.heroPhotoUrl || '',
+      introTitle: settingsObj.introTitle || '',
+      introBody: settingsObj.introBody || '',
       updatedAt: new Date().toISOString()
     };
 

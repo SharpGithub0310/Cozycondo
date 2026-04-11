@@ -165,6 +165,10 @@ export interface WebsiteSettings {
   privacyPolicyUrl?: string;
   termsOfServiceUrl?: string;
   sitemapUrl?: string;
+  // Showcase Redesign 2026-04-11
+  heroPhotoUrl?: string;
+  introTitle?: string;
+  introBody?: string;
   // Meta
   updatedAt?: string;
   faqs?: FAQ[];

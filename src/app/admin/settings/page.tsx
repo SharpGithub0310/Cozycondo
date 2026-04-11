@@ -43,7 +43,11 @@ export default function AdminSettings() {
     checkinTime: '',
     checkoutTime: '',
     timezone: 'Asia/Manila',
-    currency: 'PHP'
+    currency: 'PHP',
+    // Showcase Redesign 2026-04-11
+    heroPhotoUrl: '',
+    introTitle: '',
+    introBody: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -464,6 +468,55 @@ export default function AdminSettings() {
                     className="form-input min-h-[80px]"
                     placeholder="Experience the perfect blend of comfort and convenience..."
                     rows={3}
+                  />
+                </div>
+
+                {/* Showcase Redesign 2026-04-11 — new hero photo field */}
+                <div>
+                  <label className="form-label">Hero Photo URL</label>
+                  <input
+                    type="text"
+                    value={settings.heroPhotoUrl || ''}
+                    onChange={(e) => setSettings({...settings, heroPhotoUrl: e.target.value})}
+                    className="form-input"
+                    placeholder="https://... (paste a URL from any property photo, or an uploaded image)"
+                  />
+                  {settings.heroPhotoUrl && (
+                    <img
+                      src={settings.heroPhotoUrl}
+                      alt="Hero preview"
+                      className="mt-2 h-32 w-full object-cover rounded border border-[#faf3e6]"
+                    />
+                  )}
+                  <p className="text-xs text-[#9a7d5e] mt-1">
+                    The full-bleed photo used on the homepage hero.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Homepage Intro (Showcase Redesign 2026-04-11) */}
+            <div className="mb-6">
+              <h4 className="font-medium text-[#5f4a38] mb-3">Homepage Intro</h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="form-label">Intro Title</label>
+                  <input
+                    type="text"
+                    value={settings.introTitle || ''}
+                    onChange={(e) => setSettings({...settings, introTitle: e.target.value})}
+                    className="form-input"
+                    placeholder="Cozy Condo is a small family-run collection of rentals…"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Intro Body</label>
+                  <textarea
+                    value={settings.introBody || ''}
+                    onChange={(e) => setSettings({...settings, introBody: e.target.value})}
+                    className="form-input min-h-[80px]"
+                    placeholder="We handpick every unit, furnish it ourselves..."
+                    rows={4}
                   />
                 </div>
               </div>
