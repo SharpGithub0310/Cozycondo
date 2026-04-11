@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Trash2, Star, DollarSign, Car, Percent, Calendar, Link, Hash } from 'lucide-react';
+import { Save, X, Plus, MapPin, Home, Users, Bed, Upload, Trash2, Star, DollarSign, Calendar, Link, Hash } from 'lucide-react';
 // Using API endpoints instead of direct database calls
 
 export default function EditProperty() {
@@ -407,130 +407,29 @@ export default function EditProperty() {
             </div>
           </div>
 
-          {/* Pricing & Fees */}
+          {/* Starting Price (shown on cards as "From ₱X/night") */}
           <div>
             <h3 className="font-display text-lg font-semibold text-[#5f4a38] mb-4">
-              Pricing & Fees
+              Starting Price
             </h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Price per Night (₱)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={property.pricePerNight}
-                  onChange={(e) => setProperty({...property, pricePerNight: e.target.value})}
-                  className="form-input"
-                  placeholder="e.g., 2500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Cleaning Fee (₱)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={property.cleaningFee}
-                  onChange={(e) => setProperty({...property, cleaningFee: parseFloat(e.target.value) || 0})}
-                  className="form-input"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <Car className="w-4 h-4" />
-                  Parking Fee (₱)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={property.parkingFee}
-                  onChange={(e) => setProperty({...property, parkingFee: parseFloat(e.target.value) || 0})}
-                  className="form-input"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <Percent className="w-4 h-4" />
-                  Admin Fee (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={property.adminFeePercent}
-                  onChange={(e) => setProperty({...property, adminFeePercent: Math.min(100, parseFloat(e.target.value) || 0)})}
-                  className="form-input"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Min Nights
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={property.minNights}
-                  onChange={(e) => setProperty({...property, minNights: parseInt(e.target.value) || 1})}
-                  className="form-input"
-                  placeholder="1"
-                />
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Max Nights
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={property.maxNights}
-                  onChange={(e) => setProperty({...property, maxNights: parseInt(e.target.value) || 30})}
-                  className="form-input"
-                  placeholder="30"
-                />
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Base Occupancy
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={property.maxGuests || 10}
-                  value={property.baseOccupancy}
-                  onChange={(e) => setProperty({...property, baseOccupancy: parseInt(e.target.value) || 2})}
-                  className="form-input"
-                  placeholder="2"
-                />
-                <p className="text-xs text-[#7d6349] mt-1">Guests included in base price</p>
-              </div>
-              <div>
-                <label className="form-label flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Extra Person Fee
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={property.extraPersonFee}
-                  onChange={(e) => setProperty({...property, extraPersonFee: parseFloat(e.target.value) || 0})}
-                  className="form-input"
-                  placeholder="0"
-                />
-                <p className="text-xs text-[#7d6349] mt-1">Per extra person per night (PHP)</p>
-              </div>
+            <div className="max-w-xs">
+              <label className="form-label flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Price per Night (₱)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={property.pricePerNight}
+                onChange={(e) => setProperty({...property, pricePerNight: e.target.value})}
+                className="form-input"
+                placeholder="e.g., 2500"
+                required
+              />
+              <p className="text-xs text-[#7d6349] mt-1">
+                Shown as &quot;From ₱{property.pricePerNight || 'X'}/night&quot; on the site.
+                Actual rates are quoted via Messenger.
+              </p>
             </div>
           </div>
 
