@@ -213,7 +213,7 @@ Configured in `vercel.json`:
   - Fill in real testimonials via `/admin/testimonials`
   - Set the homepage Hero Photo URL via `/admin/settings` → Hero photo URL
   - Pick a Card cover photo for each featured property via `/admin/properties/[id]/edit`
-- **Vercel env vars** — set `NEXT_PUBLIC_FACEBOOK_PAGE_URL` and `NEXT_PUBLIC_MESSENGER_URL` in the Vercel project settings before next deploy
+- **Deploy to Dokploy** — `NEXT_PUBLIC_FACEBOOK_PAGE_URL` and `NEXT_PUBLIC_MESSENGER_URL` are already set in the Dokploy env. Just trigger a redeploy to pick up Phase 2.
 - **Optional cleanup** (future session):
   - Codebase-wide lint sweep (192 pre-existing errors, mostly `any` usage)
   - Remove legacy `--color-warm-*` / `--color-primary-*` CSS vars once terms/privacy/sitemap/admin pages are visually migrated
