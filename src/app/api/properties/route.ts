@@ -122,6 +122,11 @@ export async function GET(request: NextRequest) {
     // Convert to the format expected by the frontend (keeping backward compatibility)
     const result: Record<string, any> = {};
 
+    // Card/list views only need the single cover image. `?cover=1` slims the
+    // payload to one photo per property and drops photoRecords (only the detail
+    // endpoint / admin edit needs the full set).
+    const coverOnly = searchParams.get('cover') === '1';
+
     (data || []).forEach((prop) => {
       // Ensure slug exists, fallback to UUID if needed
       const slug = prop.slug || prop.id || prop.name?.toLowerCase().replace(/\s+/g, '-') || 'property-' + Date.now();
@@ -135,6 +140,16 @@ export async function GET(request: NextRequest) {
       // Find featured photo index
       const featuredPhotoIndex = (prop.property_photos || [])
         .findIndex((photo: any) => photo.is_primary) || 0;
+
+      // For card/list views, send only the cover photo to keep the payload small.
+      let cardPhotos = sortedPhotos;
+      if (coverOnly) {
+        const coverRec = (prop as any).cover_photo_id
+          ? sortedPhotoRecords.find((p: any) => p.id === (prop as any).cover_photo_id)
+          : null;
+        const coverUrl = coverRec?.url || sortedPhotos[featuredPhotoIndex] || sortedPhotos[0];
+        cardPhotos = coverUrl ? [coverUrl] : [];
+      }
 
       result[slug] = {
         id: slug, // Use slug as ID for frontend compatibility
@@ -171,15 +186,19 @@ export async function GET(request: NextRequest) {
         featured: prop.featured === true,
         active: prop.active === true,
         amenities: Array.isArray(prop.amenities) ? prop.amenities : [],
-        images: sortedPhotos, // Legacy compatibility
-        photos: sortedPhotos,
-        photoRecords: sortedPhotoRecords.map((p: any) => ({
-          id: p.id,
-          url: p.url,
-          alt_text: p.alt_text || null,
-          display_order: p.display_order || 0,
-          is_primary: !!p.is_primary,
-        })),
+        images: cardPhotos, // Legacy compatibility
+        photos: cardPhotos,
+        // photoRecords (full photo objects) only needed by the detail endpoint /
+        // admin edit; omit from the slimmed card payload.
+        ...(coverOnly ? {} : {
+          photoRecords: sortedPhotoRecords.map((p: any) => ({
+            id: p.id,
+            url: p.url,
+            alt_text: p.alt_text || null,
+            display_order: p.display_order || 0,
+            is_primary: !!p.is_primary,
+          })),
+        }),
         featuredPhotoIndex: featuredPhotoIndex >= 0 ? featuredPhotoIndex : 0,
         slug: slug,
         displayOrder: prop.display_order || 0,

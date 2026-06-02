@@ -12,7 +12,7 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/properties')
+    fetch('/api/properties?cover=1')
       .then((r) => r.json())
       .then((data) => {
         // API shape: { success, data: { [slug]: property }, meta }
