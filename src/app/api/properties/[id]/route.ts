@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient, requireAuth, rateLimit } from '@/lib/api-auth';
+import { persistPhotoUrls } from '@/lib/storage';
 import {
   successResponse,
   errorResponse,
@@ -411,7 +412,9 @@ export async function PUT(
 
           // Insert new photos
           if (photos && photos.length > 0) {
-            const photoInserts = photos.map((url: string, index: number) => ({
+            // Upload any base64 photos to Storage so the DB only ever holds URLs
+            const persistedPhotos = await persistPhotoUrls(adminClient, photos);
+            const photoInserts = persistedPhotos.map((url: string, index: number) => ({
               property_id: propData.id,
               url,
               display_order: index,
