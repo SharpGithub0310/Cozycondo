@@ -84,7 +84,7 @@ class CleanDatabaseService {
         featured_photo_index,
         created_at,
         updated_at,
-        property_photos (
+        property_photos!property_id (
           id,
           url,
           alt_text,
@@ -178,7 +178,7 @@ class CleanDatabaseService {
         featured_photo_index,
         created_at,
         updated_at,
-        property_photos (
+        property_photos!property_id (
           id,
           url,
           alt_text,

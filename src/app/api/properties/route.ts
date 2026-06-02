@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
         cover_photo_id,
         created_at,
         updated_at,
-        property_photos (
+        property_photos!property_id (
           id,
           url,
           alt_text,

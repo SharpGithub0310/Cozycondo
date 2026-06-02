@@ -76,7 +76,7 @@ export async function GET(
         cover_photo_id,
         created_at,
         updated_at,
-        property_photos (
+        property_photos!property_id (
           id,
           url,
           alt_text,
@@ -124,7 +124,7 @@ export async function GET(
           cover_photo_id,
           created_at,
           updated_at,
-          property_photos (
+          property_photos!property_id (
             id,
             url,
             alt_text,
