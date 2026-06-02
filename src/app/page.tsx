@@ -51,7 +51,7 @@ export default async function HomePage() {
   }
 
   const heroPhoto = settings?.heroPhotoUrl || (featured[0] ? coverPhotoUrl(featured[0]) : '');
-  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || '#';
+  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || 'https://m.me/cozycondoiloilocity';
   const introTitle = settings?.introTitle ||
     'Cozy Condo is a small family-run collection of rentals across Iloilo City.';
   const introBody = settings?.introBody ||

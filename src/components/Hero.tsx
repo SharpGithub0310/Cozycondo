@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function Hero({ settings, heroPhotoUrl = '' }: Props) {
-  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || '#';
+  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || 'https://m.me/cozycondoiloilocity';
   const title = settings?.heroTitle || 'Stay well in the heart of Iloilo.';
   const description = settings?.heroDescription ||
     'Thoughtfully furnished condominiums for travelers who want more than a hotel room. Each unit is lived-in, cared for, and ready for your stay.';

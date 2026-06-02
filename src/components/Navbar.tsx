@@ -21,7 +21,7 @@ export default function Navbar(_props: NavbarProps = {}) {
   const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const messengerUrl = process.env.NEXT_PUBLIC_MESSENGER_URL || '#';
+  const messengerUrl = process.env.NEXT_PUBLIC_MESSENGER_URL || 'https://m.me/cozycondoiloilocity';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

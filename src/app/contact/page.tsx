@@ -6,8 +6,8 @@ export const metadata = {
 };
 
 export default function ContactPage() {
-  const fb = process.env.NEXT_PUBLIC_FACEBOOK_PAGE_URL || '#';
-  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || '#';
+  const fb = process.env.NEXT_PUBLIC_FACEBOOK_PAGE_URL || 'https://www.facebook.com/cozycondoiloilocity';
+  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || 'https://m.me/cozycondoiloilocity';
 
   return (
     <main className="pt-32 pb-24">

@@ -15,7 +15,9 @@ export default function PropertiesPage() {
     fetch('/api/properties')
       .then((r) => r.json())
       .then((data) => {
-        const list = Array.isArray(data) ? data : (data.properties || []);
+        // API shape: { success, data: { [slug]: property }, meta }
+        const payload = data?.data ?? data;
+        const list = Array.isArray(payload) ? payload : Object.values(payload || {});
         setAll(list.map((p: any) => normalizePropertyData(p)).filter((p: any) => p.active !== false));
       })
       .finally(() => setLoading(false));

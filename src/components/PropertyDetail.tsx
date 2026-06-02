@@ -32,8 +32,8 @@ export default function PropertyDetail({ property, testimonials = [] }: Props) {
   const photos = useMemo(() => normalizePhotos(property), [property]);
   const firstFive = photos.slice(0, 5);
 
-  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || '#';
-  const fbPage    = process.env.NEXT_PUBLIC_FACEBOOK_PAGE_URL || '#';
+  const messenger = process.env.NEXT_PUBLIC_MESSENGER_URL || 'https://m.me/cozycondoiloilocity';
+  const fbPage    = process.env.NEXT_PUBLIC_FACEBOOK_PAGE_URL || 'https://www.facebook.com/cozycondoiloilocity';
   const price     = property.pricePerNight;
 
   return (
