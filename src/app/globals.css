@@ -133,6 +133,15 @@ html, body {
 }
 .section-dark .section-subtitle { color: rgba(255,255,255,0.7); }
 
+/* Floating Messenger widget (public pages) — recovered from old globals.css.
+   Without this the widget renders inline instead of pinned to the corner. */
+.messenger-widget {
+  position: fixed;
+  bottom: clamp(1rem, 4vw, 1.5rem);
+  right: clamp(1rem, 4vw, 1.5rem);
+  z-index: 1000;
+}
+
 /* Legacy stubs — do NOT use in new components. Kept only so legacy files
    that still render don't throw missing-class errors during migration. */
 .hero-badge, .hero-badge-dot { display: none; }
