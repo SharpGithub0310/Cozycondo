@@ -101,27 +101,30 @@ export default function AdminDashboard() {
   }, []);
 
   // Create dynamic stats array
+  // NOTE: these are applied via inline style={{ background }}, so they must be
+  // real CSS color values, not Tailwind class strings — otherwise the icon box
+  // renders transparent and the white icon becomes invisible.
   const statsArray = [
     {
       name: 'Total Properties',
       value: isLoading ? '...' : stats.totalProperties.toString(),
       icon: Building2,
       href: '/admin/properties',
-      color: 'bg-[color:var(--color-primary-500)]'
+      color: 'var(--color-primary-500)'
     },
     {
       name: 'Blog Posts',
       value: isLoading ? '...' : stats.blogPosts.toString(),
       icon: FileText,
       href: '/admin/blog',
-      color: 'bg-[#1877F2]'
+      color: '#1877F2'
     },
     {
       name: 'Today\'s Visitors',
       value: isLoading ? '...' : stats.visitorStats.today.toString(),
       icon: BarChart3,
       href: '/admin/console',
-      color: 'bg-[color:var(--color-warm-600)]'
+      color: 'var(--color-warm-600)'
     },
   ];
 

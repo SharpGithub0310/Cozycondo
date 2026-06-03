@@ -44,6 +44,28 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
 
+  // Page title for the top bar. Use the nav match when available, else fall back
+  // to a label for the pages that aren't in the sidebar (bookings/calendar/etc.),
+  // else derive from the path — so it never wrongly reads "Dashboard".
+  const pageTitle = (() => {
+    const navMatch = navigation.find(item =>
+      pathname === item.href ||
+      (item.href !== '/admin' && pathname.startsWith(item.href))
+    );
+    if (navMatch) return navMatch.name;
+    if (pathname === '/admin') return 'Dashboard';
+    const extra: Record<string, string> = {
+      '/admin/bookings': 'Bookings',
+      '/admin/calendar': 'Calendar',
+      '/admin/revenue': 'Revenue',
+      '/admin/console': 'Console',
+    };
+    const hit = Object.keys(extra).find(href => pathname.startsWith(href));
+    if (hit) return extra[hit];
+    const seg = pathname.split('/').filter(Boolean).pop() || 'Dashboard';
+    return seg.charAt(0).toUpperCase() + seg.slice(1);
+  })();
+
   useEffect(() => {
     const initializeAdmin = async () => {
       try {
@@ -203,10 +225,7 @@ export default function AdminLayout({
               </button>
               <div className="admin-breadcrumb">
                 <span className="admin-breadcrumb-item">
-                  {navigation.find(item =>
-                    pathname === item.href ||
-                    (item.href !== '/admin' && pathname.startsWith(item.href))
-                  )?.name || 'Dashboard'}
+                  {pageTitle}
                 </span>
               </div>
             </div>
