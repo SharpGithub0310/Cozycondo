@@ -8,6 +8,7 @@ import { postMigrationDatabaseService } from '@/lib/post-migration-database-serv
 import {
   LayoutDashboard,
   Building2,
+  CalendarDays,
   FileText,
   Settings,
   LogOut,
@@ -20,12 +21,14 @@ import {
   MessageSquareQuote,
 } from 'lucide-react';
 
-// Showcase Redesign 2026-04-11 — Bookings/Calendar/Revenue pages still exist
-// in the repo (accessible by direct URL) but are delinked from the sidebar
-// since the site no longer accepts on-site bookings.
+// Showcase Redesign 2026-04-11 — Bookings/Revenue pages still exist in the repo
+// (accessible by direct URL) but are delinked from the sidebar since the site no
+// longer accepts on-site bookings. Calendar is kept in the sidebar for managing
+// Airbnb availability sync.
 const navigation = [
   { name: 'Dashboard',    href: '/admin',              icon: LayoutDashboard },
   { name: 'Properties',   href: '/admin/properties',   icon: Building2 },
+  { name: 'Calendar',     href: '/admin/calendar',     icon: CalendarDays },
   { name: 'Testimonials', href: '/admin/testimonials', icon: MessageSquareQuote },
   { name: 'Stories',      href: '/admin/blog',         icon: FileText },
   { name: 'Settings',     href: '/admin/settings',     icon: Settings },
