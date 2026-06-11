@@ -17,11 +17,12 @@ interface NavbarProps {
   settings?: WebsiteSettings | null;
 }
 
-export default function Navbar(_props: NavbarProps = {}) {
+export default function Navbar({ settings }: NavbarProps = {}) {
   const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const messengerUrl = process.env.NEXT_PUBLIC_MESSENGER_URL || 'https://m.me/cozycondoiloilocity';
+  const logoUrl = settings?.logo;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -43,7 +44,15 @@ export default function Navbar(_props: NavbarProps = {}) {
     >
       <div className="container-xl flex items-center h-16">
         <Link href="/" className="font-semibold text-[17px] tracking-tight">
-          Cozy Condo
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="Cozy Condo"
+              className="h-8 w-auto object-contain"
+            />
+          ) : (
+            'Cozy Condo'
+          )}
         </Link>
 
         <ul className="hidden md:flex gap-8 mx-auto text-[13px]">
